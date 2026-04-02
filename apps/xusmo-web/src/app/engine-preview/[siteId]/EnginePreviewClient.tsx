@@ -157,7 +157,7 @@ export default function EnginePreviewClient({
 
   const pageData = useMemo(() => {
     if (!doc.pages) return null;
-    return doc.pages[activePageSlug] || doc.pages.home || null;
+    const page = doc.pages[activePageSlug]; if (page) return page; if (activePageSlug === "home" && doc.pages.home) return doc.pages.home; return null;
   }, [doc.pages, activePageSlug]);
 
   const themeCSS = useMemo(() => buildThemeCSS(theme), [theme]);
