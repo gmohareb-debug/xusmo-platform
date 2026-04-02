@@ -249,31 +249,51 @@ export async function generateBlueprint(leadId: string) {
   const businessInfo: BlueprintBusinessInfo = {
     name: businessName,
     description: (answers.business_description as string) ?? lead.businessDescription ?? "",
-    tagline: buildTagline(
-      (industry?.sampleTaglines as string[]) ?? [],
-      businessName,
-      location
-    ),
+    tagline: businessDesc.length > 20
+      ? ""  // Let the engine generate a tagline from the business description
+      : buildTagline(
+          (industry?.sampleTaglines as string[]) ?? [],
+          businessName,
+          location
+        ),
     yearsInBusiness: (answers.years_in_business as string) ?? lead.yearsInBusiness ?? "",
     location,
     phone: (answers.phone as string) ?? lead.phone ?? "",
     email: (answers.email as string) ?? lead.email ?? "",
   };
 
-  // Merge selected services with industry defaults
+  // Build services from business description first, fall back to industry defaults
+  const businessDesc = (answers.business_description as string) ?? lead.businessDescription ?? "";
   const defaultServices = (industry?.defaultServices as Array<{ name: string; description: string }>) ?? [];
   const selectedServiceValues = (answers.selected_services as string[]) ?? [];
-  const services: BlueprintService[] = defaultServices.map((s) => ({
-    name: s.name,
-    description: s.description,
-    featured: selectedServiceValues.includes(
-      s.name.toLowerCase().replace(/\s+/g, "_")
-    ),
-  }));
 
-  // If no services were selected, mark the first 3 as featured
-  if (!services.some((s) => s.featured) && services.length > 0) {
-    services.slice(0, 3).forEach((s) => (s.featured = true));
+  // If user described their business, the engine will generate relevant services.
+  // Only use industry defaults if there's no business description at all.
+  let services: BlueprintService[];
+  if (businessDesc.length > 20) {
+    // Pass the actual business description as the primary service
+    // The engine's LLM will expand this into real service cards
+    services = [
+      { name: businessName, description: businessDesc, featured: true },
+    ];
+    // Also add any explicitly selected services
+    if (selectedServiceValues.length > 0) {
+      for (const svc of selectedServiceValues) {
+        services.push({ name: svc.replace(/_/g, " "), description: "", featured: true });
+      }
+    }
+  } else {
+    // Fallback to industry defaults
+    services = defaultServices.map((s) => ({
+      name: s.name,
+      description: s.description,
+      featured: selectedServiceValues.includes(
+        s.name.toLowerCase().replace(/\s+/g, "_")
+      ),
+    }));
+    if (!services.some((s) => s.featured) && services.length > 0) {
+      services.slice(0, 3).forEach((s) => (s.featured = true));
+    }
   }
 
   const features = (lead.features as string[]) ?? (industry?.defaultFeatures as string[]) ?? [];
