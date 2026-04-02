@@ -16,6 +16,32 @@
 
 ## Future Enhancements
 
+## TODO (New Bugs — Found by QA Testing Agent, 2025-04-02)
+
+- [ ] BUG 16: **AI response latency** — Homepage generation took 70+ seconds with no progress indicator. User has no feedback during long waits. Add a loading progress bar or step-by-step status messages (e.g. "Generating hero...", "Adding sections...").
+
+- [ ] - [ ] BUG 17: **Irrelevant about-section image** — The about-section image on the homepage shows people fishing from a bridge in Istanbul, Turkey — not Ontario, Canada. Image selection must be geo-relevant and contextually accurate. Fix image search query to include location context.
+
+- [ ] - [ ] BUG 18: **Navbar shows hamburger menu on desktop** — On Services, Contact, About, and Gallery pages (desktop viewport), the navbar renders a hamburger/mobile menu icon instead of full horizontal navigation links. This is a critical UI regression.
+
+- [ ] - [ ] BUG 19: **Large black blank space in hero section (mobile/tablet)** — On mobile and tablet viewports, there is a large empty black area above the hero image/content. The hero section has incorrect height or padding at smaller breakpoints.
+
+- [ ] - [ ] BUG 20: **SEO meta description has empty location placeholder** — On Home and Services pages, the meta description contains "in ." with a blank location variable (e.g. "Ontario Fishing Adventures in ."). The location/city variable is not being populated. All pages must be checked and the placeholder resolved.
+
+- [ ] - [ ] BUG 21: **Missing pages in AI Designer page dropdown** — The AI Designer page selector only shows: home, about, contact, gallery, services. Pages FAQ, Blog, Service-Areas, and Testimonials are missing from the dropdown. Users cannot edit these pages via AI Designer.
+
+- [ ] - [ ] BUG 22: **Trust badges show non-branded placeholder images** — The "As Seen On & Proudly Affiliated With" trust-badges section shows grayscale generic ocean/coastal photos instead of real partner logos or relevant brand badges. This looks unprofessional and misleading.
+
+- [ ] - [ ] BUG 23: **Logo in navbar is a stock photo, not a brand logo** — The navbar logo displays a fishing boat stock photo image instead of a text logo or branded SVG. This should default to business name text or an auto-generated logo placeholder.
+
+- [ ] - [ ] BUG 24: **No second CTA button in hero** — The prompt asked for "CTA buttons" (plural) in the hero section but only one button ("Explore Our Packages") was generated. Hero should have two CTAs (e.g. primary + secondary "Contact Us").
+
+- [ ] - [ ] BUG 25: **OG/Social preview image missing on all pages** — None of the SEO pages have a social preview (OG image) set. The AI should auto-generate or assign a relevant OG image per page when building the site.
+
+- [ ] - [ ] BUG 26: **Testimonials show 4 stars instead of 5** — At least one testimonial card (Mark Reynolds) displays only 4 gold stars out of 5. Default generated testimonials should show 5-star ratings unless intentionally set otherwise.
+
+- [ ] - [ ] BUG 27: **Footer nav links don't match site pages** — The footer shows: Home, Adventures, Gallery, About Us, Contact — but the site has pages named "Services" (not "Adventures") and missing FAQ, Blog, Testimonials. Footer links should auto-sync with actual page structure.
+
 - [ ] E-commerce Agent — WooCommerce product creation, checkout, cart (postponed)
 - [ ] Vibe Coding Agent — Generate clean React + Tailwind export alongside WordPress
 - [ ] WordPress theme file generation — PHP templates, child themes, ACF fields
