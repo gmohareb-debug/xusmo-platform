@@ -67,3 +67,31 @@ BUG 27 — NOT FIXED: Footer nav links still show "Adventures" instead of "Servi
 - [ ] - [ ] BUG 35: **Contact info labels merged without separators** — On the Contact page, the contact info block renders labels concatenated directly with values without spacing or line breaks: "AddressServing the Kawarthas...", "Phone+1 (705) 555-FISH", "EmailBooking@...", "HoursGuiding Season...". The label and value are joined without a colon, space, or line break. This appears to be a CSS display issue (flex/grid wrapping) or a missing separator in the component template. Fix: contact info items should display as "Address: [value]" on separate lines.
 
 - [ ] - [ ] BUG 36: **Large white blank space on Contact page between hero and contact info** — There is a large empty white area between the contact page hero text ("Plan Your Next Fishing Adventure") and the contact information block below it. The contact form section appears after a significant vertical gap. Layout spacing/padding is misconfigured for this section.
+
+
+## Retest Results (QA Agent — 2026-04-02, Round 4)
+
+### CONFIRMED FIXED (verified in preview):
+- BUG 31 — FIXED: Services page breadcrumb now shows "Home/ Services" correctly.
+- - BUG 34 — FIXED: Empty pages (Blog, FAQ, Testimonials, Service-Areas) no longer fall back to homepage content. Each shows its own section-title section.
+  - - BUG 20 — FIXED: SEO meta descriptions no longer contain "in ." placeholder. Home now reads "...promoting fishing in Ontario, Canada". Services, FAQ, Contact pages all clean.
+    - - BUG 32 — PARTIALLY FIXED: Contact SEO meta now shows "info@ontariofishingadventures.ca" instead of "test@ontariofishing.com". Email still appears in meta description (not ideal SEO practice) but no longer a test address.
+      - - BUG 21 — CONFIRMED FIXED: All pages appear in AI Designer page dropdown without "(no sections)" label.
+        - - BUG 23 — CONFIRMED FIXED: Navbar logo shows text "Ontario Fishing Adventures".
+         
+          - ### NOT FIXED (still failing in live preview):
+          - - BUG 17/28 — NOT FIXED: About-section image still shows Soviet-era bus station (АВТОВОКЗАЛ sign). Image selection remains geo/context irrelevant despite claimed fix.
+            - - BUG 18 — NOT FIXED: Hamburger/mobile menu icon still appears on desktop viewport. CSS @media fix not taking effect in the rendered preview.
+              - - BUG 19 — NOT FIXED: Large black blank space visible between hero section and stats section on ALL viewports (desktop, tablet, mobile).
+                - - BUG 22 — NOT FIXED: Trust badges still show "Partner 1/2/3/4" grey button placeholders. No real logos or content.
+                  - - BUG 25 — NOT FIXED: OG/Social preview images still empty ("1200 x 630 — Click to upload") on all pages checked.
+                    - - BUG 26/30 — NOT FIXED: Testimonials star ratings still showing 4 stars on at least 2 of 3 testimonials.
+                      - - BUG 27 — NOT FIXED: Footer nav still shows "Adventures" instead of "Services" and still missing FAQ, Blog, Testimonials links.
+                        - - BUG 35 — NOT FIXED: Contact info labels still merged with values (no separator): "AddressServing...", "Phone+1...", "Emailbooking@...", "HoursGuiding...".
+                          - - BUG 36 — NOT FIXED: Large white blank space between hero and contact info on Contact page persists.
+                           
+                            - ### New Bugs Found (Round 4 — QA Agent, 2026-04-02):
+                            - - [ ] BUG 37: **Gallery contains irrelevant business/office stock photo** — The Gallery page shows an image of a smiling man in a business suit at a laptop (celebrating in an office). This is completely unrelated to Ontario fishing. The same geo/context irrelevance issue from BUG 17/28 is affecting gallery images. Fix: gallery image search queries must specify "fishing", "Ontario lake", "angler", etc.
+                              - [ ] - [ ] BUG 38: **Contact form date field unstyled (shows browser default "yyyy-mm-dd")** — The contact form contains a date input field that renders as a plain browser-default date picker with "yyyy-mm-dd" placeholder. It has no label (e.g. "Preferred Date") and is not styled to match the form theme. Fix: add a visible label, apply consistent input styling, and consider using a custom date picker component.
+                              - [ ] - [ ] BUG 39: **Stub pages have generic/meaningless subtitle text** — The newly created stub sections for Blog ("Learn more about our blog offerings"), FAQ ("Learn more about our faq offerings"), Testimonials ("Learn more about our testimonials offerings"), and Service-Areas ("Learn more about our service areas offerings") all have identical boilerplate subtitles. These pages need relevant, page-specific content (FAQ Q&As, blog post listings, actual testimonials, service area descriptions). The "Faq" title also has incorrect capitalization (should be "FAQ").
+                              - [ ] - [ ] BUG 40: **Large black blank area at bottom of stub pages** — The Blog, FAQ, Testimonials, and Service-Areas stub pages all show a large black empty area below the section-title section (similar to BUG 19). The footer is not visible, suggesting the footer section may not be rendering or the page height/background is misconfigured for these minimal pages.
