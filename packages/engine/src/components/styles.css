@@ -582,7 +582,7 @@ body { margin: 0; }
    PAGE RENDERER
    ═══════════════════════════════════════ */
 
-.page { display: flex; flex-direction: column; gap: 0; }
+.page { display: flex; flex-direction: column; gap: 0; min-height: 100vh; background-color: var(--bg, #ffffff); color: var(--text, #1a1a2e); }
 .page__meta {
   display: flex;
   justify-content: space-between;
@@ -610,7 +610,7 @@ body { margin: 0; }
 }
 
 /* Backgrounds */
-.site-section--bg-default { --section-bg: var(--surface); }
+.site-section--bg-default { --section-bg: var(--bg, var(--surface)); }
 .site-section--bg-surface { --section-bg: var(--surface); }
 .site-section--bg-muted { --section-bg: color-mix(in srgb, var(--surface) 90%, var(--border) 10%); }
 .site-section--bg-accent { --section-bg: var(--accent); --section-text: #fff; }

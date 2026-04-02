@@ -37,11 +37,11 @@ const FIELD_ALIASES: Record<string, string> = {
   body: "bodyContent", body_content: "bodyContent", page_title: "title",
 };
 
-// Map DB fields to designDocument section prop names
-const FIELD_TO_PROP: Record<string, string> = {
-  heroHeadline: "title",
-  heroSubheadline: "subtitle",
-  ctaLabel: "cta",
+// Map DB fields to designDocument section prop names (hero section uses title/subtitle/cta)
+const FIELD_TO_PROP: Record<string, string[]> = {
+  heroHeadline: ["title", "headline", "heading"],
+  heroSubheadline: ["subtitle", "subheadline", "description"],
+  ctaLabel: ["cta", "ctaLabel", "ctaText"],
 };
 
 const CONTENT_FIELDS = ["heroHeadline", "heroSubheadline", "ctaLabel", "bodyContent", "title"];
@@ -297,9 +297,9 @@ async function executeEditAction(
         });
 
         // 2. BUG 1 FIX: Also update the designDocument section props
-        const propName = FIELD_TO_PROP[field]; // heroHeadline → "title"
-        if (propName) {
-          await updateDesignDocumentHero(siteId, action.pageSlug, propName, value);
+        const propNames = FIELD_TO_PROP[field]; // heroHeadline → ["title", "headline", "heading"]
+        if (propNames) {
+          await updateDesignDocumentHero(siteId, action.pageSlug, propNames, value);
         }
 
         syncPageToWordPress(siteId, action.pageSlug).catch(() => {});
@@ -463,7 +463,7 @@ async function executeEditAction(
         const newSection = {
           id: `section-${Date.now()}`,
           component: action.component,
-          props: {},
+          props: getDefaultProps(action.component, context.businessName),
           layout: { background: "default", padding: "lg", width: "contained", align: "center" },
           style: {},
         };
@@ -573,7 +573,7 @@ async function executeEditAction(
 async function updateDesignDocumentHero(
   siteId: string,
   pageSlug: string,
-  propName: string,
+  propNames: string[],
   value: string
 ): Promise<void> {
   try {
@@ -591,13 +591,24 @@ async function updateDesignDocumentHero(
     const sections = [...(page.sections as Record<string, unknown>[])];
     let updated = false;
 
-    // Find the first hero section and update its prop
+    // Find the first hero section and update whichever matching prop exists
     for (let i = 0; i < sections.length; i++) {
       const comp = (sections[i].component as string) || "";
       if (comp.includes("hero")) {
         const s = { ...sections[i] };
         const props = { ...(s.props as Record<string, unknown> || {}) };
-        props[propName] = value;
+
+        // Update the first prop name that already exists in the section,
+        // or fall back to the first name in the list
+        let propToUpdate = propNames[0];
+        for (const name of propNames) {
+          if (name in props) {
+            propToUpdate = name;
+            break;
+          }
+        }
+
+        props[propToUpdate] = value;
         s.props = props;
         sections[i] = s;
         updated = true;
@@ -619,4 +630,122 @@ async function updateDesignDocumentHero(
   } catch {
     // Non-critical — don't fail the main action
   }
+}
+
+// ---------------------------------------------------------------------------
+// Default props for newly added sections (BUG 12-14 fix)
+// Without these, components render blank/invisible.
+// ---------------------------------------------------------------------------
+
+function getDefaultProps(component: string, businessName: string): Record<string, unknown> {
+  const defaults: Record<string, Record<string, unknown>> = {
+    "hero": {
+      title: `Welcome to ${businessName}`,
+      subtitle: "Your tagline goes here",
+      cta: "Get Started",
+      ctaHref: "#contact",
+      eyebrow: "Welcome",
+    },
+    "hero-image": {
+      title: `Welcome to ${businessName}`,
+      subtitle: "Your tagline goes here",
+      cta: "Get Started",
+      ctaHref: "#contact",
+      imageUrl: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&w=1200&h=800&fit=crop",
+    },
+    "section-title": {
+      title: "Section Title",
+      subtitle: "Brief description of this section",
+    },
+    "about-section": {
+      title: `About ${businessName}`,
+      description: `${businessName} is dedicated to providing exceptional service and quality. Learn more about our story, mission, and the team behind everything we do.`,
+      image: "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&w=800&h=600&fit=crop",
+      stats: [
+        { value: "10+", label: "Years Experience" },
+        { value: "500+", label: "Happy Clients" },
+        { value: "98%", label: "Satisfaction Rate" },
+      ],
+    },
+    "services-section": {
+      title: "Our Services",
+      services: [
+        { title: "Service One", description: "Description of your first service.", icon: "star" },
+        { title: "Service Two", description: "Description of your second service.", icon: "heart" },
+        { title: "Service Three", description: "Description of your third service.", icon: "zap" },
+      ],
+    },
+    "testimonials": {
+      title: "What Our Clients Say",
+      testimonials: [
+        { name: "Alex Johnson", role: "Happy Customer", quote: "Absolutely fantastic experience. Highly recommended!", rating: 5, avatar: "https://placehold.co/80x80/6366f1/ffffff?text=AJ" },
+        { name: "Sarah Chen", role: "Loyal Client", quote: "Professional, reliable, and exceptional quality every time.", rating: 5, avatar: "https://placehold.co/80x80/6366f1/ffffff?text=SC" },
+        { name: "Mike Davis", role: "Business Partner", quote: "They exceeded our expectations in every way possible.", rating: 5, avatar: "https://placehold.co/80x80/6366f1/ffffff?text=MD" },
+      ],
+    },
+    "contact": {
+      title: "Get in Touch",
+      subtitle: "We'd love to hear from you",
+      email: "hello@example.com",
+      phone: "(555) 123-4567",
+    },
+    "contact-form": {
+      title: "Send Us a Message",
+      subtitle: "Fill out the form below and we'll get back to you within 24 hours.",
+    },
+    "footer": {
+      logo: businessName,
+      tagline: `${businessName} — Quality you can trust.`,
+      columns: [
+        { title: "Quick Links", links: [{ label: "Home", href: "/" }, { label: "About", href: "/about" }, { label: "Contact", href: "/contact" }] },
+        { title: "Company", links: [{ label: "Privacy Policy", href: "/privacy" }, { label: "Terms of Service", href: "/terms" }] },
+      ],
+      social: [{ label: "Facebook", href: "#" }, { label: "Instagram", href: "#" }],
+      text: `\u00a9 ${new Date().getFullYear()} ${businessName}. All rights reserved.`,
+    },
+    "faq-accordion": {
+      title: "Frequently Asked Questions",
+      items: [
+        { question: "What services do you offer?", answer: "We offer a wide range of professional services. Contact us to learn more." },
+        { question: "How can I get started?", answer: "Simply reach out via our contact form or give us a call." },
+        { question: "What are your business hours?", answer: "We're available Monday through Friday, 9 AM to 5 PM." },
+      ],
+    },
+    "features": {
+      title: "Why Choose Us",
+      items: [
+        { icon: "star", title: "Quality First", description: "We never compromise on quality." },
+        { icon: "zap", title: "Fast Delivery", description: "Quick turnaround on all projects." },
+        { icon: "heart", title: "Customer Focus", description: "Your satisfaction is our priority." },
+      ],
+    },
+    "pricing": {
+      title: "Pricing Plans",
+      plans: [
+        { name: "Basic", price: "$29/mo", features: ["Feature 1", "Feature 2", "Feature 3"], ctaLabel: "Get Started", ctaHref: "#contact" },
+        { name: "Pro", price: "$59/mo", features: ["Everything in Basic", "Feature 4", "Feature 5", "Priority Support"], ctaLabel: "Get Started", ctaHref: "#contact", featured: true },
+      ],
+    },
+    "newsletter-form": {
+      title: "Stay Updated",
+      subtitle: "Subscribe to our newsletter for the latest news and offers.",
+    },
+    "client-logos": {
+      title: "Trusted By",
+      logos: [
+        { name: "Partner 1", src: "https://placehold.co/120x40/e5e7eb/6b7280?text=Partner+1" },
+        { name: "Partner 2", src: "https://placehold.co/120x40/e5e7eb/6b7280?text=Partner+2" },
+        { name: "Partner 3", src: "https://placehold.co/120x40/e5e7eb/6b7280?text=Partner+3" },
+      ],
+    },
+    "gallery": {
+      title: "Gallery",
+      images: [
+        { src: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&w=600&h=400&fit=crop", alt: "Gallery image 1" },
+        { src: "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&w=600&h=400&fit=crop", alt: "Gallery image 2" },
+      ],
+    },
+  };
+
+  return defaults[component] || {};
 }
