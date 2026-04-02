@@ -77,3 +77,37 @@
 - [ ] WordPress theme file generation — PHP templates, child themes, ACF fields
 - [ ] Multi-user real-time editing — WebSocket-based collaboration
 - [ ] AI image generation — Flux/Leonardo for custom AI-generated images (beyond Pexels stock)
+
+- [ ] ## Retest Results (QA Agent — 2026-04-02, Round 3)
+
+- [ ] BUG 21 — FIXED: AI Designer page dropdown now shows ALL pages: Home, About, Blog, Contact, Faq, Gallery, Service-Areas, Services, Testimonials. Pages that have no sections show "— no sections" label. Fully resolved.
+
+- [ ] BUG 23 — FIXED: Navbar logo now shows text "Ontario Fishing Adventures" instead of a stock photo. Branding is now text-based. Resolved.
+
+- [ ] BUG 24 — CONFIRMED FIXED: Two CTA buttons visible in hero ("Explore Our Packages" + "Inquire Now"). Acceptable.
+
+- [ ] BUG 29 — PARTIALLY FIXED: Footer black empty space is no longer visible in the current desktop preview. Footer appears normally structured. Needs recheck on mobile/tablet viewports.
+
+- [ ] BUG 17/28 — NOT FIXED (CRITICAL): About-section image still shows a Soviet-era bus station building (АВТОВОКЗАЛ sign visible). Image is completely irrelevant to Ontario fishing. Root cause in image search query construction remains unresolved.
+
+- [ ] BUG 18 — NOT FIXED: Hamburger/mobile menu icon still appears on desktop viewport on Home, Services, and other pages. Full horizontal nav not rendering on desktop breakpoint.
+
+- [ ] BUG 19 — NOT FIXED: Large black blank space still visible between hero section and stats section on mobile viewport. CSS min-height or padding issue at mobile breakpoint persists.
+
+- [ ] BUG 20 — NOT FIXED: SEO meta descriptions still contain empty location placeholder "in ." on Home ("Ontario Fishing Adventures in ."), Services ("Explore services offered by Ontario Fishing Adventures in ."), and Contact ("Contact Ontario Fishing Adventures in . Email: test@ontariofishing.com.") pages. All pages affected.
+
+- [ ] BUG 22 — CHANGED (NOT FIXED): Trust badges section previously showed grayscale stock photos; now shows plain text "Partner" placeholders (4x). Still not real partner logos or branded content. The fix removed images but did not replace with proper content.
+- [ ] 
+BUG 25 — NOT FIXED: OG/Social preview images missing on ALL pages checked (Home, Services, Contact). "1200 x 630 — Click to upload" placeholder shown. No auto-generation triggered.
+
+BUG 26/30 — NOT FIXED: At least one testimonial still shows 4 stars instead of 5. AI UPDATE_SECTION action is still not mapping the stars/rating prop correctly.
+
+BUG 27 — NOT FIXED: Footer nav links still show "Adventures" instead of "Services". Footer still missing FAQ, Blog, Testimonials links. Footer does not auto-sync with actual site page structure.
+
+## New Bugs Found (Round 3 — QA Agent, 2026-04-02)
+
+- [ ] BUG 31: **Breadcrumb mismatch on Services page** — The Services page breadcrumb shows "Home/ Adventures" instead of "Home/ Services". The breadcrumb trail is using the wrong page label, likely pulling from footer nav link naming ("Adventures") instead of the actual page slug/title. Fix: breadcrumb should derive from current page title, not footer link labels.
+
+- [ ] - [ ] BUG 32: **Contact page SEO shows test email address** — The Contact page meta description contains "Email: test@ontariofishing.com." — this is a placeholder/test email that should not appear in production SEO metadata. Real business contact details or a generic CTA should replace it.
+
+- [ ] - [ ] BUG 33: **Blog, FAQ, and Testimonials pages have no sections** — In the AI Designer page dropdown, Blog, FAQ, and Testimonials pages show "— no sections" label. These pages exist in the nav but have no content, resulting in blank pages. AI should auto-generate appropriate default sections for these pages or prompt the user to generate them.
