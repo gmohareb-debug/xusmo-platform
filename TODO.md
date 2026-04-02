@@ -42,6 +42,24 @@
 
 - [ ] - [ ] BUG 27: **Footer nav links don't match site pages** — The footer shows: Home, Adventures, Gallery, About Us, Contact — but the site has pages named "Services" (not "Adventures") and missing FAQ, Blog, Testimonials. Footer links should auto-sync with actual page structure.
 
+- [ ] ## Retest Results (QA Agent — 2025-04-02, Round 2)
+
+- [ ] **BUG 24 — PARTIALLY FIXED**: Two CTA buttons now appear in hero ("Explore Our Packages" + "Inquire Now"). Button label differs from requested ("Book a Free Consultation") — minor, acceptable.
+
+- [ ] **BUG 17 — REGRESSED (WORSE)**: About-section image replaced with a Soviet-era bus station photo (Cyrillic "АВТОВОКЗАЛ" text visible). Image is now MORE irrelevant than before (was Istanbul bridge fishing, now is a bus station building). Image search/selection algorithm needs urgent fix for geo-contextual relevance.
+
+- [ ] **BUG 23 — NOT FIXED**: Navbar logo still shows a stock photo (changed from fishing boat to a building/signage image). Not a brand logo. The logo image prop is still pointing to stock photos instead of text-based brand identity.
+
+- [ ] **BUG 26 — NOT FIXED**: At least one testimonial card still shows 4 stars instead of 5. The star count property is not being updated by the AI fix request.
+
+- [ ] **BUG 27 — NOT FIXED**: Footer nav links still show "Adventures" instead of "Services" and still missing FAQ, Blog, Testimonials pages. Footer links are not auto-syncing with actual page structure.
+
+- [ ] - [ ] BUG 28: **Image search returns geo/context irrelevant results** — The Pexels/stock image search is failing to respect location context ("Ontario, Canada") and thematic context ("fishing"). Results include: Istanbul bridge scene, Soviet bus station building. Root cause: image search queries are not constructed with enough specificity (e.g. "Ontario lake fishing" vs generic keyword). Fix: build image search queries from `[niche] [location] [section-type]` pattern.
+
+- [ ] - [ ] BUG 29: **Footer large black empty space** — After the AI fix attempt on BUG 27, the footer now has a large black empty area above the social icons and below the newsletter section. The footer background or height is misconfigured. Footer content (nav links, business name) is invisible against the black background.
+
+- [ ] - [ ] BUG 30: **AI cannot fix star rating count** — When asked to "fix all testimonials to show 5 stars", the AI reports the action but the star count does not change. The testimonials `rating` or `stars` prop is likely not being mapped or updated correctly by the UPDATE_SECTION action.
+
 - [ ] E-commerce Agent — WooCommerce product creation, checkout, cart (postponed)
 - [ ] Vibe Coding Agent — Generate clean React + Tailwind export alongside WordPress
 - [ ] WordPress theme file generation — PHP templates, child themes, ACF fields
