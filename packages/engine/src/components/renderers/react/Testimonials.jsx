@@ -31,7 +31,8 @@ export function Testimonials({ title, testimonials = [] }) {
             </div>
             {record.rating && (
               <div className="testimonials__stars">
-                {'★'.repeat(Math.min(record.rating, 5))}{'☆'.repeat(5 - Math.min(record.rating, 5))}
+                {'★'.repeat(Math.min(Math.max(Math.round(Number(record.rating)), 0), 5))}
+                {'☆'.repeat(5 - Math.min(Math.max(Math.round(Number(record.rating)), 0), 5))}
               </div>
             )}
           </article>

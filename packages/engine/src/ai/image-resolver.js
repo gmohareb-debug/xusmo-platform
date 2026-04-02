@@ -128,8 +128,31 @@ function parsePicsumUrl(url) {
  * If no API key is configured, keeps the original picsum URLs as-is
  * (they show real photos, just not keyword-matched).
  */
-export async function resolveImages(obj, accentColor) {
+export async function resolveImages(obj, accentColor, businessContext) {
   console.log(`[ImageResolver] resolveImages() called — accentColor=${accentColor || 'none'}`)
+
+  // Extract business context for better search queries
+  let contextPrefix = ''
+  if (businessContext) {
+    const parts = []
+    if (businessContext.industry) parts.push(businessContext.industry)
+    if (businessContext.location) parts.push(businessContext.location)
+    if (businessContext.businessName && !businessContext.industry?.toLowerCase().includes(businessContext.businessName.toLowerCase())) {
+      parts.push(businessContext.businessName)
+    }
+    contextPrefix = parts.join(' ')
+    console.log('[ImageResolver] Business context prefix: ' + contextPrefix)
+  } else if (obj?._plan?.businessProfile) {
+    const bp = obj._plan.businessProfile
+    const parts = []
+    if (bp.industry) parts.push(bp.industry)
+    if (bp.location) parts.push(bp.location)
+    if (bp.businessName && !bp.industry?.toLowerCase().includes(bp.businessName.toLowerCase())) {
+      parts.push(bp.businessName)
+    }
+    contextPrefix = parts.join(' ')
+    console.log('[ImageResolver] Business context from _plan: ' + contextPrefix)
+  }
 
   if (!obj || typeof obj !== 'object') {
     console.warn('[ImageResolver] Input is not an object — skipping image resolution')
@@ -194,13 +217,14 @@ export async function resolveImages(obj, accentColor) {
         }
 
         // Try Pexels first, then Unsplash, then keep original
-        const pexelsUrl = await searchPexels(parsed.keyword, parsed.width, parsed.height)
+        const enrichedKeyword = contextPrefix ? (contextPrefix + ' ' + parsed.keyword).slice(0, 80) : parsed.keyword
+        const pexelsUrl = await searchPexels(enrichedKeyword, parsed.width, parsed.height)
         if (pexelsUrl) {
           resolved++
           return { path, newUrl: pexelsUrl }
         }
 
-        const unsplashUrl = await searchUnsplash(parsed.keyword, parsed.width, parsed.height)
+        const unsplashUrl = await searchUnsplash(enrichedKeyword, parsed.width, parsed.height)
         if (unsplashUrl) {
           resolved++
           return { path, newUrl: unsplashUrl }

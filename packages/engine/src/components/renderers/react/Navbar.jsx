@@ -1,18 +1,35 @@
 import { useState } from 'react'
 import { onImgError } from './imgFallback'
 
+const desktopOverride = `
+@media (min-width: 769px) {
+  .navbar__toggle { display: none !important; }
+  .navbar__menu {
+    display: flex !important;
+    flex-direction: row !important;
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+  }
+  .navbar__links { flex-direction: row !important; }
+}
+`
+
 export function Navbar({ logo, logoUrl, links = [], cta }) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   // Use text logo if logoUrl is a placehold.co placeholder or missing
   const isPlaceholder = !logoUrl || logoUrl.includes('placehold.co')
 
-  // Ensure "Home" link exists — prepend if missing
+  // Ensure "Home" link exists - prepend if missing
   const hasHome = links.some(l => l.href === '/' || (l.label || '').toLowerCase() === 'home')
   const allLinks = hasHome ? links : [{ label: 'Home', href: '/' }, ...links]
 
   return (
     <nav className="navbar">
+      <style dangerouslySetInnerHTML={{ __html: desktopOverride }} />
       <div className="navbar__inner">
         <a className="navbar__logo" href="/">
           {isPlaceholder

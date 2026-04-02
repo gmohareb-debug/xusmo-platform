@@ -1126,6 +1126,196 @@ Match colors to the business type:
 
 Return ONLY the JSON object. No explanations, no markdown fences, no extra text.`
 
+// ── Auto-populate empty pages (RC5) ──
+
+function autoPopulateEmptyPages(parsed, plan, businessProfile) {
+  if (!parsed?.pages || !plan?.pages) return
+
+  const homeNavbar = parsed.pages.home?.sections?.find(s => s.component === 'navbar')
+  const homeFooter = parsed.pages.home?.sections?.find(s => s.component === 'footer')
+
+  for (const pageDef of plan.pages) {
+    const pageKey = pageDef.key
+    if (pageKey === 'home') continue
+
+    const page = parsed.pages[pageKey]
+    const hasSections = page?.sections?.length >= 2
+
+    if (!hasSections) {
+      console.log('[AutoPopulate] Page "' + pageKey + '" is empty or missing, generating defaults from goal: ' + (pageDef.goal || 'general'))
+
+      const goal = (pageDef.goal || '').toLowerCase()
+      const label = pageDef.label || pageKey.charAt(0).toUpperCase() + pageKey.slice(1)
+      const bName = businessProfile?.businessName || 'Our Company'
+      const bIndustry = businessProfile?.industry || 'business'
+
+      const sections = []
+
+      if (homeNavbar) sections.push(JSON.parse(JSON.stringify(homeNavbar)))
+
+      sections.push({
+        component: 'section-title',
+        props: { title: label, subtitle: pageDef.goal || ('Learn more about ' + bName) },
+        layout: { background: 'default', padding: 'lg', width: 'contained', align: 'center' },
+        style: { '--comp-heading-size': '36px' }
+      })
+
+      if (pageKey === 'faq' || goal.includes('faq') || goal.includes('question')) {
+        sections.push({
+          component: 'faq-accordion',
+          props: {
+            title: 'Frequently Asked Questions',
+            items: [
+              { question: 'What services does ' + bName + ' offer?', answer: 'We provide comprehensive ' + bIndustry + ' services tailored to your needs. Contact us for a detailed consultation.' },
+              { question: 'How can I get started?', answer: 'Simply reach out through our contact form or give us a call. We will schedule a free consultation to discuss your requirements.' },
+              { question: 'What areas do you serve?', answer: 'We serve clients throughout our local region and surrounding areas. Contact us to confirm service availability in your location.' },
+              { question: 'What makes ' + bName + ' different?', answer: 'Our commitment to quality, personalized service, and years of industry experience set us apart from the competition.' },
+              { question: 'Do you offer free estimates?', answer: 'Yes! We provide free, no-obligation estimates for all our services. Get in touch today to request yours.' }
+            ]
+          },
+          layout: { background: 'muted', padding: 'lg', width: 'contained', align: 'left' },
+          style: { '--comp-radius': '16px', '--comp-card-padding': '20px' }
+        })
+      } else if (pageKey === 'blog' || goal.includes('blog') || goal.includes('article') || goal.includes('news')) {
+        sections.push({
+          component: 'features',
+          props: {
+            title: 'Latest Updates',
+            features: [
+              { icon: '\ud83d\udcf0', title: 'Industry Insights', description: 'Stay up to date with the latest trends and developments in ' + bIndustry + '.' },
+              { icon: '\ud83d\udca1', title: 'Tips & Guides', description: 'Expert advice and practical guides to help you make informed decisions.' },
+              { icon: '\ud83c\udfc6', title: 'Success Stories', description: 'See how ' + bName + ' has helped clients achieve their goals.' }
+            ]
+          },
+          layout: { background: 'default', padding: 'lg', width: 'contained', align: 'center' },
+          style: { '--comp-cols': '3', '--comp-gap': '28px', '--comp-radius': '20px', '--comp-shadow': '0 4px 24px rgba(0,0,0,0.06)', '--comp-card-padding': '28px' }
+        })
+      } else if (pageKey === 'testimonials' || goal.includes('testimonial') || goal.includes('review')) {
+        sections.push({
+          component: 'testimonials',
+          props: {
+            title: 'What Our Clients Say',
+            testimonials: [
+              { name: 'Sarah M.', role: 'Satisfied Customer', quote: bName + ' exceeded our expectations. Their attention to detail and professionalism made all the difference.', rating: 5, avatar: 'https://placehold.co/80x80/e5e7eb/6b7280?text=SM' },
+              { name: 'James R.', role: 'Business Owner', quote: 'Exceptional service from start to finish. I highly recommend ' + bName + ' to anyone looking for quality ' + bIndustry + ' services.', rating: 5, avatar: 'https://placehold.co/80x80/e5e7eb/6b7280?text=JR' },
+              { name: 'Emily K.', role: 'Returning Client', quote: 'We have been working with ' + bName + ' for years and they consistently deliver outstanding results.', rating: 5, avatar: 'https://placehold.co/80x80/e5e7eb/6b7280?text=EK' }
+            ]
+          },
+          layout: { background: 'accent-light', padding: 'lg', width: 'contained', align: 'center' },
+          style: { '--comp-cols': '3', '--comp-gap': '28px', '--comp-radius': '24px', '--comp-shadow': '0 4px 20px rgba(0,0,0,0.05)', '--comp-card-padding': '32px' }
+        })
+      } else if (pageKey === 'about' || goal.includes('trust') || goal.includes('story') || goal.includes('team')) {
+        sections.push({
+          component: 'about-section',
+          props: {
+            title: 'About ' + bName,
+            description: 'We are dedicated to providing exceptional ' + bIndustry + ' services. Our team brings years of experience and a passion for excellence to every project.',
+            stats: [
+              { value: '10+', label: 'Years Experience' },
+              { value: '500+', label: 'Happy Clients' },
+              { value: '98%', label: 'Satisfaction Rate' }
+            ]
+          },
+          layout: { background: 'default', padding: 'lg', width: 'contained', align: 'left' },
+          style: { '--comp-radius': '20px', '--comp-shadow': '0 8px 30px rgba(0,0,0,0.08)' }
+        })
+      } else if (pageKey === 'services' || goal.includes('service') || goal.includes('offering')) {
+        sections.push({
+          component: 'services-section',
+          props: {
+            title: 'Our Services',
+            services: (businessProfile?.keyServices || ['Main Service', 'Consultation', 'Support']).map((svc, idx) => ({
+              icon: ['\ud83d\udd27', '\u2b50', '\ud83d\udcbc', '\ud83c\udfaf', '\ud83d\udccb', '\ud83d\udee0\ufe0f'][idx % 6],
+              title: svc,
+              description: 'Professional ' + svc.toLowerCase() + ' tailored to your specific needs and goals.',
+              href: '/services#' + svc.toLowerCase().replace(/\s+/g, '-')
+            }))
+          },
+          layout: { background: 'default', padding: 'lg', width: 'contained', align: 'center' },
+          style: { '--comp-cols': '3', '--comp-gap': '28px', '--comp-radius': '20px', '--comp-shadow': '0 4px 24px rgba(0,0,0,0.06)', '--comp-card-padding': '28px' }
+        })
+      } else if (pageKey === 'contact' || goal.includes('contact') || goal.includes('booking') || goal.includes('friction')) {
+        sections.push({
+          component: 'contact-form',
+          props: {
+            title: 'Get In Touch',
+            description: 'Ready to get started? Send us a message and we will get back to you within 24 hours.',
+            fields: ['name', 'email', 'phone', 'message'],
+            button: 'Send Message'
+          },
+          layout: { background: 'muted', padding: 'lg', width: 'contained', align: 'center' },
+          style: { '--comp-radius': '16px', '--comp-card-padding': '32px' }
+        })
+      } else {
+        sections.push({
+          component: 'features',
+          props: {
+            title: label,
+            features: [
+              { icon: '\u2728', title: 'Quality Service', description: bName + ' delivers exceptional quality in everything we do.' },
+              { icon: '\ud83e\udd1d', title: 'Trusted Partner', description: 'Years of experience serving clients with dedication and professionalism.' },
+              { icon: '\ud83d\udcc8', title: 'Proven Results', description: 'Our track record speaks for itself with hundreds of satisfied clients.' }
+            ]
+          },
+          layout: { background: 'default', padding: 'lg', width: 'contained', align: 'center' },
+          style: { '--comp-cols': '3', '--comp-gap': '28px', '--comp-radius': '20px', '--comp-shadow': '0 4px 24px rgba(0,0,0,0.06)', '--comp-card-padding': '28px' }
+        })
+      }
+
+      if (homeFooter) sections.push(JSON.parse(JSON.stringify(homeFooter)))
+
+      parsed.pages[pageKey] = {
+        page: (businessProfile?.businessName || 'site').toLowerCase().replace(/\s+/g, '-') + '-' + pageKey,
+        sections
+      }
+
+      console.log('[AutoPopulate] Generated ' + sections.length + ' sections for page "' + pageKey + '"')
+    }
+  }
+}
+
+// ── Auto-assign OG images (RC9) ──
+
+function assignOgImages(parsed) {
+  if (!parsed?.pages) return
+
+  for (const [pageKey, page] of Object.entries(parsed.pages)) {
+    if (!page?.sections?.length) continue
+
+    let ogImage = null
+
+    for (const section of page.sections) {
+      if (!section.props) continue
+
+      if (section.component === 'hero' || section.component === 'hero-image' || section.component === 'hero-video') {
+        if (section.props.imageUrl) { ogImage = section.props.imageUrl; break }
+      }
+
+      if (section.props.imageUrl) { ogImage = section.props.imageUrl; break }
+      if (section.props.image) { ogImage = section.props.image; break }
+
+      const arrays = ['products', 'services', 'items', 'features', 'testimonials']
+      for (const arrKey of arrays) {
+        if (Array.isArray(section.props[arrKey])) {
+          const firstWithImg = section.props[arrKey].find(i => i.image || i.imageUrl)
+          if (firstWithImg) {
+            ogImage = firstWithImg.image || firstWithImg.imageUrl
+            break
+          }
+        }
+      }
+      if (ogImage) break
+    }
+
+    if (ogImage) {
+      if (!page.meta) page.meta = {}
+      page.meta.ogImage = ogImage
+    }
+  }
+
+  console.log('[OGImage] Assigned OG images to pages')
+}
+
 // ── Post-generation consistency enforcement ──
 
 /**
@@ -1309,6 +1499,9 @@ function enforceConsistency(parsed) {
         .replace(/\s+in\s+,\s*/g, ' ')        // "in ,"
         .replace(/\s+in\s*$/g, '')             // trailing "in "
         .replace(/\s+in\s{2,}/g, ' ')          // "in   " (multiple spaces)
+        .replace(/\s+in\s*"/g, '"')            // "in" (before quote)
+        .replace(/\s+in\s*!/g, '!')            // "in!"
+        .replace(/\s{2,}/g, ' ')               // collapse double spaces
         .trim()
     }
     if (Array.isArray(obj)) return obj.map(stripEmptyLocation)
@@ -1554,9 +1747,15 @@ export async function generateFull(prompt) {
   // Step 3: Enforce cross-page consistency (navbar, footer, products, contact)
   enforceConsistency(parsed)
 
+  // Step 3b: Auto-populate empty pages declared by planner but not generated
+  autoPopulateEmptyPages(parsed, plan, businessProfile)
+
+  // Step 3c: Auto-assign OG images from hero/first image per page
+  assignOgImages(parsed)
+
   // Step 4: Resolve images — replace picsum.photos with real keyword-matched photos
   console.log('[Generator] Step 4: Resolving images...')
-  await resolveImages(parsed, parsed.theme?.colors?.accent?.replace('#', ''))
+  await resolveImages(parsed, parsed.theme?.colors?.accent?.replace('#', ''), { businessName: businessProfile.businessName, industry: businessProfile.industry, location: businessProfile.location })
 
   // Attach plan metadata for debugging and UI
   parsed._plan = {
@@ -1633,7 +1832,7 @@ export async function generateLayoutOnly(prompt, currentPages) {
 
   // Resolve images if API key available
   console.log('[Generator] Layout-only: Resolving images...')
-  await resolveImages(parsed)
+  await resolveImages(parsed, null, null)
 
   return parsed.pages
 }
