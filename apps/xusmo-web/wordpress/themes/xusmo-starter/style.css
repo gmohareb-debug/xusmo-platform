@@ -1,0 +1,34 @@
+/*
+Theme Name: Xusmo Starter
+Theme URI: https://xusmo.io
+Description: AI-generated WordPress sites. Child theme of Twenty Twenty-Five.
+Author: Xusmo
+Author URI: https://xusmo.io
+Template: twentytwentyfive
+Version: 1.2.0
+Requires at least: 6.6
+Tested up to: 6.7
+Requires PHP: 8.2
+License: GPL-2.0-or-later
+*/
+
+/* React component pages: zero gaps between all sections (each section owns its own padding) */
+.wp-block-post-content.is-layout-flow > [data-xusmo-component] {
+  margin-block-start: 0 !important;
+  margin-block-end: 0 !important;
+}
+.wp-block-post-content.is-layout-flow > .wp-block-html {
+  margin-block-start: 0 !important;
+  margin-block-end: 0 !important;
+}
+
+/* Ensure mount-point divs don't add extra space */
+[data-xusmo-component] {
+  margin: 0;
+  padding: 0;
+}
+
+/* Reset any inherited body/root padding */
+.wp-block-post-content.is-layout-flow {
+  padding: 0 !important;
+}

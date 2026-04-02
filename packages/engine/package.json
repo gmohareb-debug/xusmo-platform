@@ -1,0 +1,26 @@
+{
+  "name": "@xusmo/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./ai": "./src/ai/generate.js",
+    "./components": "./src/components/componentRegistry.js",
+    "./components/styles.css": "./src/components/styles.css",
+    "./types": "./src/types/index.ts"
+  },
+  "scripts": {
+    "build": "tsc && cp src/ai/component-catalog.json dist/ai/",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@anthropic-ai/sdk": "^0.78.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "@types/node": "^20"
+  }
+}

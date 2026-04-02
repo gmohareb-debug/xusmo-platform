@@ -1,0 +1,1634 @@
+// =============================================================================
+// XUSMO — Universal AI Website Builder
+// Prisma Schema — All database tables
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================================
+// AUTH (NextAuth.js Prisma Adapter)
+// =============================================================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// =============================================================================
+// USERS & CLIENTS
+// =============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  image         String?
+  phone         String?
+  role          UserRole  @default(CUSTOMER)
+
+  // Stripe
+  stripeCustomerId String? @unique
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  accounts          Account[]
+  sessions          Session[]
+  leads             Lead[]
+  sites             Site[]
+  subscriptions     Subscription[]
+  domains           Domain[]
+  revisions         Revision[]
+  tenantMemberships TenantMember[]
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  SUPPORT
+}
+
+// =============================================================================
+// MULTI-TENANCY (ported from Dropnex TenantRegistry)
+// =============================================================================
+
+model Tenant {
+  id       String       @id @default(cuid())
+  slug     String       @unique
+  domain   String?      @unique
+  planName String       @default("starter")
+  status   TenantStatus @default(ACTIVE)
+
+  // Entitlements (ported from gds_tenant_config)
+  productLimit      Int @default(100)
+  storeLimit        Int @default(1)
+  orderMonthlyLimit Int @default(500)
+  siteLimit         Int @default(3)
+  pageLimit         Int @default(5)
+  featureFlags      Json @default("{}")
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  members      TenantMember[]
+  sites        Site[]
+  stores       StoreConnection[]
+  settings     TenantSettings?
+  usageRecords UsageRecord[]
+
+  @@index([slug])
+  @@index([domain])
+}
+
+enum TenantStatus {
+  ACTIVE
+  TRIAL
+  SUSPENDED
+  ARCHIVED
+}
+
+// =============================================================================
+// RBAC (ported from Dropnex Capabilities.php — 8 roles, 3 tiers)
+// =============================================================================
+
+model TenantMember {
+  id       String     @id @default(cuid())
+  tenantId String
+  userId   String
+  role     TenantRole @default(TENANT_ADMIN)
+
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId])
+  @@index([userId])
+}
+
+enum TenantRole {
+  // Platform tier (control plane)
+  PLATFORM_OWNER
+  PLATFORM_OPS
+  PLATFORM_SUPPORT
+  // Tenant tier (merchant/store owner)
+  TENANT_OWNER
+  TENANT_ADMIN
+  TENANT_CATALOG
+  TENANT_OPS
+  // Developer tier
+  DEV_APP_OWNER
+}
+
+// =============================================================================
+// METERED BILLING (ported from Dropnex BillingEngine)
+// =============================================================================
+
+model UsageRecord {
+  id       String @id @default(cuid())
+  tenantId String
+  metric   String
+  month    String
+  count    Int    @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, metric, month])
+  @@index([tenantId, month])
+}
+
+// =============================================================================
+// TENANT-SCOPED SETTINGS (ported from Dropnex Settings.php)
+// =============================================================================
+
+model TenantSettings {
+  id       String @id @default(cuid())
+  tenantId String @unique
+  settings Json   @default("{}")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+}
+
+// =============================================================================
+// AUDIT LOG (ported from Dropnex Logger — tenant-scoped, secret-redacted)
+// =============================================================================
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  tenantId   String?
+  userId     String?
+  action     String
+  component  String
+  objectType String?
+  objectId   String?
+  details    Json?
+  ipAddress  String?
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([action])
+}
+
+// =============================================================================
+// STORE CONNECTIONS & SUPPLIER FEEDS (E-Commerce Add-On)
+// =============================================================================
+
+model StoreConnection {
+  id       String      @id @default(cuid())
+  siteId   String
+  tenantId String
+  storeUrl String
+  apiKey   String?
+  status   StoreStatus @default(PROVISIONING)
+  plan     String      @default("starter")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site      Site           @relation(fields: [siteId], references: [id])
+  tenant    Tenant         @relation(fields: [tenantId], references: [id])
+  suppliers SupplierFeed[]
+
+  @@index([siteId])
+  @@index([tenantId])
+}
+
+model SupplierFeed {
+  id                String   @id @default(cuid())
+  storeConnectionId String
+  name              String
+  slug              String
+  connectorType     String
+  config            Json?
+  isActive          Boolean  @default(true)
+  lastSyncAt        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  storeConnection StoreConnection @relation(fields: [storeConnectionId], references: [id])
+
+  @@unique([storeConnectionId, slug])
+}
+
+enum StoreStatus {
+  PROVISIONING
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+// =============================================================================
+// LEADS & INTAKE
+// =============================================================================
+
+model Lead {
+  id     String     @id @default(cuid())
+  userId String
+  status LeadStatus @default(NEW)
+
+  // Interview state
+  track        SiteTrack @default(WEBSITE)
+  currentStage Int       @default(1)
+  rawAnswers   Json?     // Record<string, any> — all interview answers
+
+  // Business basics (from intake form)
+  businessName        String?
+  businessDescription String?  @db.Text
+  website             String?
+  phone               String?
+  email               String?
+  location            String?
+  yearsInBusiness     String?
+
+  // Classification output (4-layer)
+  industryId     String?
+  industryName   String?
+  subNiche       String?
+  archetype      Archetype?
+  confidence     Float?
+  alternatives   Json?       // string[] of alternative industry guesses
+  features       Json?       // string[] of recommended features
+  styleVariant   String?
+  complexityLevel String?
+
+  // Tracking
+  source         String?     // "google_ads", "organic", "referral", etc.
+  utmCampaign    String?
+  utmSource      String?
+  utmMedium      String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blueprint  Blueprint?
+  industry   IndustryDefault? @relation(fields: [industryId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([industryId])
+}
+
+enum LeadStatus {
+  NEW
+  INTERVIEW_STARTED
+  INTERVIEW_COMPLETED
+  BLUEPRINT_GENERATED
+  BUILD_STARTED
+  PREVIEW_READY
+  APPROVED
+  PUBLISHED
+  CHURNED
+  ABANDONED
+}
+
+enum Archetype {
+  SERVICE
+  VENUE
+  PORTFOLIO
+  COMMERCE
+}
+
+enum SiteTrack {
+  WEBSITE
+  ECOMMERCE
+}
+
+// =============================================================================
+// BLUEPRINTS (Interview Output)
+// =============================================================================
+
+model Blueprint {
+  id     String @id @default(cuid())
+  leadId String @unique
+
+  // Structured interview output
+  businessInfo    Json    // { name, tagline, years, differentiator, targetCustomer }
+  services        Json    // [{ name, description, featured }]
+  pages           Json    // [{ slug, title, blocks[] }]
+  features        Json    // ["quote_form", "gallery", "booking", etc.]
+  designPrefs     Json    // { colors, imagery, tone, font, layout }
+  trustSignals    Json    // [{ type, value }] — licenses, certifications, reviews
+  contactPrefs    Json    // { phone, email, whatsapp, bookingUrl, formType }
+  complianceFlags Json?   // { regulated: bool, disclaimers: string[] }
+  seoData         Json?   // { focusKeywords, metaDescription, schemaType }
+  goals           Json?   // ["get_calls", "get_bookings", "showcase_work"]
+
+  // Enhanced interview data (stages 2, 4, 5, 7)
+  story           Json?   // { foundingStory, differentiator, targetAudience, usp, certifications, serviceAreas }
+  team            Json?   // [{ name, role, bio }]
+  testimonials    Json?   // [{ quote, name, title }]
+  businessHours   String? // "Mon-Fri: 8am-6pm..."
+  socialMedia     Json?   // { facebook?, instagram? }
+  faqs            Json?   // [{ question, answer }]
+  portfolioItems  Json?   // [{ title, category, description }]
+  requestedPages  Json?   // ["home", "services", "about", ...]
+
+  // Generator selection
+  generatorType     String      @default("gutenberg") // "gutenberg" | "engine"
+
+  // Interview metadata
+  interviewDuration Int?        // seconds
+  questionsAsked    Int?
+  llmModel          String?     // "gemini-flash", "gemini-pro", "claude"
+  llmTokensUsed     Int?
+  llmCost           Float?      // estimated cost in USD
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  lead  Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  build Build?
+}
+
+// =============================================================================
+// BUILDS (Agent Pipeline Execution)
+// =============================================================================
+
+model Build {
+  id          String      @id @default(cuid())
+  blueprintId String      @unique
+  siteId      String?     @unique
+  status      BuildStatus @default(QUEUED)
+
+  // Pipeline tracking
+  currentAgent  String?   // "content", "builder", "seo", "asset", "qa", etc.
+  progress      Int       @default(0)  // 0-100 percentage
+  startedAt     DateTime?
+  completedAt   DateTime?
+  failedAt      DateTime?
+  failureReason String?   @db.Text
+
+  // Build configuration
+  archetype     Archetype
+  generatorType String      @default("gutenberg") // "gutenberg" | "engine"
+  industryId    String?
+  goldenImageId String?   // "GI-SERVICE-2026Q1-001"
+  serverVpsId   String?   // which Hetzner VPS this site is on
+
+  // Cost tracking
+  totalLlmCost    Float   @default(0)
+  totalImageCost  Float   @default(0)
+  totalBuildTime  Int     @default(0) // seconds
+
+  // Design relevance (set by QA Agent)
+  designRelevanceScore  Float?       // 0-100
+  industryFitGrade      String?      // "A" | "B" | "C" | "D" | "F"
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  blueprint Blueprint   @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
+  site      Site?       @relation(fields: [siteId], references: [id])
+  agentLogs AgentLog[]
+  qaReports QaReport[]
+
+  @@index([status])
+  @@index([currentAgent])
+}
+
+enum BuildStatus {
+  QUEUED
+  IN_PROGRESS
+  CONTENT_DONE
+  BUILD_DONE
+  SEO_DONE
+  ASSETS_DONE
+  QA_RUNNING
+  QA_PASSED
+  QA_FAILED
+  PREVIEW_READY
+  APPROVED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  CANCELLED
+}
+
+// =============================================================================
+// SITES (Live WordPress Installations)
+// =============================================================================
+
+model Site {
+  id     String     @id @default(cuid())
+  userId String
+  status SiteStatus @default(STAGING)
+
+  // Multi-tenancy
+  tenantId    String?
+  isEcommerce Boolean   @default(false)
+  track       SiteTrack @default(WEBSITE)
+  pageLimit   Int       @default(5)
+
+  // WordPress details
+  wpUrl          String?         // "https://mybusiness.xusmo.io" or custom domain
+  wpAdminUrl     String?
+  wpAdminUser    String?
+  wpAdminEmail   String?
+  wpDbName       String?
+  wpDirectory    String?         // "/home/runcloud/webapps/site-xxx/"
+
+  // Site info
+  businessName   String
+  industryId     String?
+  archetype      Archetype
+  tier           SiteTier        @default(FREE)
+
+  // Server
+  serverIp       String?
+  vpsId          String?         // Hetzner VPS identifier
+  runcloudAppId  String?         // RunCloud application ID
+  sslActive      Boolean         @default(false)
+
+  // Classification (for density management)
+  siteClass      SiteClass       @default(CLASS_A)
+
+  // Managed service
+  managed           Boolean         @default(false)
+  managedPlan       ManagedPlan?
+  managedFee        Float           @default(0)
+  managedStartedAt  DateTime?
+  managedCanceledAt DateTime?
+
+  // WordPress versions & health
+  wpVersion         String?
+  themeVersion      String?
+  sslExpiresAt      DateTime?
+  lastBackupAt      DateTime?
+  lastHealthCheck   DateTime?
+  healthScore       Int?
+  responseTimeMs    Int?
+
+  // Performance
+  lighthouseScore  Int?
+  lastCheckedAt    DateTime?
+
+  // Lineage (Factory Provision Spec)
+  goldenImageVersion String?       // "GI-SERVICE-2026Q1-001" — set by Provisioning Agent at creation
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  publishedAt DateTime?
+
+  // Relations
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant        Tenant?        @relation(fields: [tenantId], references: [id])
+  build         Build?
+  domain        Domain?
+  subscription  Subscription?
+  revisions     Revision[]
+  pages         Page[]
+  sitePlugins     SitePlugin[]
+  healthChecks    SiteHealthCheck[]
+  wpCredential    WpCredential?
+  agentRuns       AgentRun[]
+  entitlements    Entitlement[]
+  storeConnections StoreConnection[]
+
+  // Studio enrichment relations
+  formSubmissions FormSubmission[]
+  blogPosts       BlogPost[]
+  testimonials    Testimonial[]
+  shareLinks      SiteShareLink[]
+  teamMembers     TeamMember[]
+
+  // Custom CSS (advanced design panel)
+  customCss            String?  @db.Text
+  customCssUpdatedAt   DateTime?
+  activePreset         String?   // "professional" | "bold" | "elegant" | "minimal" | "warm"
+
+  // Theme pool
+  themePoolEntryId String?
+  themePoolEntry   ThemePoolEntry? @relation(fields: [themePoolEntryId], references: [id])
+  logo             SiteLogo?
+
+  // Engine source-of-truth: React component JSON from @xusmo/engine
+  designDocument   Json?
+
+  // Multi-theme architecture (v2)
+  wpTheme          String?           // "xusmo-service" | "xusmo-commerce" | "xusmo-venue" | "xusmo-portfolio"
+  wpStyleVariation String?           // "industrial" | "warm-friendly" | "bold-startup" etc.
+  wpContainerName  String?           // "xusmo-site-abc12345"
+  wpCliContainer   String?           // "xusmo-cli-abc12345"
+  wpPort           Int?              // 9042
+  // wpDbName already exists above
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([tier])
+  @@index([vpsId])
+  @@index([managed])
+}
+
+enum SiteStatus {
+  STAGING
+  APPROVED
+  LIVE
+  SUSPENDED
+  DEPROVISIONED
+  MAINTENANCE
+}
+
+enum SiteTier {
+  FREE
+  BASIC
+  PRO
+  AGENCY
+}
+
+enum SiteClass {
+  CLASS_A   // Light brochure: 40-50 sites/VPS
+  CLASS_B   // Medium active: 25-35 sites/VPS
+  CLASS_C   // Heavy e-commerce: 15-25 sites/VPS
+}
+
+enum ManagedPlan {
+  ESSENTIAL
+  PREMIUM
+}
+
+// =============================================================================
+// PAGES (Individual Site Pages)
+// =============================================================================
+
+model Page {
+  id     String @id @default(cuid())
+  siteId String
+
+  slug        String
+  title       String
+  content     String?   @db.Text  // HTML/block content
+  metaTitle   String?
+  metaDesc    String?
+  blocks      Json?     // [{ type, data, order }]
+  isRequired  Boolean   @default(false)
+  sortOrder   Int       @default(0)
+
+  // Social media OG fields
+  ogTitle            String?
+  ogDescription      String?
+  ogImageUrl         String?
+  twitterTitle       String?
+  twitterDescription String?
+
+  // Hero content (for version tracking)
+  heroHeadline    String?  @db.Text
+  heroSubheadline String?  @db.Text
+  ctaLabel        String?
+  bodyContent     Json?
+
+  // WordPress linkage (for sync)
+  wpPostId Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site     Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  versions ContentVersion[]
+
+  @@unique([siteId, slug])
+  @@index([siteId])
+}
+
+// =============================================================================
+// SUBSCRIPTIONS (Stripe Billing)
+// =============================================================================
+
+model Subscription {
+  id     String             @id @default(cuid())
+  userId String
+  siteId String?            @unique
+  status SubscriptionStatus @default(ACTIVE)
+
+  // Stripe
+  stripeSubscriptionId String  @unique
+  stripePriceId        String
+  stripeProductId      String?
+
+  // Plan details
+  planType       PlanType
+  billingCycle   BillingCycle @default(MONTHLY)
+  amount         Float           // monthly amount in USD
+  hostingAmount  Float           @default(11.99)
+  tierAmount     Float           @default(0)
+
+  // Dates
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  canceledAt         DateTime?
+  trialEndAt         DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  site Site? @relation(fields: [siteId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([stripeSubscriptionId])
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  TRIALING
+  PAUSED
+}
+
+enum PlanType {
+  FREE
+  BASIC       // $0 tier + $11.99 hosting
+  PRO         // $9.99 tier + $11.99 hosting
+  AGENCY      // $29.99 tier + $11.99 hosting
+}
+
+enum BillingCycle {
+  MONTHLY
+  ANNUAL
+}
+
+// =============================================================================
+// DOMAINS
+// =============================================================================
+
+model Domain {
+  id     String       @id @default(cuid())
+  userId String
+  siteId String?      @unique
+  status DomainStatus @default(PENDING)
+
+  // Domain details
+  domainName    String   @unique
+  registrar     String?  // "cloudflare", "byod"
+  purchaseType  DomainPurchaseType @default(BYOD)
+  purchasePrice Float?
+  renewalPrice  Float?
+
+  // DNS
+  dnsConfigured Boolean  @default(false)
+  aRecord       String?
+  cnameRecord   String?
+  sslActive     Boolean  @default(false)
+
+  // Dates
+  registeredAt DateTime?
+  expiresAt    DateTime?
+  renewedAt    DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  site Site? @relation(fields: [siteId], references: [id])
+
+  @@index([userId])
+  @@index([domainName])
+}
+
+enum DomainStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  TRANSFERRING
+  SUSPENDED
+}
+
+enum DomainPurchaseType {
+  XUSMO       // Purchased through Xusmo (Cloudflare Registrar)
+  BYOD        // Bring Your Own Domain
+  ANNUAL_FREE // Free with annual hosting prepay
+}
+
+// =============================================================================
+// INDUSTRY DEFAULTS (Curated Defaults Database)
+// =============================================================================
+
+model IndustryDefault {
+  id        String    @id @default(cuid())
+  isActive  Boolean   @default(true)
+
+  // Classification
+  industryCode  String    @unique  // "plumbing", "restaurant", "law_firm"
+  displayName   String              // "Plumbing"
+  category      String?             // "trades", "food_beverage", "professional"
+  subNiches     Json?               // ["residential_plumbing", "commercial_plumbing"]
+  archetype     Archetype
+  keywords      Json                // ["plumber", "plumbing", "drain", "pipe", "water heater"]
+
+  // Feature profile
+  defaultFeatures Json              // ["contact_form", "emergency_call", "service_area_map", "quote_form"]
+
+  // Content defaults
+  defaultServices   Json            // [{ name, description }]
+  sampleTaglines    Json?           // ["Fast, Reliable Plumbing in {City}"]
+  sampleAbout       String?  @db.Text // Template for About page
+  defaultQuestions   Json?           // [{ question, fieldType, options[], required }]
+  defaultHours       Json?           // { mon: "8am-6pm", tue: "8am-6pm", ... }
+  commonTrustSignals Json?           // ["Licensed & Insured", "Same-Day Service"]
+  faqLibrary         Json?           // [{ question, answer }]
+
+  // Visual style defaults
+  primaryColors    Json?            // ["#1e40af", "#ffffff", "#64748b"]
+  imageryThemes    Json?            // ["technicians", "tools", "homes"]
+  tone             String?          // "professional, reliable, urgent"
+  fontPreference   String?          // "clean sans-serif"
+  layoutDensity    String?          // "moderate"
+  requiredSections Json?            // ["services_grid", "emergency_cta", "license_badges"]
+
+  // Compliance
+  isRegulated       Boolean @default(false)
+  defaultDisclaimers Json?           // ["This does not constitute legal advice."]
+
+  // SEO
+  schemaType    String?             // "Plumber", "Restaurant", "LegalService"
+  seoKeywords   Json?               // ["plumber near me", "emergency plumber {city}"]
+
+  // Archetype metadata
+  requiredPages   Json?             // ["home", "services", "contact"]
+  optionalPages   Json?             // ["about", "gallery", "faq", "blog"]
+  conversionPriority String?        // "phone_calls", "reservations", "inquiries"
+
+  // Maturity tracking (data flywheel)
+  totalBuilds      Int     @default(0)
+  approvedBuilds   Int     @default(0)
+  avgQualityScore  Float?
+  avgBuildDuration Int?    // seconds
+  llmTier          Int     @default(3)  // 1=cached, 2=distilled, 3=mainstream
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  leads Lead[]
+
+  @@index([archetype])
+  @@index([industryCode])
+  @@index([isActive])
+}
+
+// =============================================================================
+// AGENT LOGS (Pipeline Activity Tracking)
+// =============================================================================
+
+model AgentLog {
+  id      String @id @default(cuid())
+  buildId String
+
+  // Agent info
+  agentName   String    // "interview", "content", "builder", "seo", "qa", etc.
+  status      AgentLogStatus @default(STARTED)
+
+  // Execution details
+  input       Json?     // What the agent received
+  output      Json?     // What the agent produced
+  error       String?   @db.Text
+  durationMs  Int?      // How long the agent took
+  tokensUsed  Int?
+  llmModel    String?
+  llmCost     Float?
+
+  // Timestamps
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  // Relations
+  build Build @relation(fields: [buildId], references: [id], onDelete: Cascade)
+
+  @@index([buildId])
+  @@index([agentName])
+  @@index([status])
+}
+
+enum AgentLogStatus {
+  STARTED
+  COMPLETED
+  FAILED
+  RETRIED
+  SKIPPED
+}
+
+// =============================================================================
+// QA REPORTS
+// =============================================================================
+
+model QaReport {
+  id      String @id @default(cuid())
+  buildId String
+
+  // Lighthouse
+  lighthouseScore     Int?
+  performanceScore    Int?
+  accessibilityScore  Int?
+  bestPracticesScore  Int?
+  seoScore            Int?
+
+  // Checks
+  mobileResponsive Boolean @default(false)
+  formsWorking     Boolean @default(false)
+  linksValid       Boolean @default(false)
+  imagesLoaded     Boolean @default(false)
+  sslValid         Boolean @default(false)
+  securityScanPass Boolean @default(false)
+
+  // Overall
+  passed    Boolean  @default(false)
+  notes     String?  @db.Text
+  rawReport Json?    // Full Lighthouse JSON
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  // Relations
+  build Build @relation(fields: [buildId], references: [id], onDelete: Cascade)
+
+  @@index([buildId])
+  @@index([passed])
+}
+
+// =============================================================================
+// REVISIONS
+// =============================================================================
+
+model Revision {
+  id     String         @id @default(cuid())
+  userId String
+  siteId String
+  status RevisionStatus @default(PENDING)
+
+  // Request
+  requestType    String?  // "content", "layout", "features", "design", "bug"
+  description    String   @db.Text
+  pagesAffected  Json?    // ["home", "services"]
+  feedbackTag    String?  // "layout" | "branding" | "copy" | "images" | "missing_section" | "feature_request"
+
+  // Response
+  agentsUsed     Json?    // ["content", "builder"]
+  changesMade    String?  @db.Text
+  llmCost        Float?
+
+  // Timestamps
+  requestedAt  DateTime @default(now())
+  completedAt  DateTime?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([userId])
+  @@index([status])
+}
+
+enum RevisionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+// =============================================================================
+// WORDPRESS OPERATIONS — Plugin Catalog, Health, Credentials, Agents
+// =============================================================================
+
+model PluginCatalog {
+  id             String       @id @default(cuid())
+  slug           String       @unique
+  name           String
+  status         PluginStatus @default(EVALUATING)
+  riskLevel      PluginRisk   @default(LOW)
+  category       String?
+  testedVersion  String?
+  latestVersion  String?
+  lastTestedAt   DateTime?
+  testResult     String?
+  testNotes      String?      @db.Text
+  isRequired     Boolean      @default(false)
+  isBanned       Boolean      @default(false)
+  installedCount Int          @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sitePlugins SitePlugin[]
+
+  @@index([status])
+  @@index([slug])
+}
+
+enum PluginStatus {
+  EVALUATING
+  APPROVED
+  REJECTED
+  BANNED
+}
+
+enum PluginRisk {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model SitePlugin {
+  id             String   @id @default(cuid())
+  siteId         String
+  pluginId       String?
+  slug           String
+  version        String?
+  isActive       Boolean  @default(true)
+  updateAvailable String?
+  installedAt    DateTime @default(now())
+  lastUpdatedAt  DateTime?
+  lastCheckedAt  DateTime?
+
+  site   Site           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  plugin PluginCatalog? @relation(fields: [pluginId], references: [id])
+
+  @@unique([siteId, slug])
+  @@index([siteId])
+  @@index([pluginId])
+}
+
+model SiteHealthCheck {
+  id              String  @id @default(cuid())
+  siteId          String
+  healthScore     Int?
+  lighthouseScore Int?
+  responseTimeMs  Int?
+  wpVersionOk     Boolean @default(true)
+  themeVersionOk  Boolean @default(true)
+  pluginsOk       Boolean @default(true)
+  sslOk           Boolean @default(true)
+  backupOk        Boolean @default(true)
+  uptimeOk        Boolean @default(true)
+  issues          Json?
+  checkedAt       DateTime @default(now())
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([checkedAt])
+}
+
+model WpCredential {
+  id            String   @id @default(cuid())
+  siteId        String   @unique
+  wpAdminUser   String
+  wpAdminPassEnc String  @db.Text
+  wpDbUser      String?
+  wpDbPassEnc   String?  @db.Text
+  sshUser       String?
+  sshKeyRef     String?
+  lastRotatedAt DateTime?
+  rotationDueAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+}
+
+model GoldenImage {
+  id              String            @id @default(cuid())
+  version         String            @unique
+  archetype       Archetype
+  wpVersion       String?
+  themeVersion    String?
+  phpVersion      String?
+  pluginCount     Int?
+  patternCount    Int?
+  pluginList      Json?
+  status          GoldenImageStatus @default(DRAFT)
+  lighthouseScore Int?
+  testedAt        DateTime?
+  testResults     Json?
+  siteCount       Int               @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([archetype])
+}
+
+enum GoldenImageStatus {
+  DRAFT
+  TESTING
+  ACTIVE
+  DEPRECATED
+}
+
+model BlockPattern {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  category    String?
+  version     String        @default("1.0")
+  htmlCode    String        @db.Text
+  preview     String?       @db.Text
+  archetypes  Json?
+  industries  Json?
+  status      PatternStatus @default(DRAFT)
+  usedByCount Int           @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([slug])
+}
+
+enum PatternStatus {
+  DRAFT
+  TESTING
+  LIVE
+  RETIRED
+}
+
+model AdminAgent {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  displayName String
+  description String  @db.Text
+  schedule    String?
+  isEnabled   Boolean @default(true)
+  managedOnly Boolean @default(true)
+  targetPlans Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  runs      AgentRun[]
+  approvals AgentApproval[]
+
+  @@index([name])
+}
+
+model AgentRun {
+  id           String         @id @default(cuid())
+  agentId      String
+  siteId       String?
+  status       AgentRunStatus @default(STARTED)
+  startedAt    DateTime       @default(now())
+  completedAt  DateTime?
+  durationMs   Int?
+  sitesChecked Int            @default(0)
+  issuesFound  Int            @default(0)
+  autoFixed    Int            @default(0)
+  escalated    Int            @default(0)
+  actions      Json?
+  errors       String?        @db.Text
+
+  agent AdminAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  site  Site?      @relation(fields: [siteId], references: [id])
+
+  @@index([agentId])
+  @@index([siteId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+enum AgentRunStatus {
+  STARTED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model AgentApproval {
+  id         String           @id @default(cuid())
+  agentId    String
+  action     String           @db.Text
+  reason     String           @db.Text
+  priority   ApprovalPriority @default(NORMAL)
+  metadata   Json?
+  status     ApprovalStatus   @default(PENDING)
+  resolvedBy String?
+  resolvedAt DateTime?
+  resolution String?
+
+  createdAt DateTime @default(now())
+
+  agent AdminAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+}
+
+enum ApprovalPriority {
+  LOW
+  NORMAL
+  URGENT
+  CRITICAL
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  DISMISSED
+  DEFERRED
+}
+
+model ActivityLog {
+  id       String  @id @default(cuid())
+  siteId   String?
+  userId   String?
+  action   String
+  category String
+  severity String  @default("info")
+  message  String  @db.Text
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([siteId])
+  @@index([userId])
+  @@index([category])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+// =============================================================================
+// ADD-ONS & ENTITLEMENTS (Per-Feature Pricing)
+// =============================================================================
+
+model AddOn {
+  id            String      @id @default(cuid())
+  slug          String      @unique          // e.g. "auto-blogger", "reservation-widget"
+  name          String                       // Display name
+  description   String
+  category      String                       // "content", "booking", "ecommerce", "seo", "analytics"
+  pricingType   String                       // "ONE_TIME" | "RECURRING" | "USAGE"
+  priceInCents  Int                          // e.g. 2900 = $29.00
+  interval      String?                      // "month" | "year" | null (for ONE_TIME)
+  stripePriceId String?                      // Stripe Price ID once synced
+  archetypes    String[]                     // Which archetypes this is relevant to
+  industries    String[]                     // Industry codes where this is auto-recommended
+  isActive      Boolean     @default(true)
+  sortOrder     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  entitlements  Entitlement[]
+  bundleItems   BundleItem[]
+
+  @@index([slug])
+  @@index([category])
+  @@index([isActive])
+}
+
+model Bundle {
+  id            String       @id @default(cuid())
+  slug          String       @unique         // e.g. "lead-boost", "seo-boost"
+  name          String
+  description   String
+  discountPct   Int          @default(15)    // 15-20% discount vs a la carte
+  stripePriceId String?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  items         BundleItem[]
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model BundleItem {
+  id       String @id @default(cuid())
+  bundleId String
+  addOnId  String
+  bundle   Bundle @relation(fields: [bundleId], references: [id])
+  addOn    AddOn  @relation(fields: [addOnId], references: [id])
+
+  @@unique([bundleId, addOnId])
+}
+
+model Entitlement {
+  id              String    @id @default(cuid())
+  siteId          String
+  addOnId         String
+  status          String    @default("ACTIVE")  // "ACTIVE" | "EXPIRED" | "CANCELLED"
+  grantedAt       DateTime  @default(now())
+  expiresAt       DateTime?
+  stripeSubItemId String?                       // For RECURRING add-ons
+  site            Site      @relation(fields: [siteId], references: [id])
+  addOn           AddOn     @relation(fields: [addOnId], references: [id])
+
+  @@unique([siteId, addOnId])
+  @@index([siteId])
+  @@index([addOnId])
+  @@index([status])
+}
+
+// =============================================================================
+// STUDIO ENRICHMENT — Form Submissions (Lead Capture)
+// =============================================================================
+
+model FormSubmission {
+  id     String @id @default(cuid())
+  siteId String
+  userId String
+
+  // Submission data
+  formName    String            // "Contact Form", "Quote Request", "Booking"
+  pageSlug    String            // which page the form was on
+  fields      Json              // { name, email, phone, message, ... }
+  submitterIp String?
+  userAgent   String?
+
+  // CRM status
+  status      FormSubmissionStatus @default(NEW)
+  notes       String?  @db.Text
+  contactedAt DateTime?
+  archivedAt  DateTime?
+
+  // Timestamps
+  receivedAt DateTime @default(now())
+
+  // Relations
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([status])
+  @@index([receivedAt])
+}
+
+enum FormSubmissionStatus {
+  NEW
+  VIEWED
+  CONTACTED
+  CONVERTED
+  ARCHIVED
+}
+
+// =============================================================================
+// STUDIO ENRICHMENT — Blog Posts
+// =============================================================================
+
+model BlogPost {
+  id     String @id @default(cuid())
+  siteId String
+
+  // Content
+  title       String
+  slug        String
+  excerpt     String?  @db.Text
+  content     Json     // block format
+  featuredImageUrl String?
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?  @db.Text
+  focusKeyword    String?
+
+  // AI generation tracking
+  aiGenerated     Boolean  @default(false)
+  aiPrompt        String?  @db.Text
+  llmModel        String?
+  llmCost         Float?
+
+  // WP sync
+  wpPostId     Int?
+  status       BlogPostStatus @default(DRAFT)
+  publishedAt  DateTime?
+  lastSyncedAt DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, slug])
+  @@index([siteId])
+  @@index([status])
+}
+
+enum BlogPostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+// =============================================================================
+// STUDIO ENRICHMENT — Testimonials & Reviews
+// =============================================================================
+
+model Testimonial {
+  id     String @id @default(cuid())
+  siteId String
+
+  // Content
+  authorName    String
+  authorTitle   String?
+  authorPhoto   String?
+  rating        Int?
+  content       String     @db.Text
+
+  // Source
+  source        TestimonialSource @default(MANUAL)
+  sourceId      String?
+  sourceUrl     String?
+
+  // Display
+  isPublished   Boolean    @default(true)
+  sortOrder     Int        @default(0)
+  featuredPage  String?
+
+  // WP sync
+  wpPostId      Int?
+  lastSyncedAt  DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+}
+
+enum TestimonialSource {
+  MANUAL
+  GOOGLE
+  FACEBOOK
+  YELP
+}
+
+// =============================================================================
+// STUDIO ENRICHMENT — Share Links (Client Preview)
+// =============================================================================
+
+model SiteShareLink {
+  id     String @id @default(cuid())
+  siteId String
+  userId String
+
+  token       String   @unique @default(cuid())
+  label       String?
+  canComment  Boolean  @default(false)
+  expiresAt   DateTime?
+  viewCount   Int      @default(0)
+  lastViewedAt DateTime?
+  isRevoked   Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([siteId])
+}
+
+// =============================================================================
+// STUDIO ENRICHMENT — Content Versions (Rollback)
+// =============================================================================
+
+model ContentVersion {
+  id     String @id @default(cuid())
+  pageId String
+  siteId String
+
+  // Snapshot of Page content at save time
+  heroHeadline    String?  @db.Text
+  heroSubheadline String?  @db.Text
+  ctaLabel        String?
+  bodyContent     Json?
+  metaTitle       String?
+  metaDescription String?  @db.Text
+
+  // Who/why
+  savedBy    String
+  saveReason String?
+
+  createdAt DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId])
+  @@index([siteId])
+}
+
+// =============================================================================
+// STUDIO ENRICHMENT — Team Members (Access Control)
+// =============================================================================
+
+model TeamMember {
+  id     String @id @default(cuid())
+  siteId String
+  userId String
+
+  // Invitee
+  inviteEmail   String
+  inviteeName   String?
+  inviteeUserId String?
+
+  role        TeamRole         @default(VIEWER)
+  status      TeamInviteStatus @default(PENDING)
+  inviteToken String           @unique @default(cuid())
+
+  // Audit
+  invitedAt  DateTime @default(now())
+  acceptedAt DateTime?
+  revokedAt  DateTime?
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([inviteEmail])
+}
+
+enum TeamRole {
+  VIEWER
+  EDITOR
+  MANAGER
+}
+
+enum TeamInviteStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+// =============================================================================
+// STUDIO ENRICHMENT — Notifications
+// =============================================================================
+
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+
+  type      NotificationType
+  title     String
+  body      String?
+  linkUrl   String?
+  siteId    String?
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+}
+
+enum NotificationType {
+  NEW_LEAD
+  BUILD_COMPLETE
+  REVISION_DONE
+  HEALTH_ALERT
+  SITE_LIVE
+  CLIENT_COMMENT
+  TEAM_INVITE
+}
+
+// =============================================================================
+// THEME POOL — Reusable theme presets across all customers
+// =============================================================================
+
+model ThemePoolEntry {
+  id             String    @id @default(cuid())
+  name           String                          // "Modern Blue Service"
+  slug           String    @unique               // "modern-blue-service"
+  archetype      Archetype                       // SERVICE, VENUE, PORTFOLIO, COMMERCE
+  industryTags   Json?                           // ["plumbing","hvac","cleaning"]
+  colors         Json                            // {primary,secondary,accent,bg,surface,text,textMuted,border}
+  fonts          Json                            // {heading,body,headingWeight,bodyWeight,googleFontsUrl}
+  borderRadius   Json                            // {small,medium,large,pill}
+  buttonStyle    Json                            // {borderRadius,padding,fontSize,fontWeight,textTransform}
+  sectionPadding String    @default("4rem")
+  contentSize    String    @default("800px")
+  wideSize       String    @default("1200px")
+  headingSizes   Json?                           // {h1,h2,h3,h4} with clamp() values
+  designPackage  Json?                           // {headerVariant,footerVariant,homeLayout:[],aboutLayout:[],...}
+  baseTheme      String?                         // "xusmo-service" | "xusmo-commerce" | "xusmo-venue" | "xusmo-portfolio"
+  styleVariation String?                         // "industrial" | "warm-friendly" | "bold-startup" etc.
+  previewUrl     String?                         // Screenshot URL of a site using this theme
+  thumbnailUrl   String?                         // Small preview image
+  usageCount     Int       @default(0)           // How many sites use this
+  rating         Float     @default(0)           // Average rating
+  isSystem       Boolean   @default(false)       // System-provided vs user-created
+  status         String    @default("active")    // active, deprecated, draft
+  createdBy      String?                         // userId who created it
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  sites Site[]
+
+  @@index([archetype])
+  @@index([status])
+}
+
+// =============================================================================
+// ASSET POOL — Reusable images, heroes, icons across all customers
+// =============================================================================
+
+model AssetPoolEntry {
+  id            String   @id @default(cuid())
+  type          String                          // "hero_image", "logo", "section_bg", "icon"
+  industryTags  Json?                           // ["restaurant","cafe","food"]
+  archetypeTags Json?                           // ["VENUE","SERVICE"]
+  moodTags      Json?                           // ["warm","professional","bold"]
+  url           String                          // Storage URL (local/S3)
+  thumbnailUrl  String?
+  width         Int?
+  height        Int?
+  format        String?                         // "png","jpg","svg","webp"
+  alt           String?                         // Alt text description
+  source        String?                         // "unsplash", "generated", "uploaded"
+  sourceId      String?                         // Unsplash photo ID, etc.
+  usageCount    Int      @default(0)
+  isSystem      Boolean  @default(false)
+  status        String   @default("active")     // active, deprecated
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([type])
+  @@index([status])
+}
+
+// =============================================================================
+// SITE LOGO — Per-site logo with color extraction
+// =============================================================================
+
+model SiteLogo {
+  id             String   @id @default(cuid())
+  siteId         String   @unique
+  site           Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  type           String                         // "uploaded", "generated", "text"
+  url            String?                        // Stored file URL
+  text           String?                        // Text-based logo content (business name)
+  dominantColors Json?                          // [{hex,population}] extracted from image
+  width          Int?
+  height         Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

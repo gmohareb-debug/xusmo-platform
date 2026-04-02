@@ -1,0 +1,241 @@
+"use client";
+
+// =============================================================================
+// Engine Preview Client — Renders engine-generated site sections using
+// the 104 React components from @xusmo/engine's componentRegistry.
+// Runs inside an iframe so component CSS is isolated from the studio.
+// =============================================================================
+
+import { useMemo } from "react";
+// @ts-expect-error — componentRegistry is a JS module with default export
+import componentRegistry from "@xusmo/engine/components";
+
+// ── Types for the engine's SiteDocument JSON ──
+
+interface SectionDef {
+  component: string;
+  props: Record<string, unknown>;
+  layout?: {
+    background?: string;
+    padding?: string;
+    width?: string;
+    align?: string;
+  };
+  style?: Record<string, string>;
+}
+
+interface PageData {
+  page?: string;
+  sections: SectionDef[];
+}
+
+interface ThemeDef {
+  name?: string;
+  colors?: {
+    accent?: string;
+    accentLight?: string;
+    surface?: string;
+    background?: string;
+    text?: string;
+    border?: string;
+    muted?: string;
+  };
+  fonts?: {
+    heading?: string;
+    body?: string;
+  };
+  radius?: string;
+}
+
+interface DesignDocument {
+  pages: Record<string, PageData>;
+  theme?: ThemeDef;
+  _plan?: Record<string, unknown>;
+}
+
+// ── Unicode decoder (same as PageRenderer.jsx) ──
+
+function decodeUnicode(obj: unknown): unknown {
+  if (typeof obj === "string") {
+    let decoded = obj;
+    decoded = decoded.replace(
+      /\\u(D[89ABab][0-9a-fA-F]{2})\\u(D[C-Fc-f][0-9a-fA-F]{2})/g,
+      (_, hi, lo) => {
+        try {
+          const code =
+            (parseInt(hi, 16) - 0xd800) * 0x400 +
+            (parseInt(lo, 16) - 0xdc00) +
+            0x10000;
+          return String.fromCodePoint(code);
+        } catch {
+          return _;
+        }
+      }
+    );
+    decoded = decoded.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) =>
+      String.fromCharCode(parseInt(hex, 16))
+    );
+    return decoded;
+  }
+  if (Array.isArray(obj)) return obj.map(decodeUnicode);
+  if (obj && typeof obj === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj)) {
+      out[k] = decodeUnicode(v);
+    }
+    return out;
+  }
+  return obj;
+}
+
+// ── Build CSS custom properties from theme ──
+
+function buildThemeCSS(theme?: ThemeDef): string {
+  if (!theme) return "";
+  const vars: string[] = [];
+  if (theme.colors) {
+    const map: Record<string, string> = {
+      accent: "--accent",
+      accentLight: "--accent-light",
+      surface: "--surface",
+      background: "--bg",
+      text: "--text",
+      border: "--border",
+      muted: "--muted",
+    };
+    for (const [key, cssVar] of Object.entries(map)) {
+      const val = theme.colors[key as keyof typeof theme.colors];
+      if (val) vars.push(`${cssVar}: ${val}`);
+    }
+  }
+  if (theme.radius) vars.push(`--radius: ${theme.radius}`);
+
+  const fontRules: string[] = [];
+  const googleFonts: string[] = [];
+  if (theme.fonts?.heading) {
+    fontRules.push(`--font-heading: '${theme.fonts.heading}', serif`);
+    googleFonts.push(
+      theme.fonts.heading.replace(/ /g, "+") + ":wght@400;600;700"
+    );
+  }
+  if (theme.fonts?.body) {
+    fontRules.push(
+      `font-family: '${theme.fonts.body}', system-ui, sans-serif`
+    );
+    googleFonts.push(
+      theme.fonts.body.replace(/ /g, "+") + ":wght@400;500;600;700"
+    );
+  }
+  if (theme.colors?.background) {
+    fontRules.push(`background-color: ${theme.colors.background}`);
+  }
+  if (theme.colors?.text) {
+    fontRules.push(`color: ${theme.colors.text}`);
+  }
+
+  const allVars = [...vars, ...fontRules].join(";\n  ");
+  const googleLink = googleFonts.length
+    ? `@import url('https://fonts.googleapis.com/css2?family=${googleFonts.join("&family=")}&display=swap');`
+    : "";
+
+  return `${googleLink}\n:root {\n  ${allVars};\n}\nh1,h2,h3,h4,h5,h6 { font-family: var(--font-heading, inherit); }`;
+}
+
+// ── Main component ──
+
+export default function EnginePreviewClient({
+  designDocument,
+  businessName,
+  activePageSlug,
+}: {
+  designDocument: Record<string, unknown>;
+  businessName: string;
+  activePageSlug: string;
+}) {
+  const doc = designDocument as unknown as DesignDocument;
+  const theme = doc.theme;
+
+  const pageData = useMemo(() => {
+    if (!doc.pages) return null;
+    return doc.pages[activePageSlug] || doc.pages.home || null;
+  }, [doc.pages, activePageSlug]);
+
+  const themeCSS = useMemo(() => buildThemeCSS(theme), [theme]);
+
+  if (!pageData?.sections?.length) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+          fontFamily: "system-ui, sans-serif",
+          color: "#94A3B8",
+          fontSize: 16,
+        }}
+      >
+        No content for page &ldquo;{activePageSlug}&rdquo;
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: themeCSS }} />
+
+      <div className="page">
+        {pageData.sections.map((section, index) => {
+          const Component =
+            componentRegistry[section.component] as React.ComponentType<
+              Record<string, unknown>
+            > | undefined;
+
+          if (!Component) {
+            return (
+              <div
+                key={`missing-${index}`}
+                style={{
+                  padding: "16px 32px",
+                  background: "#FEF3C7",
+                  color: "#92400E",
+                  fontSize: 13,
+                  fontFamily: "monospace",
+                }}
+              >
+                Unknown component: {section.component}
+              </div>
+            );
+          }
+
+          const l = section.layout || {};
+          const cls = [
+            "site-section",
+            l.background ? `site-section--bg-${l.background}` : "",
+            l.padding ? `site-section--pad-${l.padding}` : "",
+            l.width === "full" ? "site-section--full" : "",
+            l.align ? `site-section--align-${l.align}` : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+
+          const styleTokens = { ...(section.style || {}) };
+
+          return (
+            <div
+              className={cls}
+              style={styleTokens}
+              key={`${section.component}-${index}`}
+            >
+              <div className="site-section__inner">
+                <Component
+                  {...(decodeUnicode(section.props) as Record<string, unknown>)}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}

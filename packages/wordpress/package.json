@@ -1,0 +1,19 @@
+{
+  "name": "@xusmo/wordpress",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@xusmo/engine": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "@types/node": "^20"
+  }
+}

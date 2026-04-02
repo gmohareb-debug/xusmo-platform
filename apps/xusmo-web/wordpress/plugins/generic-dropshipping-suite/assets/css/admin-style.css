@@ -1,0 +1,68 @@
+/* GDS Admin Premium Theme */
+.gds-dashboard {
+    background: #05070a;
+    color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+.gds-dashboard h1 {
+    color: #fff;
+    font-weight: 800;
+    margin-bottom: 30px;
+    background: linear-gradient(to right, #00f2ff, #7000ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.gds-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 25px;
+    color: #fff;
+}
+
+.gds-card h3 {
+    margin: 0 0 15px 0;
+    color: #a0a0c0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+/* Table Styling */
+.gds-dashboard table.widefat {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #e0e0e0;
+    border-radius: 12px;
+}
+
+.gds-dashboard table.widefat thead th {
+    background: rgba(255, 255, 255, 0.05);
+    color: #00f2ff;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+}
+
+.gds-dashboard table.widefat td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.gds-dashboard table.widefat tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+#wpcontent {
+    background: #05070a !important;
+}

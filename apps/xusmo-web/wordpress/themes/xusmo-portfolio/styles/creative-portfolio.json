@@ -1,0 +1,44 @@
+{
+  "version": 3,
+  "title": "Creative Portfolio",
+  "settings": {
+    "color": {
+      "palette": [
+        { "slug": "primary", "color": "#000000", "name": "Primary" },
+        { "slug": "secondary", "color": "#374151", "name": "Secondary" },
+        { "slug": "accent", "color": "#ec4899", "name": "Accent" },
+        { "slug": "background", "color": "#ffffff", "name": "Background" },
+        { "slug": "surface", "color": "#f9fafb", "name": "Surface" },
+        { "slug": "text", "color": "#111827", "name": "Text" },
+        { "slug": "text-muted", "color": "#6b7280", "name": "Text Muted" },
+        { "slug": "border", "color": "#e5e7eb", "name": "Border" },
+        { "slug": "light", "color": "#ffffff", "name": "Light" }
+      ]
+    },
+    "typography": {
+      "fontFamilies": [
+        { "fontFamily": "\"Space Grotesk\", sans-serif", "name": "Heading", "slug": "heading" },
+        { "fontFamily": "\"Space Grotesk\", sans-serif", "name": "Body", "slug": "body" }
+      ]
+    },
+    "custom": {
+      "borderRadius": {
+        "small": "2px",
+        "medium": "4px",
+        "large": "8px",
+        "pill": "9999px"
+      }
+    }
+  },
+  "styles": {
+    "elements": {
+      "button": {
+        "border": { "radius": "4px" },
+        "typography": {
+          "textTransform": "none",
+          "letterSpacing": "0"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+# XUSMO-WEB (Monorepo) — Local Development Infrastructure
+# Ports shifted to avoid conflicts with SiteFast (5433→5434, 6380→6381, 8088→8089, 3310→3312)
+# Run: docker compose up -d
+
+services:
+  # PostgreSQL — app database
+  postgres:
+    image: postgres:16
+    container_name: xusmo2-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: xusmo
+      POSTGRES_DB: xusmo
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Redis — job queue (BullMQ) + caching
+  redis:
+    image: redis:7-alpine
+    container_name: xusmo2-redis
+    restart: unless-stopped
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_data:/data
+
+  # WordPress — local Golden Image development
+  wordpress:
+    image: wordpress:6.7-php8.2-apache
+    container_name: xusmo2-wp
+    restart: unless-stopped
+    environment:
+      WORDPRESS_DB_HOST: wp-db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    ports:
+      - "8089:80"
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./wordpress/themes/xusmo-starter:/var/www/html/wp-content/themes/xusmo-starter
+      - ./wordpress/patterns:/var/www/html/wp-content/themes/xusmo-starter/patterns
+      - ./wordpress/themes/xusmo-service:/var/www/html/wp-content/themes/xusmo-service
+      - ./wordpress/themes/xusmo-commerce:/var/www/html/wp-content/themes/xusmo-commerce
+      - ./wordpress/themes/xusmo-venue:/var/www/html/wp-content/themes/xusmo-venue
+      - ./wordpress/themes/xusmo-portfolio:/var/www/html/wp-content/themes/xusmo-portfolio
+      - ./wordpress/shared:/var/www/html/wp-content/themes/shared
+      - ./wordpress/plugins/generic-dropshipping-suite:/var/www/html/wp-content/plugins/generic-dropshipping-suite
+    depends_on:
+      - wp-db
+
+  # WordPress MySQL — separate from app PostgreSQL
+  wp-db:
+    image: mysql:8.0
+    container_name: xusmo2-wp-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3312:3306"
+    volumes:
+      - wp_db_data:/var/lib/mysql
+
+  # WP-CLI — for automating WordPress operations
+  wpcli:
+    image: wordpress:cli-2.10-php8.2
+    container_name: xusmo2-wpcli
+    environment:
+      WORDPRESS_DB_HOST: wp-db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./wordpress/themes/xusmo-starter:/var/www/html/wp-content/themes/xusmo-starter
+      - ./wordpress/patterns:/var/www/html/wp-content/themes/xusmo-starter/patterns
+      - ./wordpress/themes/xusmo-service:/var/www/html/wp-content/themes/xusmo-service
+      - ./wordpress/themes/xusmo-commerce:/var/www/html/wp-content/themes/xusmo-commerce
+      - ./wordpress/themes/xusmo-venue:/var/www/html/wp-content/themes/xusmo-venue
+      - ./wordpress/themes/xusmo-portfolio:/var/www/html/wp-content/themes/xusmo-portfolio
+      - ./wordpress/shared:/var/www/html/wp-content/themes/shared
+      - ./wordpress/plugins/generic-dropshipping-suite:/var/www/html/wp-content/plugins/generic-dropshipping-suite
+    depends_on:
+      - wordpress
+      - wp-db
+    entrypoint: ["sh", "-c", "sleep infinity"]
+
+volumes:
+  postgres_data:
+  redis_data:
+  wordpress_data:
+  wp_db_data:

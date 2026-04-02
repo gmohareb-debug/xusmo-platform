@@ -1,0 +1,485 @@
+/*
+ * Xusmo Starter - Font Pair Definitions
+ *
+ * 7 curated font pairs for AI-generated WordPress sites.
+ * Each pair defines a heading and body @font-face with font-display: swap.
+ * The woff2 files are expected in the same directory as this CSS file.
+ */
+
+/* ==========================================================================
+   1. modern-clean: Inter + Inter
+   ========================================================================== */
+
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./inter-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('./inter-medium.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('./inter-semibold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('./inter-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 800;
+	font-display: swap;
+	src: url('./inter-extrabold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Inter';
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./inter-italic.woff2') format('woff2');
+}
+
+/* ==========================================================================
+   2. professional: Playfair Display + Inter
+   ========================================================================== */
+
+@font-face {
+	font-family: 'Playfair Display';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./playfair-display-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Playfair Display';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('./playfair-display-medium.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Playfair Display';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('./playfair-display-semibold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Playfair Display';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('./playfair-display-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Playfair Display';
+	font-style: normal;
+	font-weight: 800;
+	font-display: swap;
+	src: url('./playfair-display-extrabold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Playfair Display';
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./playfair-display-italic.woff2') format('woff2');
+}
+
+/* Inter body fonts already defined in section 1 (modern-clean) */
+
+/* ==========================================================================
+   3. bold-energetic: Montserrat + Open Sans
+   ========================================================================== */
+
+@font-face {
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./montserrat-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('./montserrat-medium.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('./montserrat-semibold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('./montserrat-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Montserrat';
+	font-style: normal;
+	font-weight: 800;
+	font-display: swap;
+	src: url('./montserrat-extrabold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Montserrat';
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./montserrat-italic.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./open-sans-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('./open-sans-medium.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('./open-sans-semibold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('./open-sans-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./open-sans-italic.woff2') format('woff2');
+}
+
+/* ==========================================================================
+   4. elegant: Cormorant Garamond + Lato
+   ========================================================================== */
+
+@font-face {
+	font-family: 'Cormorant Garamond';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./cormorant-garamond-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Cormorant Garamond';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('./cormorant-garamond-medium.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Cormorant Garamond';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('./cormorant-garamond-semibold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Cormorant Garamond';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('./cormorant-garamond-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Cormorant Garamond';
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./cormorant-garamond-italic.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Lato';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./lato-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Lato';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('./lato-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Lato';
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./lato-italic.woff2') format('woff2');
+}
+
+/* ==========================================================================
+   5. friendly: Nunito + Nunito Sans
+   ========================================================================== */
+
+@font-face {
+	font-family: 'Nunito';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./nunito-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Nunito';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('./nunito-medium.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Nunito';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('./nunito-semibold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Nunito';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('./nunito-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Nunito';
+	font-style: normal;
+	font-weight: 800;
+	font-display: swap;
+	src: url('./nunito-extrabold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Nunito';
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./nunito-italic.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Nunito Sans';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./nunito-sans-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Nunito Sans';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('./nunito-sans-medium.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Nunito Sans';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('./nunito-sans-semibold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Nunito Sans';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('./nunito-sans-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Nunito Sans';
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./nunito-sans-italic.woff2') format('woff2');
+}
+
+/* ==========================================================================
+   6. authoritative: Merriweather + Source Sans Pro
+   ========================================================================== */
+
+@font-face {
+	font-family: 'Merriweather';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./merriweather-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Merriweather';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('./merriweather-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Merriweather';
+	font-style: normal;
+	font-weight: 900;
+	font-display: swap;
+	src: url('./merriweather-black.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Merriweather';
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./merriweather-italic.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Source Sans Pro';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./source-sans-pro-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Source Sans Pro';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('./source-sans-pro-semibold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Source Sans Pro';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('./source-sans-pro-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Source Sans Pro';
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./source-sans-pro-italic.woff2') format('woff2');
+}
+
+/* ==========================================================================
+   7. minimal: DM Sans + DM Sans
+   ========================================================================== */
+
+@font-face {
+	font-family: 'DM Sans';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./dm-sans-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'DM Sans';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('./dm-sans-medium.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'DM Sans';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('./dm-sans-semibold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'DM Sans';
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url('./dm-sans-bold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'DM Sans';
+	font-style: normal;
+	font-weight: 800;
+	font-display: swap;
+	src: url('./dm-sans-extrabold.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'DM Sans';
+	font-style: italic;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./dm-sans-italic.woff2') format('woff2');
+}

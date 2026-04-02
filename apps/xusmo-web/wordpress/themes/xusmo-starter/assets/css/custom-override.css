@@ -1,0 +1,147 @@
+:root {
+  --sf-text: #3f2d1f;
+  --sf-accent: #6b8e23;
+  --sf-border: #ead7c2;
+  --sf-primary: #b45309;
+  --sf-surface: #fef3e2;
+  --sf-secondary: #92400e;
+  --sf-textMuted: #7c6757;
+  --sf-background: #fffaf4;
+}
+
+/* ===== Premium Transparent Header ===== */
+
+.xusmo-header-transparent {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba(10, 10, 10, 0.4) !important;
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Site title — white with glow hover */
+.xusmo-header-transparent .wp-block-site-title a {
+  color: #ffffff !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease;
+}
+.xusmo-header-transparent .wp-block-site-title a:hover {
+  color: var(--wp--preset--color--primary) !important;
+}
+
+/* Nav links — white on transparent header */
+.xusmo-header-transparent .wp-block-navigation a,
+.xusmo-header-transparent .wp-block-navigation .wp-block-navigation-item__content {
+  color: rgba(255, 255, 255, 0.85) !important;
+  text-decoration: none !important;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  position: relative;
+  padding-bottom: 4px;
+}
+.xusmo-header-transparent .wp-block-navigation a:hover,
+.xusmo-header-transparent .wp-block-navigation .wp-block-navigation-item__content:hover {
+  color: #ffffff !important;
+}
+
+/* Animated underline on hover */
+.xusmo-header-transparent .wp-block-navigation .wp-block-navigation-item a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--wp--preset--color--primary);
+  transition: width 0.25s ease;
+  border-radius: 1px;
+}
+.xusmo-header-transparent .wp-block-navigation .wp-block-navigation-item a:hover::after {
+  width: 100%;
+}
+
+/* Hamburger/menu icon — white */
+.xusmo-header-transparent .wp-block-navigation__responsive-container-open svg {
+  fill: #ffffff;
+}
+.xusmo-header-transparent .wp-block-navigation button svg {
+  fill: #ffffff;
+}
+
+/* Mobile overlay */
+.wp-block-navigation__responsive-container.is-menu-open {
+  animation: xusmoFadeIn 0.25s ease;
+}
+@keyframes xusmoFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ===== Card polish ===== */
+.wp-block-group[style*="border-radius"] {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.wp-block-group[style*="border-radius"]:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+/* Button hover */
+.wp-block-button__link {
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+.wp-block-button__link:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Footer link styling */
+.wp-block-group.has-surface-background-color a {
+  transition: color 0.2s ease;
+}
+
+/* Smooth scroll */
+html { scroll-behavior: smooth; }
+
+/* ===== Broken image fallback ===== */
+.xusmo-service-img img[src=""] { display: none; }
+.xusmo-service-img:has(img[src=""]) {
+  background: linear-gradient(135deg, var(--wp--preset--color--surface, #f5f5f5), var(--wp--preset--color--border, #e0e0e0));
+  aspect-ratio: 16/10;
+  border-radius: 12px;
+}
+
+/* Outline button fill on hover */
+.wp-block-button.is-style-outline .wp-block-button__link:hover {
+  background: var(--wp--preset--color--primary) !important;
+  color: var(--wp--preset--color--background) !important;
+}
+
+/* FAQ accordion polish */
+details.wp-block-details {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+details.wp-block-details[open] {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+details.wp-block-details summary {
+  cursor: pointer;
+  padding: 1rem 1.25rem;
+}
+
+/* Service card learn-more link */
+.xusmo-learn-more {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--wp--preset--color--primary);
+  text-decoration: none;
+  transition: gap 0.2s ease;
+}
+.xusmo-learn-more:hover { text-decoration: underline; }

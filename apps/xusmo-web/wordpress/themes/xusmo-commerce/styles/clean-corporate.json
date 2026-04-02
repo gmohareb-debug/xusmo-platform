@@ -1,0 +1,44 @@
+{
+  "version": 3,
+  "title": "Clean Corporate",
+  "settings": {
+    "color": {
+      "palette": [
+        { "slug": "primary", "color": "#1e40af", "name": "Primary" },
+        { "slug": "secondary", "color": "#475569", "name": "Secondary" },
+        { "slug": "accent", "color": "#dc2626", "name": "Accent" },
+        { "slug": "background", "color": "#ffffff", "name": "Background" },
+        { "slug": "surface", "color": "#f8fafc", "name": "Surface" },
+        { "slug": "text", "color": "#0f172a", "name": "Text" },
+        { "slug": "text-muted", "color": "#64748b", "name": "Text Muted" },
+        { "slug": "border", "color": "#e2e8f0", "name": "Border" },
+        { "slug": "light", "color": "#ffffff", "name": "Light" }
+      ]
+    },
+    "typography": {
+      "fontFamilies": [
+        { "fontFamily": "\"Inter\", sans-serif", "name": "Heading", "slug": "heading" },
+        { "fontFamily": "\"Inter\", sans-serif", "name": "Body", "slug": "body" }
+      ]
+    },
+    "custom": {
+      "borderRadius": {
+        "small": "4px",
+        "medium": "6px",
+        "large": "12px",
+        "pill": "9999px"
+      }
+    }
+  },
+  "styles": {
+    "elements": {
+      "button": {
+        "border": { "radius": "6px" },
+        "typography": {
+          "textTransform": "none",
+          "letterSpacing": "0"
+        }
+      }
+    }
+  }
+}

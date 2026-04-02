@@ -1,0 +1,28 @@
+{
+  "name": "word1-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@xusmo/engine": "*",
+    "@xusmo/editor": "*",
+    "@xusmo/wordpress": "*",
+    "@xusmo/publish": "*",
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "tsx": "^4.19.0",
+    "@types/node": "^20",
+    "@types/express": "^5",
+    "@types/cors": "^2"
+  }
+}
