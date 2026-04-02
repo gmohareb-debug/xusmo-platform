@@ -719,6 +719,13 @@ body { margin: 0; }
 .navbar__hamburger--open::before { transform: rotate(45deg) translate(4px, 4px); }
 .navbar__hamburger--open::after { transform: rotate(-45deg) translate(4px, -4px); }
 
+/* Desktop: ensure menu is always visible and toggle is hidden */
+@media (min-width: 769px) {
+  .navbar__toggle { display: none !important; }
+  .navbar__menu { display: flex !important; align-items: center; gap: 24px; position: static; background: transparent; flex-direction: row; padding: 0; border-bottom: none; box-shadow: none; }
+  .navbar__links { flex-direction: row; gap: 20px; }
+}
+
 @media (max-width: 768px) {
   .navbar { position: relative; }
   .navbar__toggle { display: block; z-index: 10; }
@@ -924,8 +931,12 @@ body { margin: 0; }
 
 /* — Responsive — */
 @media (max-width: 768px) {
-  .hero-unified { min-height: var(--comp-height, 400px); }
-  .hero-unified__content { padding: 40px 20px; }
+  .hero-unified { min-height: auto; height: auto; max-height: none; }
+  .hero-unified--image,
+  .hero-unified--video { min-height: 360px; }
+  .hero-unified--text { min-height: 320px; }
+  .hero-unified__bg { min-height: 360px; }
+  .hero-unified__content { padding: 48px 20px; }
   .hero-unified__title { font-size: clamp(28px, 7vw, 42px); }
   .hero-unified__actions { flex-direction: column; align-items: center; }
 }

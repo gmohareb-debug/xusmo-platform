@@ -348,6 +348,21 @@ export default function AIDesignerClient({ site }: { site: SiteData }) {
         text: m.text,
       }));
 
+      // BUG 16: Show progress messages during long operations
+      const progressTimer = setTimeout(() => {
+        setChatMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last?.role === "assistant" && last.text.includes("Thinking")) return prev;
+          return [...prev, { id: `p-${Date.now()}`, role: "assistant" as const, text: "Analyzing your request and routing to the right agent...", ts: Date.now() }];
+        });
+      }, 3000);
+      const progressTimer2 = setTimeout(() => {
+        setChatMessages((prev) => [...prev, { id: `p2-${Date.now()}`, role: "assistant" as const, text: "Still working — generating content and applying changes...", ts: Date.now() }]);
+      }, 15000);
+      const progressTimer3 = setTimeout(() => {
+        setChatMessages((prev) => [...prev, { id: `p3-${Date.now()}`, role: "assistant" as const, text: "Almost done — this is a complex operation, hang tight...", ts: Date.now() }]);
+      }, 40000);
+
       // Use the multi-agent pipeline endpoint
       const res = await fetch(`/api/studio/${site.id}/agents`, {
         method: "POST",
@@ -376,7 +391,8 @@ export default function AIDesignerClient({ site }: { site: SiteData }) {
           refreshPreview();
           fetchSections();
         }
-        setChatLoading(false);
+        clearTimeout(progressTimer); clearTimeout(progressTimer2); clearTimeout(progressTimer3);
+    setChatLoading(false);
         return;
       }
 
@@ -414,6 +430,7 @@ export default function AIDesignerClient({ site }: { site: SiteData }) {
         { id: `e-${Date.now()}`, role: "assistant", text: "Something went wrong. Please try again.", ts: Date.now() },
       ]);
     }
+    clearTimeout(progressTimer); clearTimeout(progressTimer2); clearTimeout(progressTimer3);
     setChatLoading(false);
   };
 
@@ -581,14 +598,28 @@ export default function AIDesignerClient({ site }: { site: SiteData }) {
                     onChange={(e) => setActivePage(e.target.value)}
                     style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: `1px solid ${C.border}`, background: C.bg, color: C.text, fontSize: 12 }}
                   >
-                    {Object.keys(sectionPages).length > 0
-                      ? Object.keys(sectionPages).map((slug) => (
-                          <option key={slug} value={slug}>{slug}</option>
-                        ))
-                      : site.pages.map((p) => (
-                          <option key={p.slug} value={p.slug}>{p.title} ({p.slug})</option>
-                        ))
-                    }
+                    {(() => {
+                      // BUG 21 FIX: Merge DB pages + designDocument pages (show all)
+                      const docSlugs = new Set(Object.keys(sectionPages));
+                      const dbSlugs = new Set(site.pages.map((p) => p.slug));
+                      const allSlugs = [...new Set([...docSlugs, ...dbSlugs])];
+                      // Sort: home first, then alphabetical
+                      allSlugs.sort((a, b) => {
+                        if (a === "home") return -1;
+                        if (b === "home") return 1;
+                        return a.localeCompare(b);
+                      });
+                      return allSlugs.map((slug) => {
+                        const dbPage = site.pages.find((p) => p.slug === slug);
+                        const hasDoc = docSlugs.has(slug);
+                        const label = dbPage ? dbPage.title : slug.charAt(0).toUpperCase() + slug.slice(1);
+                        return (
+                          <option key={slug} value={slug}>
+                            {label} ({slug}){!hasDoc ? " — no sections" : ""}
+                          </option>
+                        );
+                      });
+                    })()}
                   </select>
                 </div>
 

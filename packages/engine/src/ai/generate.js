@@ -823,11 +823,13 @@ The seed in picsum.photos URLs is used as a SEARCH KEYWORD to find a matching ph
 - https://picsum.photos/seed/{search-keyword}/800/600   (about/featured: standard)
 - https://picsum.photos/seed/{search-keyword}/600/400   (cards/thumbnails)
 
-The search keyword MUST describe the actual photo subject. Examples:
-- Bidet store hero: "modern bathroom bidet" NOT "hero-image"
-- Landscaping hero: "green garden lawn care" NOT "landscaping-hero"
-- Dental hero: "dental clinic patient smiling" NOT "dental-office"
-- Restaurant hero: "restaurant dining table food" NOT "food-hero"
+The search keyword MUST describe the actual photo subject AND include the business location if known.
+If the business has a location (city, region, country), APPEND it to every image search keyword so photos are geo-relevant.
+Examples:
+- Bidet store in Ontario: "modern bathroom bidet ontario canada" NOT "hero-image"
+- Landscaping in Toronto: "green garden lawn care toronto" NOT "landscaping-hero"
+- Dental in London: "dental clinic patient smiling london" NOT "dental-office"
+- Restaurant in Dubai: "restaurant dining table food dubai" NOT "food-hero"
 Use DIFFERENT keywords for each image so you get DIFFERENT photos.
 
 **PRODUCT IMAGES:**
@@ -842,9 +844,12 @@ Example: "professional lawn mowing", "teeth whitening dental"
 Use placehold.co with person's initials:
 - https://placehold.co/80x80/accent_hex/ffffff?text=JD
 
-**TRUST BADGES and CLIENT LOGOS:**
-Use placehold.co with organization names:
+**TRUST BADGES and CLIENT LOGOS (CRITICAL — NEVER use picsum for these):**
+Trust badges and client/partner logos MUST ONLY use placehold.co with organization names.
+NEVER use picsum.photos for trust badges or client logos — they are text-based placeholders, not photos.
 - https://placehold.co/120x40/e5e7eb/6b7280?text=Partner+Name
+- https://placehold.co/120x40/e5e7eb/6b7280?text=Google
+- https://placehold.co/120x40/e5e7eb/6b7280?text=Forbes
 
 **NAVBAR LOGO:**
 Use placehold.co with business initials on accent-colored background:
@@ -930,10 +935,11 @@ Example footer props:
 - Navigation links must use real page paths (/about, /services, /contact), not "#".
 - CTA buttons in heroes: on the Home page, use anchor links like "#products", "#features". On other pages, use "/#products" (with leading slash) so it navigates to Home first then scrolls.
 - Hero CTA "ctaHref" default: "#products". Hero "ctaSecondaryHref" default: "#features".
+- CRITICAL: The hero section MUST include BOTH "cta" (primary button text) AND "ctaSecondary" (secondary button text). Never omit ctaSecondary — every hero needs two CTAs (e.g., "Get Started" + "Learn More").
 
 ### Visual Quality Rules (CRITICAL)
 - Every services-section card SHOULD include a relevant thumbnail "image" URL using placehold.co with colors matching the theme.
-- Testimonials MUST include "avatar" (placehold.co with initials), "role" (job title at company), and "rating" (4 or 5).
+- Testimonials MUST include "avatar" (placehold.co with initials), "role" (job title at company), and "rating" (ALWAYS 5 — never less than 5).
 - Features should use the RICH format: array of { icon: emoji, title: string, description: string } — NOT simple string arrays.
 - Use relevant EMOJI icons for services and features (e.g., landscaping: 🌿🏡🌳, restaurant: 🍽️👨‍🍳🍷, tech: 💻🚀⚡).
 - CRITICAL: Emoji must be actual Unicode characters, NOT escape sequences. Write "🛠️" not "\\u{1F6E0}\\uFE0F" or "🛠ufe0f". The JSON output must contain the literal emoji character.
@@ -1295,7 +1301,137 @@ function enforceConsistency(parsed) {
     }
   }
 
-  console.log('[Consistency] Enforced navbar/footer/product/contact consistency across all pages')
+  // 9. BUG 20 — Strip "in ." or "in  " from all text fields (empty location)
+  function stripEmptyLocation(obj) {
+    if (typeof obj === 'string') {
+      return obj
+        .replace(/\s+in\s+\.\s*/g, ' ')      // "in ."
+        .replace(/\s+in\s+,\s*/g, ' ')        // "in ,"
+        .replace(/\s+in\s*$/g, '')             // trailing "in "
+        .replace(/\s+in\s{2,}/g, ' ')          // "in   " (multiple spaces)
+        .trim()
+    }
+    if (Array.isArray(obj)) return obj.map(stripEmptyLocation)
+    if (obj && typeof obj === 'object') {
+      const out = {}
+      for (const [k, v] of Object.entries(obj)) {
+        out[k] = stripEmptyLocation(v)
+      }
+      return out
+    }
+    return obj
+  }
+
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (let i = 0; i < page.sections.length; i++) {
+      if (page.sections[i].props) {
+        page.sections[i].props = stripEmptyLocation(page.sections[i].props)
+      }
+    }
+  }
+
+  // 10. BUG 23 — Navbar logo must be text (business name), not a stock photo URL
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (section.component === 'navbar' && section.props) {
+        // If logo looks like a URL, replace it with logoUrl and use business name instead
+        if (section.props.logo && /^https?:\/\//.test(section.props.logo)) {
+          section.props.logoUrl = section.props.logo
+          section.props.logo = section.props.logo // will be overridden below
+        }
+        // If logoUrl is a picsum/unsplash photo (not placehold.co), replace with placehold.co
+        if (section.props.logoUrl && !section.props.logoUrl.includes('placehold.co')) {
+          const name = section.props.logo || 'Site'
+          const initials = name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase()
+          section.props.logoUrl = `https://placehold.co/40x40/333333/ffffff?text=${initials}`
+        }
+      }
+    }
+  }
+
+  // 11. BUG 26 — Force all testimonial ratings to 5
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (section.component === 'testimonials' && section.props?.items) {
+        for (const item of section.props.items) {
+          if (item.rating !== undefined && item.rating < 5) {
+            item.rating = 5
+          }
+        }
+      }
+    }
+  }
+
+  // 12. BUG 27 — Rebuild footer column links from actual page list
+  // Extract actual pages from the parsed output
+  const actualPageKeys = Object.keys(pages)
+  const pageLabels = {}
+  // Try to infer labels from navbar links
+  if (homeNavbar?.props?.links) {
+    for (const link of homeNavbar.props.links) {
+      const slug = (link.href || '').replace(/^\//, '') || 'home'
+      pageLabels[slug] = link.label
+    }
+  }
+  // Build a "Quick Links" column from actual pages
+  const quickLinks = actualPageKeys
+    .filter(k => k !== 'home')
+    .map(k => ({
+      label: pageLabels[k] || k.charAt(0).toUpperCase() + k.slice(1).replace(/-/g, ' '),
+      href: k === 'home' ? '/' : `/${k}`,
+    }))
+  // Add Home at the start
+  quickLinks.unshift({ label: 'Home', href: '/' })
+
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (section.component === 'footer' && section.props?.columns) {
+        // Find or create the "Quick Links" / navigation column
+        const navColIndex = section.props.columns.findIndex(c =>
+          /quick\s*links|pages|navigation|sitemap|menu/i.test(c.title)
+        )
+        if (navColIndex >= 0) {
+          section.props.columns[navColIndex].links = quickLinks
+        } else if (section.props.columns.length > 0) {
+          // Replace the first column with quick links
+          section.props.columns[0] = { title: 'Quick Links', links: quickLinks }
+        }
+      }
+    }
+  }
+
+  // 13. BUG 22 — Force trust-badges / client logos to use placehold.co, not picsum
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (section.component === 'trust-badges' && section.props) {
+        // Fix badges array
+        const badgeArrays = ['badges', 'items', 'logos', 'clients', 'partners']
+        for (const key of badgeArrays) {
+          if (Array.isArray(section.props[key])) {
+            for (const badge of section.props[key]) {
+              if (badge.image && !badge.image.includes('placehold.co')) {
+                const name = badge.name || badge.label || badge.title || 'Partner'
+                const encoded = encodeURIComponent(name).replace(/%20/g, '+')
+                badge.image = `https://placehold.co/120x40/e5e7eb/6b7280?text=${encoded}`
+              }
+              if (badge.logo && !badge.logo.includes('placehold.co')) {
+                const name = badge.name || badge.label || badge.title || 'Partner'
+                const encoded = encodeURIComponent(name).replace(/%20/g, '+')
+                badge.logo = `https://placehold.co/120x40/e5e7eb/6b7280?text=${encoded}`
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  console.log('[Consistency] Enforced navbar/footer/product/contact/testimonial/trust-badge consistency across all pages')
   return parsed
 }
 

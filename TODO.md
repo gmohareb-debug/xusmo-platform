@@ -2,17 +2,29 @@
 
 ## Fixed (deployed to production)
 
-- [x] BUG 1: Hero content sync — `updateDesignDocumentHero()` now tries ALL matching prop names (title/headline/heading for heroHeadline, subtitle/subheadline/description for heroSubheadline)
-- [x] BUG 2: Page creation — `CREATE_PAGE` action creates pages in both DB and designDocument
-- [x] BUG 3: Theme colors rendering — `.page` CSS now uses `var(--bg)` for background-color, sections use `var(--bg, var(--surface))` fallback
-- [x] BUG 4+10: Response truncation — Switched to Gemini Pro (4K tokens) + `salvageJSON()` for partial responses
-- [x] BUG 5+6: Send button conflict — Floating StudioAgent hidden on AI Designer page (`!pathname.includes("/aidesigner")`)
-- [x] BUG 7: JSON leak in replies — `sanitizeReply()` strips raw action data from user-facing text
-- [x] BUG 8: AI hallucination — System prompt: "ONLY report actions you are ACTUALLY executing"
-- [x] BUG 9: Chat persistence — Chat history saved/restored from `localStorage` (last 50 messages)
-- [x] BUG 11: Page selector — Defaults to "home" page
-- [x] BUG 12-14: Empty sections — `getDefaultProps()` provides real default content for 15+ component types (about, testimonials, footer, services, FAQ, features, etc.)
-- [x] BUG 15: Unknown action — All action types now implemented in editor agent (12 actions total)
+- [x] BUG 1: Hero content sync — `updateDesignDocumentHero()` tries ALL matching prop names
+- [x] BUG 2: Page creation — `CREATE_PAGE` action
+- [x] BUG 3: Theme colors rendering — `.page` uses `var(--bg)` for background
+- [x] BUG 4+10: Response truncation — Gemini Pro + `salvageJSON()`
+- [x] BUG 5+6: Send button conflict — StudioAgent hidden on AI Designer
+- [x] BUG 7: JSON leak — `sanitizeReply()` strips raw action data
+- [x] BUG 8: AI hallucination — anti-hallucination prompt rules
+- [x] BUG 9: Chat persistence — localStorage (last 50 messages)
+- [x] BUG 11: Page selector — defaults to "home"
+- [x] BUG 12-14: Empty sections — `getDefaultProps()` for 15+ component types
+- [x] BUG 15: Unknown action — all 12 action types implemented
+- [x] BUG 16: Progress indicator — status messages at 3s, 15s, 40s during long operations
+- [x] BUG 17: Geo-relevant images — image keywords now include business location
+- [x] BUG 18: Navbar hamburger on desktop — CSS fix: `@media (min-width: 769px)` forces full nav
+- [x] BUG 19: Hero black space on mobile — CSS fix: `min-height: auto` on mobile, variant-specific minimums
+- [x] BUG 20: Empty location in SEO — `stripEmptyLocation()` removes "in ." patterns from all text
+- [x] BUG 21: Missing pages in dropdown — merged DB + designDocument pages, home first
+- [x] BUG 22: Trust badges stock photos — prompt + post-processing forces placehold.co for logos
+- [x] BUG 23: Navbar logo stock photo — `enforceConsistency()` replaces URL logos with text + initials
+- [x] BUG 24: Missing secondary CTA — prompt rule: hero MUST include `cta` + `ctaSecondary`
+- [x] BUG 25: OG images — auto-set from hero/page images during generation
+- [x] BUG 26: Testimonials 4 stars — prompt + post-processing forces all ratings to 5
+- [x] BUG 27: Footer nav mismatch — `enforceConsistency()` rebuilds footer links from actual pages
 
 ## Future Enhancements
 
