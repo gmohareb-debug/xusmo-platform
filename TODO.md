@@ -164,3 +164,38 @@ BUG 27 — NOT FIXED: Footer nav links still show "Adventures" instead of "Servi
 
 - [ ] - [ ] BUG 67: **Website creation flow collects only business name + email before generation** — The AI interview collects only the business name (inferred from chat) and an email address before generating a full multi-page site. No location, services, brand colors, logo, phone number, or social links are requested. This forces the AI to fabricate all business details (e.g., invented phone "555-FISH", invented guide name "Johnathan Pike"), directly causing image mismatch bugs, placeholder content, and SEO issues. Fix: add a 3–5 question guided onboarding flow before generation to collect real business data.
 - [ ] 
+
+## TC-001: E-commerce Site — Wax and Wick Studio (QA Agent — 2026-04-03, Round 9)
+
+**Test:** Create an e-commerce store for a handmade candle business via the /interview flow.
+**Input provided:** Business name, type (e-commerce), brand tone (warm/friendly), location (Toronto, Ontario), product categories, shipping policy, payment methods, email.
+**Generation time:** ~100 seconds total (interview ~80s + build ~20s)
+
+### PASSED ✅
+- [ ] TC-001-P1: AI collected 6 data points before generating (name, tone, location, products, shipping, payment, email) — more thorough than service site flow
+- [ ] - [ ] TC-001-P2: Hero copy correctly used "HANDMADE IN TORONTO" — location data was applied
+- [ ] - [ ] TC-001-P3: Real email (hello@waxandwickstudio.com) correctly populated on Contact page
+- [ ] - [ ] TC-001-P4: Contact info labels render with proper formatting (Email: / Phone: on separate lines) — BUG 35 FIXED on this site type
+- [ ] - [ ] TC-001-P5: Nav CTA button ("Shop All Candles") has correct white text on amber background — BUG 63 NOT present on this site
+- [ ] - [ ] TC-001-P6: Single navbar rendered — no double navbar (BUG 53 not present)
+- [ ] - [ ] TC-001-P7: No black blank section between hero and stats (BUG 19 not present)
+- [ ] - [ ] TC-001-P8: All image alt texts are product/content-relevant (Lavender & Sage, Sandalwood & Vanilla, etc.)
+- [ ] - [ ] TC-001-P9: FAQ page populated with real candle-specific Q&A (not blank stub)
+- [ ] - [ ] TC-001-P10: Studio sidebar page list matches navbar pages (Home, Shop, About, FAQ, Contact) — BUG 62 not present
+- [ ] - [ ] TC-001-P11: SEO meta title correctly set: "Wax and Wick Studio | Toronto, Ontario, Canada" — no "in ." artifact (BUG 20/50 FIXED)
+- [ ] - [ ] TC-001-P12: Footer copyright correct: "© 2026 Wax and Wick Studio. All rights reserved. Handcrafted with love in Toronto."
+
+- [ ] ### FAILED ❌
+
+- [ ] - [ ] BUG 68: **Footer brand block shows "Business — Quality you can trust." on all pages** — The footer top section displays the generic placeholder tagline "Business — Quality you can trust." instead of the site name and a brand-specific tagline. Affects Shop, FAQ, Contact pages. Same as BUG 46 (not fixed). Site: Wax and Wick Studio.
+
+- [ ] - [ ] BUG 69: **All SEO pages share identical meta title and description** — Every page (Home, Shop, Contact, About, FAQ) has the same meta title "Wax and Wick Studio | Toronto, Ontario, Canada" and same description "Wax and Wick Studio in Toronto, Ontario, Canada. We sell handmade soy candles online." No page-specific SEO copy is generated. Fix: each page should have a unique, page-relevant meta title and description.
+
+- [ ] - [ ] BUG 70: **OG/Social preview image not auto-generated** — SEO panel shows "1200 x 630 — Click to upload" placeholder with no auto-generated image. Confirmed still open (same as BUG 25/51). Site: Wax and Wick Studio.
+
+- [ ] - [ ] BUG 71: **Mobile navbar does not collapse — hamburger hidden, all links visible at 390px** — On mobile viewport (390px width), the hamburger menu button is present in DOM but has `display: none`, while all 5 desktop nav links remain visible and overflow the viewport. The responsive nav breakpoint is not working. Same as BUG 18 (not fixed). Site: Wax and Wick Studio.
+
+- [ ] - [ ] BUG 72: **QA Check tool does not return results** — Clicking "Run QA Check" in the Preview & Review panel shows "QA check has been queued. Results will appear shortly." but after 15+ seconds the panel still shows "No QA report yet." Same as BUG 42 (not fixed). Site: Wax and Wick Studio.
+
+- [ ] - [ ] BUG 73: **AI Designer route returns 404** — Navigating to `/studio/site/[id]/ai-designer` returns a 404 "This page could not be found." error. The sidebar menu item "AI Designer" links to this route. Fix: AI Designer route must be registered and accessible for all site types. Site: Wax and Wick Studio (e-commerce type).
+- [ ] 
