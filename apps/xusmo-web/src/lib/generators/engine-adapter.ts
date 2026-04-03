@@ -34,13 +34,13 @@ export interface EngineResult {
  *
  * Retries up to 3 times if the LLM returns truncated/invalid JSON.
  */
-export async function generateViaEngine(prompt: string): Promise<EngineResult> {
+export async function generateViaEngine(prompt: string, blueprintContext?: Record<string, unknown>): Promise<EngineResult> {
   const MAX_ATTEMPTS = 3;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       console.log(`[engine-adapter] Generating via @xusmo/engine (attempt ${attempt}/${MAX_ATTEMPTS})...`);
-      const siteDoc = await generateFull(prompt) as SiteDocument;
+      const siteDoc = await generateFull(prompt, blueprintContext) as SiteDocument;
 
       // Convert to Gutenberg blocks for WordPress compatibility
       console.log("[engine-adapter] Converting to Gutenberg blocks...");

@@ -1671,9 +1671,26 @@ function validateBusinessContext(parsed, businessProfile) {
 
 // ── Exported generation functions ──
 
-export async function generateFull(prompt) {
-  // Step 0: Business Intelligence — understand the client deeply
-  const businessProfile = await analyzeBusinessIntelligence(prompt)
+export async function generateFull(prompt, blueprintContext) {
+  // Step 0: Business Intelligence — use blueprint context if available, else analyze
+  let businessProfile
+  if (blueprintContext && blueprintContext.businessName) {
+    console.log('[Generator] Using blueprint context (skipping re-analysis)')
+    businessProfile = {
+      businessName: blueprintContext.businessName,
+      industry: blueprintContext.industry || 'general business',
+      location: blueprintContext.location || null,
+      targetAudience: blueprintContext.targetAudience || 'general consumers',
+      primaryPainPoint: blueprintContext.differentiator || 'finding a reliable provider',
+      valueProposition: blueprintContext.description || 'quality service',
+      tone: blueprintContext.tone || 'professional',
+      websiteGoal: blueprintContext.primaryGoal || 'leads',
+      uniqueSellingPoints: blueprintContext.services ? blueprintContext.services.map(s => s.name) : [],
+      keyServices: blueprintContext.services ? blueprintContext.services.map(s => s.name) : [],
+    }
+  } else {
+    businessProfile = await analyzeBusinessIntelligence(prompt)
+  }
 
   // Step 1: Plan — classify business, select personality, pages, components
   const plan = await planSite(prompt, businessProfile)

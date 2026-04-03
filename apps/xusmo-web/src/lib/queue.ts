@@ -566,9 +566,54 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
         include: { lead: true },
       });
       const biz = (bp.businessInfo as Record<string, unknown>) ?? {};
-      const prompt = `${biz.name ?? "My Business"}: ${biz.description ?? ""} in ${biz.location ?? ""}. ${(bp.story as Record<string, unknown>)?.differentiator ?? ""}`;
+      const bpStory = (bp.story as Record<string, unknown>) ?? {};
+      const bpDesign = (bp.designPrefs as Record<string, unknown>) ?? {};
+      const bpServices = (bp.services as Array<Record<string, unknown>>) ?? [];
+      const serviceNames = bpServices.map((s: Record<string, unknown>) => `${s.name}: ${s.description}`).join("\n- ");
 
-      const { siteDoc, gutenbergPages } = await generateViaEngine(prompt);
+      const prompt = [
+        `Build a professional website for "${biz.name ?? "My Business"}".`,
+        ``,
+        `BUSINESS DETAILS:`,
+        `- Business Name: ${biz.name ?? "My Business"}`,
+        `- Industry: ${bp.lead.industryName ?? "General Business"}`,
+        `- Archetype: ${bp.lead.archetype ?? "SERVICE"}`,
+        `- Description: ${biz.description ?? ""}`,
+        biz.tagline ? `- Tagline: ${biz.tagline}` : "",
+        biz.location ? `- Location: ${biz.location}` : "",
+        biz.phone ? `- Phone: ${biz.phone}` : "",
+        biz.email ? `- Email: ${biz.email}` : "",
+        bpStory.differentiator ? `- What makes them different: ${bpStory.differentiator}` : "",
+        bpStory.targetAudience ? `- Target audience: ${bpStory.targetAudience}` : "",
+        bpDesign.tone ? `- Tone/style: ${bpDesign.tone}` : "",
+        ``,
+        serviceNames ? `SERVICES:\n- ${serviceNames}` : "",
+        ``,
+        `IMPORTANT: The navbar logo MUST say "${biz.name ?? "My Business"}". All content must be about this specific business.`,
+      ].filter(Boolean).join("\n");
+
+      // Pass structured blueprint data so the engine skips redundant re-analysis
+      const blueprintContext = {
+        businessName: biz.name as string,
+        description: biz.description as string,
+        industry: bp.lead.industryName,
+        archetype: bp.lead.archetype,
+        location: biz.location as string,
+        tagline: biz.tagline as string,
+        phone: biz.phone as string,
+        email: biz.email as string,
+        tone: (bpDesign.tone as string) || "professional",
+        primaryGoal: (bp.lead.rawAnswers as Record<string, string>)?.primary_goal || "leads",
+        differentiator: bpStory.differentiator as string,
+        targetAudience: bpStory.targetAudience as string,
+        colors: bpDesign.primaryColors as string[],
+        services: bpServices.map((s: Record<string, unknown>) => ({
+          name: s.name as string,
+          description: s.description as string,
+        })),
+      };
+
+      const { siteDoc, gutenbergPages } = await generateViaEngine(prompt, blueprintContext);
 
       // Preserve the React JSON as source of truth — will be stored in Site.designDocument
       engineDesignDocument = siteDoc;
