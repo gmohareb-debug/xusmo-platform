@@ -244,6 +244,7 @@ export async function generateBlueprint(leadId: string) {
 
   // 4. Build the Blueprint JSON
   const businessName = (answers.business_name as string) ?? lead.businessName ?? "My Business";
+const businessDesc = (answers.business_description as string) ?? lead.businessDescription ?? "";
   const location = (answers.location as string) ?? lead.location ?? "";
 
   const businessInfo: BlueprintBusinessInfo = {
@@ -263,7 +264,6 @@ export async function generateBlueprint(leadId: string) {
   };
 
   // Build services from business description first, fall back to industry defaults
-  const businessDesc = (answers.business_description as string) ?? lead.businessDescription ?? "";
   const defaultServices = (industry?.defaultServices as Array<{ name: string; description: string }>) ?? [];
   const selectedServiceValues = (answers.selected_services as string[]) ?? [];
 
