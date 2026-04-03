@@ -199,3 +199,33 @@ BUG 27 — NOT FIXED: Footer nav links still show "Adventures" instead of "Servi
 
 - [ ] - [ ] BUG 73: **AI Designer route returns 404** — Navigating to `/studio/site/[id]/ai-designer` returns a 404 "This page could not be found." error. The sidebar menu item "AI Designer" links to this route. Fix: AI Designer route must be registered and accessible for all site types. Site: Wax and Wick Studio (e-commerce type).
 - [ ] 
+
+## TC-002: Service Site — Smile Bright Dental Clinic (QA Agent — 2026-04-03, Round 10)
+
+**Test:** Create a service website for a family dental clinic via the /interview flow.
+**Input provided:** Business name, location (Vancouver BC), services (general dentistry, teeth whitening, orthodontics, emergency), brand tone (professional/clean), colors (blue & white), logo (text), email.
+**Generation time:** ~126 seconds
+
+### PASSED ✅
+- [ ] TC-002-P1: Location applied in hero copy ("YOUR FAMILY'S DENTAL HEALTH PARTNER IN VANCOUVER")
+- [ ] - [ ] TC-002-P2: All 4 services from interview correctly generated on homepage and Services page
+- [ ] - [ ] TC-002-P3: Real email (info@smilebrightdental.ca) correctly on Contact page
+- [ ] - [ ] TC-002-P4: Contact info labels correctly formatted with separators (Address / Phone / Email / Hours)
+- [ ] - [ ] TC-002-P5: Nav CTA button "Book an Appointment" — white text on blue bg, visible ✅
+- [ ] - [ ] TC-002-P6: Single navbar — no duplicate ✅
+- [ ] - [ ] TC-002-P7: No black blank sections on any viewport ✅
+- [ ] - [ ] TC-002-P8: All images loaded, all alt texts contextually relevant (dental-themed) ✅
+- [ ] - [ ] TC-002-P9: All 5 pages have content — no blank stubs (Services, Team, About, FAQ, Contact) ✅
+- [ ] - [ ] TC-002-P10: Team page generated with 2 named dentists, UBC credentials, appropriate bios ✅
+- [ ] - [ ] TC-002-P11: Footer tagline "Smile Bright Dental Clinic — Excellence in every detail." — BUG 68 FIXED ✅
+- [ ] - [ ] TC-002-P12: Home SEO title "Smile Bright Dental Clinic | Vancouver, BC" — no "in ." artifact ✅
+- [ ] - [ ] TC-002-P13: Per-page SEO titles unique — Services page: "Services | Smile Bright Dental Clinic" — BUG 69 FIXED ✅
+- [ ] - [ ] TC-002-P14: Testimonials reference Vancouver-area neighbourhoods (Kitsilano, Burnaby, Downtown) ✅
+
+- [ ] ### FAILED ❌
+- [ ] - [ ] BUG 71 — NOT FIXED: Mobile navbar not collapsing at 390px. Hamburger button present in DOM but display:none. All 6 desktop nav links visible and overflowing on mobile viewport. Confirmed on Smile Bright Dental Clinic site.
+- [ ] - [ ] BUG 70 — NOT FIXED: OG/Social preview image still "1200 x 630 — Click to upload" on all pages. No auto-generation. Confirmed on Smile Bright Dental Clinic site.
+- [ ] - [ ] BUG 72 — NOT FIXED: QA Check tool still shows "No QA report yet" after 10+ seconds. "QA check has been queued" message appears but results never load. Confirmed on Smile Bright Dental Clinic site.
+- [ ] - [ ] BUG 73 — NOT FIXED: AI Designer route /studio/site/[id]/ai-designer returns 404. Confirmed on Smile Bright Dental Clinic site (service type).
+- [ ] - [ ] BUG 74: **Studio sidebar page list does not match navbar** — Sidebar shows: Home, Services, Contact, About, Gallery, FAQ, Blog, Service-Areas, Testimonials (9 pages). Navbar shows: Home, Services, Our Team, About Us, FAQ, Contact (6 pages). "Our Team" page exists in nav but not in sidebar. Gallery, Blog, Service-Areas, Testimonials appear in sidebar but not in nav. Same systemic issue as BUG 48/62. Site: Smile Bright Dental Clinic.
+- [ ] 
