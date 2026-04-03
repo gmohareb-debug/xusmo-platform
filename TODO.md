@@ -229,3 +229,34 @@ BUG 27 — NOT FIXED: Footer nav links still show "Adventures" instead of "Servi
 - [ ] - [ ] BUG 73 — NOT FIXED: AI Designer route /studio/site/[id]/ai-designer returns 404. Confirmed on Smile Bright Dental Clinic site (service type).
 - [ ] - [ ] BUG 74: **Studio sidebar page list does not match navbar** — Sidebar shows: Home, Services, Contact, About, Gallery, FAQ, Blog, Service-Areas, Testimonials (9 pages). Navbar shows: Home, Services, Our Team, About Us, FAQ, Contact (6 pages). "Our Team" page exists in nav but not in sidebar. Gallery, Blog, Service-Areas, Testimonials appear in sidebar but not in nav. Same systemic issue as BUG 48/62. Site: Smile Bright Dental Clinic.
 - [ ] 
+---
+
+## Round 11 — TC-003: Iron and Oak Fitness (Fitness Studio, Calgary AB)
+**Date:** 2026-04-03 | **Generation time:** ~130s | **Site ID:** cmnje2hua0003w56giz1gqvu0
+**Result: 10 PASSED, 5 FAILED**
+
+### Passes (10)
+- Nav CTA contrast: white on orange - PASS
+- - Double navbar: single nav only - PASS
+  - - Footer tagline: business-specific - PASS
+    - - Black/blank sections: none found - PASS
+      - - All pages have content: 5 pages all have content - PASS
+        - - SEO "in ." artifact: not present - PASS
+          - - SEO unique per page: unique titles and descriptions - PASS
+            - - Image alt texts: business-relevant - PASS
+              - - Contact email: correct (info@ironandoakfitness.ca) - PASS
+                - - AI Designer route: FIXED - /ai-designer now redirects correctly - PASS
+                 
+                  - ### Failures (5)
+                  - - BUG 71 REGRESSION: Mobile navbar hamburger hidden (display:none) at 390px
+                    - - BUG 70 REGRESSION: OG image not auto-generated - shows placeholder
+                      - - BUG 72 REGRESSION: QA Check returns no results after 10s
+                        - - BUG 74 REGRESSION: Studio sidebar pages show template pages not actual site pages
+                          - - BUG 75 NEW: Footer social icons render as "?" character - SVG icons not loading; all social links point to "#"
+                            - - BUG 76 NEW: Placeholder address "123 Fitness Row, Calgary, AB, T2P 2V6" and phone "(403) 555-1234" used on Schedule and Contact pages
+                             
+                              - ### Bug Status Changes
+                              - - BUG 73 FIXED: AI Designer route /ai-designer now correctly redirects to /aidesigner (no 404)
+                               
+                                - - [ ] BUG 75 NEW — Footer social icons render as "?" (not SVG) and all link to "#". No platform social URLs set. Affects: Iron and Oak Fitness (TC-003). Footer shows 3 "?" links for Instagram, Facebook, Twitter.
+                                  - [ ] - [ ] BUG 76 NEW — Placeholder address "123 Fitness Row, Calgary, AB, T2P 2V6" and phone "(403) 555-1234" generated on Schedule and Contact pages. AI should use real city but omit address/phone if not provided by user, or prompt user for these details.
