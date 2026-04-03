@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import Button from "../ui/Button";
 
 const NAV_LINKS = [
+  { label: "Studio", href: "/studio" },
   { label: "How It Works", href: "/how-it-works" },
   { label: "Features", href: "/#industries" },
   { label: "Pricing", href: "/pricing" },

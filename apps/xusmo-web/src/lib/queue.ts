@@ -129,7 +129,7 @@ export async function startBuildPipeline(blueprintId: string) {
     include: { lead: true },
   });
 
-  const generatorType = (blueprint as Record<string, unknown>).generatorType as string ?? "gutenberg";
+  const generatorType = (blueprint as Record<string, unknown>).generatorType as string ?? "engine";
 
   // Create Build record
   const build = await prisma.build.create({
@@ -491,7 +491,7 @@ export async function startDevBuildPipeline(blueprintId: string) {
   const archetype = isEcommerce
     ? "COMMERCE"
     : (blueprint.lead.archetype ?? "SERVICE");
-  const generatorType = (blueprint as Record<string, unknown>).generatorType as string ?? "gutenberg";
+  const generatorType = (blueprint as Record<string, unknown>).generatorType as string ?? "engine";
 
   // Auto-select a matching theme from the pool (least used for variety)
   const matchingTheme = await prisma.themePoolEntry.findFirst({
@@ -547,7 +547,7 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
 
     // Determine which generator to use
     const buildRecord = await prisma.build.findUniqueOrThrow({ where: { id: buildId } });
-    const generatorType = (buildRecord as Record<string, unknown>).generatorType as string ?? "gutenberg";
+    const generatorType = (buildRecord as Record<string, unknown>).generatorType as string ?? "engine";
 
     // =====================================================================
     // Stage 1: Content Generation — branched by generator type
