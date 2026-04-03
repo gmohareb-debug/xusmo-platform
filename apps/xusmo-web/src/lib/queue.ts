@@ -741,6 +741,7 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
         // Store engine's React component JSON as source of truth
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         designDocument: engineDesignDocument as any ?? undefined,
+        // WordPress URL will be set by Stage 3 provisioning
       },
     });
 
@@ -837,13 +838,9 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
     let wpAdminUrl: string | null = null;
     let wpAdminUser: string | null = null;
 
-    if (generatorType === "engine") {
-      // Engine builds skip WP entirely — fast-track to completion
-      console.log("[dev-pipeline] Stage 3: Skipped (engine build — no WP needed until publish).");
-      await prisma.build.update({
-        where: { id: buildId },
-        data: { progress: 75 },
-      });
+    if (false) {
+      // Previously: engine builds skipped WP. Now all builds provision WordPress.
+      // The React engine renders the frontend, WordPress provides the CMS backend.
     } else {
 
     try {
