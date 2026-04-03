@@ -116,3 +116,34 @@ This file captures test rounds that could not be appended to TODO.md due to GitH
                             - - BUG 75 REGRESSION: Social links on contact page (Instagram, Facebook, TripAdvisor) all point to "#"
                               - - BUG 76 REGRESSION: "123 Rue Saint-Paul" placeholder address and "Phone+1" (incomplete phone) on contact page
                                 - - BUG 78 CONFIRMED AGAIN: Footer tagline "Verde Kitchen — Excellence in every detail." — now seen on restaurant (3rd business type). Pattern: real estate, law, restaurant all get generic tagline. Earlier business types (fitness, dental, tutoring) got specific ones.
+
+---
+
+## Round 16 — TC-008: Blue Ridge Landscaping (Landscaping, Victoria BC)
+**Date:** 2026-04-03 | **Generation time:** ~132s | **Site ID:** cmnjjvy0t0004kk6ghbgyhlpy
+**Note:** Spark Digital (TC-008A, digital marketing, Toronto) hung indefinitely — BUG 77 reproduced second time. Switched to Blue Ridge Landscaping.
+**Result: 11 PASSED, 4 FAILED**
+
+### Passes (11)
+- Nav CTA: white on green - PASS
+- - Double navbar: 1 - PASS
+  - - Black/blank sections: 0 - PASS
+    - - All pages: 6 pages with content - PASS
+      - - SEO "in .": absent - PASS
+        - - SEO unique per page - PASS
+          - - Image alt texts: relevant - PASS
+            - - Contact email: correct (info@blueridgelandscaping.ca) - PASS
+              - - AI Designer route: fixed - PASS
+                - - Sidebar pages: match nav - PASS
+                  - - Social/footer: no broken icons, no social section generated - PASS
+                   
+                    - ### Failures (4)
+                    - - BUG 70: OG image placeholder (8th consecutive site)
+                      - - BUG 71: Mobile hamburger display:none at 390px (8th consecutive)
+                        - - BUG 72: QA Check silent failure — no "queued" message, no results (regression from TC-007 which showed "queued")
+                          - - BUG 78: Footer tagline "Blue Ridge Landscaping — Excellence in every detail." (4th consecutive site, 4th distinct business type: landscaping)
+                           
+                            - ### Notable observations
+                            - - BUG 76 PARTIAL IMPROVEMENT: Contact page shows "AddressServing the Greater Victoria, BC Area" (service area description) instead of a fake street address — improvement over previous sites. No phone number generated at all (user didn't provide one). This is better than inventing placeholder data.
+                              - - BUG 77 REPRODUCED AGAIN: Spark Digital (digital marketing, Toronto) triggered the toLowerCase hang at 17s, persisted 3m 46s before abandoning. Second confirmed reproduction.
+                                - - BUG 72 INCONSISTENT: TC-007 showed "queued" message, TC-008 shows silent failure — same bug, inconsistent UI state.
