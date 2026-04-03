@@ -860,36 +860,26 @@ Use placehold.co with business initials on accent-colored background:
 **NEVER use generic seeds like "hero", "image1", "photo" — use DESCRIPTIVE search keywords.**
 **ONLY use picsum.photos/seed/ or placehold.co for ALL images.**
 
-### Industry Color Matching (CRITICAL)
-The theme colors MUST match the nature/industry of the business. NEVER use generic blue for every site.
-- **Landscaping / Garden / Nature**: greens (#16a34a, #15803d) + earth tones, white background
-- **Restaurant / Food / Cafe**: warm colors (#c2410c, #ea580c, #b91c1c), cream/warm surfaces
-- **Health / Medical / Dental**: clean blues (#0284c7) + white, calming and clinical
-- **Legal / Finance / Corporate**: navy (#1e3a5f) + gold (#b8860b), conservative palette
-- **Fitness / Sports / Gym**: bold reds (#dc2626) or oranges (#ea580c), dark backgrounds
-- **Beauty / Spa / Wellness**: soft purples (#a855f7) or pinks (#ec4899), light surfaces
-- **Technology / SaaS / Startup**: modern blues (#3b82f6) or purples (#7c3aed), clean whites
-- **Real Estate / Architecture**: sophisticated grays (#374151) + gold/amber accents
-- **Education / Schools**: friendly blues (#2563eb) + warm accents
-- **Photography / Creative / Art**: dark/moody (#18181b) or bold accent on white
-- **Construction / HVAC / Trades**: industrial oranges (#ea580c) or yellows (#eab308), dark text
-- **Retail / E-commerce**: vibrant brand colors matching the product category
-- **Automotive**: deep blues (#1e40af) or reds (#dc2626), metallic-inspired
-- **Wildlife / Animals / Nature / Zoo**: deep greens (#166534, #15803d) + earth browns (#78350f), cream background (#fefce8)
-- **Pets / Veterinary / Pet Care**: warm greens (#16a34a) + soft oranges (#f97316), light warm background
-- **Environment / Ecology / Conservation**: forest greens (#166534) + ocean blues (#0284c7), natural backgrounds
-- **Non-Profit / Charity / NGO**: warm blues (#2563eb) + warm accents, trustworthy palette
-- **Travel / Tourism / Hospitality**: ocean blues (#0369a1) + sunset oranges (#ea580c), warm backgrounds
-- **Agriculture / Farming / Outdoor**: earth tones (#78350f, #92400e) + greens (#16a34a), natural palette
-- **Entertainment / Events / Music**: vibrant purples (#7c3aed) + pinks (#ec4899), energetic palette
-- **Cleaning / Home Services**: fresh blues (#0ea5e9) + clean whites, bright and clean
-- **Bakery / Coffee / Cafe**: warm browns (#78350f) + cream (#fefce8), cozy palette
+### Color Selection (CRITICAL — think about what fits THIS specific business)
 
-CRITICAL: The background color should NEVER be a strong/saturated color like red, blue, or green. Background should always be a NEUTRAL color:
-- Light sites: #ffffff, #fafafa, #f9fafb, #fefce8 (cream), #fdf2f8 (blush)
-- Dark sites: #0f0f0f, #1a1a2e, #111827, #0c0a09
+Do NOT use a generic color palette. Think about:
+1. What does this business DO? What colors does the customer associate with it?
+2. What EMOTION should the site evoke? (trust, excitement, calm, luxury, nature, warmth)
+3. What is the TONE? (professional=navy/gray, bold=saturated+dark, elegant=muted+gold, warm=earth tones, casual=bright+friendly)
+4. If the user specified colors, USE THEM as accent and derive the rest.
 
-Always derive accent, accentLight, surface, background, text, border, and muted from the industry palette.
+Rules:
+- "accent" = the primary brand color. Pick ONE color that captures the business identity.
+- "accentLight" = a very light tint of the accent (for subtle highlights). Use 10-15% opacity version.
+- "background" = ALWAYS a neutral: white (#ffffff, #fafafa), cream (#fefce8), or dark (#0f0f0f, #111827). NEVER a saturated color.
+- "surface" = slightly off from background (if bg is white, surface is #f8fafc; if bg is dark, surface is #1f2937)
+- "text" = high contrast against background (dark text on light bg, light text on dark bg)
+- "border" = subtle separator color (light gray #e5e7eb or dark gray #374151)
+- "muted" = secondary/dimmed text color
+
+Be CREATIVE and SPECIFIC. A steakhouse gets different colors than a vegan cafe. A law firm gets different colors than a skateboard shop. A wildlife sanctuary gets different colors than a nightclub.
+
+NEVER default to generic blue (#3b82f6) or red (#dc2626) unless the business genuinely warrants it.
 
 ### Logo Rules (CRITICAL)
 - The navbar MUST always include a "logo" prop with the business name.

@@ -93,8 +93,15 @@ AVAILABLE ACTIONS — return as JSON { "reply": "...", "actions": [...] }:
 2. UPDATE_SEO: { action: "UPDATE_SEO", pageSlug, metaTitle?, metaDesc? }
 
 3. APPLY_PRESET: { action: "APPLY_PRESET", preset: "professional"|"bold"|"elegant"|"minimal"|"warm" }
+   - Quick preset change. Use UPDATE_THEME instead for custom colors.
 
-4. UPDATE_THEME: { action: "UPDATE_THEME", colors?: {accent?, background?, text?, surface?, ...}, fonts?: {heading?, body?} }
+4. UPDATE_THEME: { action: "UPDATE_THEME", colors?: {accent?, accentLight?, background?, surface?, text?, border?, muted?}, fonts?: {heading?, body?} }
+   - For color changes: Think about what fits THIS business. Don't use generic colors.
+   - Pick colors that match the business identity, industry, and tone.
+   - "background" must ALWAYS be neutral (white/cream/dark). Never saturated.
+   - "accent" should capture the brand — e.g., green for nature, warm brown for coffee, navy for law.
+   - Be creative. A wildlife site needs earth tones, not corporate blue.
+   - For font changes: Pick fonts that match the vibe — serif for elegant, sans for modern, display for bold.
 
 5. UPDATE_CSS: { action: "UPDATE_CSS", css }
 
