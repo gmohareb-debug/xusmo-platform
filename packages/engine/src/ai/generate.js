@@ -1607,7 +1607,10 @@ function enforceConsistency(parsed) {
 
   // 10b. Generate SVG logos for navbars missing proper logos
   const themeAccent = parsed.theme?.colors?.accent || '#3b82f6'
-  const bizName = parsed._plan?.businessProfile?.businessName || 'Business'
+  // BUG 52 — Use actual business name from businessProfile, not the generic fallback
+  const bizName = (parsed._plan?.businessProfile?.businessName && parsed._plan.businessProfile.businessName !== 'Business')
+    ? parsed._plan.businessProfile.businessName
+    : (businessName || 'Business')
   for (const page of Object.values(pages)) {
     if (!page?.sections) continue
     for (const section of page.sections) {
@@ -1674,31 +1677,31 @@ function enforceConsistency(parsed) {
     }
   }
 
-  // 13. BUG 22 — Force trust-badges / client logos to use placehold.co, not picsum
+  // 13. BUG 22 — Remove trust-badges / certifications-badges sections if they only have placehold.co URLs
+  // These look worse than not having them at all (grey rectangles)
   for (const page of Object.values(pages)) {
     if (!page?.sections) continue
-    for (const section of page.sections) {
-      if (section.component === 'trust-badges' && section.props) {
-        // Fix badges array
-        const badgeArrays = ['badges', 'items', 'logos', 'clients', 'partners']
-        for (const key of badgeArrays) {
-          if (Array.isArray(section.props[key])) {
-            for (const badge of section.props[key]) {
-              if (badge.image && !badge.image.includes('placehold.co')) {
-                const name = badge.name || badge.label || badge.title || 'Partner'
-                const encoded = encodeURIComponent(name).replace(/%20/g, '+')
-                badge.image = `https://placehold.co/120x40/e5e7eb/6b7280?text=${encoded}`
-              }
-              if (badge.logo && !badge.logo.includes('placehold.co')) {
-                const name = badge.name || badge.label || badge.title || 'Partner'
-                const encoded = encodeURIComponent(name).replace(/%20/g, '+')
-                badge.logo = `https://placehold.co/120x40/e5e7eb/6b7280?text=${encoded}`
-              }
+    page.sections = page.sections.filter(section => {
+      if (section.component !== 'trust-badges' && section.component !== 'certifications-badges') return true
+      if (!section.props) return false
+      const badgeArrays = ['badges', 'items', 'logos', 'clients', 'partners']
+      let hasRealImage = false
+      for (const key of badgeArrays) {
+        if (Array.isArray(section.props[key])) {
+          for (const badge of section.props[key]) {
+            const img = badge.image || badge.logo || ''
+            if (img && !img.includes('placehold.co')) {
+              hasRealImage = true
             }
           }
         }
       }
-    }
+      if (!hasRealImage) {
+        console.log(`[Consistency] Removed ${section.component} section — only placehold.co URLs`)
+        return false
+      }
+      return true
+    })
   }
 
   // 13. Validate theme colors — fix bad backgrounds (never saturated)

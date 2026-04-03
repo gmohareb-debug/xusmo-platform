@@ -62,20 +62,22 @@ ${trackPricing}
 - User owns everything — can export anytime, no lock-in
 - Features: SEO, mobile responsive, custom domain, SSL, daily backups, AI images
 
-CONVERSATION FLOW (FAST — 1 to 3 exchanges max):
-1. If the user describes their business in the first message, extract EVERYTHING you can from it.
-2. If you have business_name AND business_description, you have enough. Set ready_to_build: true.
-3. Only ask a follow-up if business_name or business_description is truly missing.
-4. AUTO-FILL all other fields from the business description:
+CONVERSATION FLOW (3 to 5 exchanges — collect key info conversationally):
+1. If the user describes their business in the first message, extract EVERYTHING you can from it (name, description, location, services).
+2. Collect these 3-5 key pieces through natural conversation:
+   a. Business name + what they do (can be one message — if given together, great)
+   b. Location — city/region. Ask naturally: "Where are you based?" This drives image selection and local SEO.
+   c. Key services/products — "What are the main services you want to highlight?" This drives content quality.
+   d. Design vibe (optional) — "Any vibe preference? Professional, bold, warm, elegant, or casual?"
+   e. Email — ask last: "What email should we use for the contact page?"
+3. AUTO-FILL fields the user did not explicitly provide:
    - Infer primary_goal from the business type (restaurant=reservations, shop=sell_products, service=phone_calls)
    - Infer tone from the industry (law=professional, bakery=warm, tech=bold, spa=elegant)
    - Set color_preference to "surprise_me" if not mentioned
    - Set has_logo to "no_text" if not mentioned
    - Set differentiator from what makes the business unique in their description
-   - Infer location if mentioned, otherwise leave empty
-   - Use provided email or set to empty
-5. DO NOT ask about: colors, logo, tone, differentiator, email — unless the user specifically wants to discuss them
-6. The AI agent will enrich all missing data automatically. Your job is to get the business name and description FAST.
+4. Set ready_to_build: true once you have business_name, business_description, AND location (or the user declines to share location).
+5. Do NOT skip location and services — these directly affect image relevance and content quality.
 
 INFORMATION TO GATHER (use these exact keys in "data"):
 1. business_name — What's their business called? [REQUIRED]
@@ -103,18 +105,19 @@ After gathering business details, ask about the look and feel of their ${isEcomm
 These questions help create a ${isEcommerce ? "store" : "website"} they'll actually love. Do NOT skip them.
 
 IMPORTANT RULES:
-- SPEED IS EVERYTHING. The user wants a website NOW, not a 30-question interview.
-- If the user gives you their business name and what they do, that's enough. BUILD IT.
-- Auto-fill everything else from context. Do NOT ask the user to fill in fields.
-- If the user volunteers extra info (colors, tone, logo), great — extract it. But don't ask for it.
-- Maximum 3 messages before setting ready_to_build: true.
-- When in doubt, set ready_to_build: true — the engine will figure out the rest.
+- Keep it conversational and quick — aim for 3-5 exchanges, not a long interview.
+- Always ask about location and services — these make the site look real and relevant.
+- Auto-fill tone, colors, logo, differentiator from context if the user doesn't mention them.
+- If the user volunteers extra info (colors, tone, logo), great — extract it.
+- Maximum 5 messages before setting ready_to_build: true.
+- After 5 exchanges, set ready_to_build: true with whatever you have — the engine will figure out the rest.
 ${trackDetection}
 
 WHEN YOU HAVE ENOUGH:
 Set "ready_to_build" to true when you have:
   - business_name
   - business_description (even a short one is fine - the AI will enrich it)
+  - location (city/region) OR user declined to share
   Auto-fill primary_goal, tone, color_preference, has_logo from context. Don't wait for the user.
 
 RESPONSE FORMAT — ALWAYS respond with ONLY valid JSON (no markdown, no code fences):
@@ -193,8 +196,24 @@ export async function POST(request: Request) {
       };
     }
 
+    // BUG 53 — Sanitize reply: strip raw parsed data structures that leaked into the reply text
+    let sanitizedReply = parsed.reply || "Tell me more about your business!";
+    // If the reply contains many key:value patterns, it's likely raw data leaking through
+    const kvMatches = sanitizedReply.match(/\w+\s*:\s*\S/g);
+    if (kvMatches && kvMatches.length > 3) {
+      sanitizedReply = "Thanks for sharing! Let me put that together for you. Anything else you'd like to add about your business?";
+    }
+    // Also strip lines that look like internal data (e.g. "business_name : Acme")
+    sanitizedReply = sanitizedReply
+      .replace(/^.*(?:business_name|business_description|primary_goal|differentiator|tone|color_preference|has_logo|target_audience)\s*[:=].*/gmi, "")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+    if (!sanitizedReply) {
+      sanitizedReply = "Got it! Let me build something great for you.";
+    }
+
     return NextResponse.json({
-      reply: parsed.reply || "Tell me more about your business!",
+      reply: sanitizedReply,
       data: parsed.data || {},
       ready_to_build: parsed.ready_to_build || false,
       model: response.model,

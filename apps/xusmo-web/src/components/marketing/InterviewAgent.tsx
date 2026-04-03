@@ -35,6 +35,7 @@ export default function InterviewAgent() {
   const [showSignupGate, setShowSignupGate] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatorType, setGeneratorType] = useState<"gutenberg" | "engine">("engine");
+  const [generationComplete, setGenerationComplete] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -215,6 +216,8 @@ export default function InterviewAgent() {
       localStorage.removeItem("xusmo_agent_messages");
       localStorage.removeItem("xusmo_agent_ready");
       localStorage.removeItem("xusmo_agent_track");
+
+      setGenerationComplete(true);
 
       const destination = data.siteId
         ? `/studio/site/${data.siteId}`
@@ -424,7 +427,7 @@ export default function InterviewAgent() {
         )}
 
         {/* Generator picker + Build button — shown when AI collected enough data */}
-        {readyToBuild && !isBuilding && !showSignupGate && (
+        {readyToBuild && !isBuilding && !showSignupGate && !generationComplete && (
           <div className="mb-2 space-y-2">
             {/* Generator toggle */}
             <div className="flex gap-1.5 rounded-xl p-1" style={{ backgroundColor: "#F1F5F9" }}>
@@ -487,8 +490,15 @@ export default function InterviewAgent() {
           </div>
         )}
 
-        {/* Text input — always visible */}
-        {!isBuilding && !showSignupGate && (
+        {/* Generation complete — disable input */}
+        {generationComplete && (
+          <div className="mb-2 text-center py-2.5 rounded-2xl" style={{ backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0" }}>
+            <p className="text-xs font-medium" style={{ color: "#16A34A" }}>Your site is ready! Visit Studio to edit it.</p>
+          </div>
+        )}
+
+        {/* Text input — always visible unless generation complete */}
+        {!isBuilding && !showSignupGate && !generationComplete && (
           <form onSubmit={handleSubmit}>
             <div
               className="flex items-center gap-2 rounded-2xl px-3 py-2"

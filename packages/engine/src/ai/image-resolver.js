@@ -217,7 +217,8 @@ export async function resolveImages(obj, accentColor, businessContext) {
         }
 
         // Try Pexels first, then Unsplash, then keep original
-        const enrichedKeyword = contextPrefix ? (contextPrefix + ' ' + parsed.keyword).slice(0, 80) : parsed.keyword
+        // Section-specific keyword takes priority; business context is secondary
+        const enrichedKeyword = contextPrefix ? (parsed.keyword + ' ' + contextPrefix).slice(0, 80) : parsed.keyword
         const pexelsUrl = await searchPexels(enrichedKeyword, parsed.width, parsed.height)
         if (pexelsUrl) {
           resolved++
