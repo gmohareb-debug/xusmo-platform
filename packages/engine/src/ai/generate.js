@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { ARCHETYPE_PRESETS, getArchetypeComponents, AUTH_ONLY, DEBUG_ONLY, VISUAL_PERSONALITIES, PERSONALITY_TOKENS } from './component-groups.js'
 import { resolveImages } from './image-resolver.js'
+import { generateLogo } from './logo-generator.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const catalog = JSON.parse(readFileSync(join(__dirname, 'component-catalog.json'), 'utf8'))
@@ -12,7 +13,7 @@ const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 const allComponentKeys = Object.keys(catalog.components)
 const knownComponents = new Set(allComponentKeys)
-const blockedComponents = new Set([...AUTH_ONLY, ...DEBUG_ONLY])
+const blockedComponents = new Set([...AUTH_ONLY, ...DEBUG_ONLY, 'announcement-bar'])
 
 // ── Build component reference from a filtered key list ──
 
@@ -1589,6 +1590,22 @@ function enforceConsistency(parsed) {
           const name = section.props.logo || 'Site'
           const initials = name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase()
           section.props.logoUrl = `https://placehold.co/40x40/333333/ffffff?text=${initials}`
+        }
+      }
+    }
+  }
+
+  // 10b. Generate SVG logos for navbars missing proper logos
+  const themeAccent = parsed.theme?.colors?.accent || '#3b82f6'
+  const bizName = parsed._plan?.businessProfile?.businessName || 'Business'
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (section.component === 'navbar' && section.props) {
+        const url = section.props.logoUrl || ''
+        if (!url || url.includes('placehold.co')) {
+          const logo = generateLogo(bizName, themeAccent, 'rounded')
+          section.props.logoUrl = logo.dataUri
         }
       }
     }

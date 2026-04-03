@@ -21,7 +21,7 @@ export function Navbar({ logo, logoUrl, links = [], cta }) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   // Use text logo if logoUrl is a placehold.co placeholder or missing
-  const isPlaceholder = !logoUrl || logoUrl.includes('placehold.co')
+  const isPlaceholder = !logoUrl || (logoUrl.includes('placehold.co') && !logoUrl.startsWith('data:'))
 
   // Ensure "Home" link exists - prepend if missing
   const hasHome = links.some(l => l.href === '/' || (l.label || '').toLowerCase() === 'home')
