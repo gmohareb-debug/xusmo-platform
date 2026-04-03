@@ -61,3 +61,30 @@ This file captures test rounds that could not be appended to TODO.md due to GitH
                             - - BUG 78 NEW: Footer tagline is generic ("Excellence in every detail.") instead of business-specific. Previous sites generated specific taglines. Regression likely tied to business type (real estate) or template selection.
                              
                               - - [ ] BUG 78 NEW — Footer tagline generator produces generic fallback copy ("Excellence in every detail.") for certain business types (observed: real estate). Generator must always derive the tagline from interview data (business name, services, location) and must not fall back to a generic phrase. Every generated footer tagline must be specific to the business.
+
+---
+
+## Round 14 — TC-006: Vance Legal Group (Law Firm, Winnipeg MB)
+**Date:** 2026-04-03 | **Generation time:** ~109s | **Site ID:** cmnjhk2c6000pg66grsmqe2x9
+**Result: 11 PASSED, 5 FAILED**
+
+### Passes (11)
+- Nav CTA contrast: white on dark navy - PASS
+- - Double navbar: single nav - PASS
+  - - Black/blank sections: none - PASS
+    - - All pages have content: 5 pages (Home, Services, About, FAQ, Contact) - PASS
+      - - SEO "in ." artifact: not present - PASS
+        - - SEO unique per page - PASS
+          - - Image alt texts: relevant (legal practice areas) - PASS
+            - - Contact email: correct (consult@vancelegal.ca) - PASS
+              - - AI Designer route: still fixed - PASS
+                - - Studio sidebar pages: match actual site pages - PASS (BUG 74 fixed)
+                  - - Social SVG icons: render correctly - PASS (BUG 75 SVG portion fixed)
+                   
+                    - ### Failures (5)
+                    - - BUG 70 REGRESSION: OG image placeholder
+                      - - BUG 71 REGRESSION: Mobile navbar hamburger display:none at 390px
+                        - - BUG 72 REGRESSION: QA Check returns no results
+                          - - BUG 75 PARTIAL: Social URLs still all "#" — links have no real destinations
+                            - - BUG 76 REGRESSION: Placeholder phone "(204) 555-0123" and address "201 Portage Avenue" on Contact
+                              - - BUG 78 CONFIRMED: Footer tagline "Vance Legal Group — Excellence in every detail." — same generic copy as TC-005. Confirmed cross-business-type regression, not a one-off.
