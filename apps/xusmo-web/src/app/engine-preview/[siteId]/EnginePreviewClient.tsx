@@ -179,6 +179,29 @@ export default function EnginePreviewClient({
     );
   }
 
+  // Intercept all internal link clicks — navigate within preview, not to xusmo.com
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      const target = (e.target as HTMLElement).closest("a");
+      if (!target) return;
+      const href = target.getAttribute("href");
+      if (!href) return;
+      // Skip external links, anchors, mailto, tel
+      if (href.startsWith("http") || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+      // Internal link like /about, /services, /contact
+      e.preventDefault();
+      const slug = href.replace(/^\//, "").split("/")[0] || "home";
+      // Update URL with ?page= parameter to switch pages within the preview
+      const url = new URL(window.location.href);
+      url.searchParams.set("page", slug);
+      window.history.pushState({}, "", url.toString());
+      // Reload the page to re-render with the new page
+      window.location.reload();
+    }
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: themeCSS }} />
