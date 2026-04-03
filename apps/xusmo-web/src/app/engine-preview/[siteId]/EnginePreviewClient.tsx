@@ -119,9 +119,8 @@ function buildThemeCSS(theme?: ThemeDef): string {
     );
   }
   if (theme.fonts?.body) {
-    fontRules.push(
-      `font-family: '${theme.fonts.body}', system-ui, sans-serif`
-    );
+    fontRules.push(`--font-body: '${theme.fonts.body}', system-ui, sans-serif`);
+    fontRules.push(`font-family: var(--font-body)`);
     googleFonts.push(
       theme.fonts.body.replace(/ /g, "+") + ":wght@400;500;600;700"
     );
