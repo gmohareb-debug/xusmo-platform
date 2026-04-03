@@ -33,3 +33,31 @@ This file captures test rounds that could not be appended to TODO.md due to GitH
 - BUG 73 FIXED: AI Designer /ai-designer route still correctly redirecting (no 404)
 
 - [ ] BUG 77 NEW — Generator hangs indefinitely on certain business inputs with no recovery UI. Observed with "Harvest Table" restaurant in Montreal. JS error "e.toLowerCase is not a function" renders into DOM. Generator must implement: (a) a server-side timeout (max 3-5 min) that returns a graceful error and retry option to the user, (b) input sanitization/type-checking before passing business data to generation pipeline to prevent TypeError crashes, (c) client-side watchdog that detects stall after N seconds and shows user an actionable error state.
+
+---
+
+## Round 13 — TC-005: Pixel and Mortar (Real Estate Agency, Edmonton AB)
+**Date:** 2026-04-03 | **Generation time:** ~100s | **Site ID:** cmnjh9e0y000eg66gelu7va5l
+**Result: 10 PASSED, 6 FAILED**
+
+### Passes (10)
+- Nav CTA contrast: white on blue - PASS
+- - Double navbar: single nav - PASS
+  - - Black/blank sections: none - PASS
+    - - All pages have content: 6 pages (Home, Services, Listings, Valuation, About, Contact) - PASS
+      - - SEO "in ." artifact: not present - PASS
+        - - SEO unique per page: specific titles and descriptions - PASS
+          - - Image alt texts: relevant (property names, Edmonton neighbourhoods) - PASS
+            - - Contact email: correct (homes@pixelandmortar.ca) - PASS
+              - - AI Designer route: still fixed - PASS
+                - - Studio sidebar pages: match actual site pages - PASS (BUG 74 still fixed)
+                 
+                  - ### Failures (6)
+                  - - BUG 70 REGRESSION: OG image placeholder not auto-generated
+                    - - BUG 71 REGRESSION: Mobile navbar hamburger display:none at 390px
+                      - - BUG 72 REGRESSION: QA Check returns no results
+                        - - BUG 75 PARTIAL FIX: SVG icons now render correctly in footer, but all social links still point to "#"
+                          - - BUG 76 REGRESSION: Placeholder phone "(780) 555-1234" and address "123 Jasper Avenue" on Contact page
+                            - - BUG 78 NEW: Footer tagline is generic ("Excellence in every detail.") instead of business-specific. Previous sites generated specific taglines. Regression likely tied to business type (real estate) or template selection.
+                             
+                              - - [ ] BUG 78 NEW — Footer tagline generator produces generic fallback copy ("Excellence in every detail.") for certain business types (observed: real estate). Generator must always derive the tagline from interview data (business name, services, location) and must not fall back to a generic phrase. Every generated footer tagline must be specific to the business.
