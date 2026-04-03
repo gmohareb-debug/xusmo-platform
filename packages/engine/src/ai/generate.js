@@ -861,6 +861,12 @@ Use placehold.co with business initials on accent-colored background:
 **NEVER use generic seeds like "hero", "image1", "photo" — use DESCRIPTIVE search keywords.**
 **ONLY use picsum.photos/seed/ or placehold.co for ALL images.**
 
+### Contact Information Rules (CRITICAL)
+- NEVER invent fake addresses, phone numbers, or email addresses
+- If the user did NOT provide an address or phone, do NOT include one
+- Placeholder patterns like "123 Main St", "(555) 123-4567" are FORBIDDEN
+- Only include contact details the user actually provided
+
 ### Color Selection (CRITICAL — think about what fits THIS specific business)
 
 Do NOT use a generic color palette. Think about:
@@ -1549,11 +1555,17 @@ function enforceConsistency(parsed) {
       }
       // If footer is missing social links, add defaults
       if (!section.props.social || (Array.isArray(section.props.social) && section.props.social.length === 0)) {
-        section.props.social = [
-          { label: 'Facebook', href: '#' },
-          { label: 'Instagram', href: '#' },
-          { label: 'LinkedIn', href: '#' }
-        ]
+        section.props.social = []
+      }
+    }
+  }
+
+  // 6c. BUG 75 - Remove placeholder social links
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (section.component === "footer" && Array.isArray(section.props?.social)) {
+        section.props.social = section.props.social.filter(s => s.href && s.href !== "#")
       }
     }
   }
