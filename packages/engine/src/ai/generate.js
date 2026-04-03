@@ -1838,6 +1838,23 @@ function enforceConsistency(parsed) {
     }
   }
 
+  // 17b. BUG 76 - Strip fake 555 phone numbers from ALL sections
+  function hasFakePhone(text) {
+    return typeof text === 'string' && /\(\d{3}\)\s*555|555[\s-]\d{4}/.test(text)
+  }
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (!section.props) continue
+      for (const [key, val] of Object.entries(section.props)) {
+        if (typeof val === 'string' && hasFakePhone(val)) {
+          section.props[key] = val.replace(/\(?\d{3}\)?\s*555[\s-]\d{4}/g, '').trim()
+          if (!section.props[key]) delete section.props[key]
+        }
+      }
+    }
+  }
+
   // 17. BUG 45 — Remove announcement-bar from all pages (blocked component)
   for (const page of Object.values(pages)) {
     if (!page?.sections) continue
