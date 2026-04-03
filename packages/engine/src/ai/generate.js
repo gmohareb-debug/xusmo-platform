@@ -875,6 +875,19 @@ The theme colors MUST match the nature/industry of the business. NEVER use gener
 - **Construction / HVAC / Trades**: industrial oranges (#ea580c) or yellows (#eab308), dark text
 - **Retail / E-commerce**: vibrant brand colors matching the product category
 - **Automotive**: deep blues (#1e40af) or reds (#dc2626), metallic-inspired
+- **Wildlife / Animals / Nature / Zoo**: deep greens (#166534, #15803d) + earth browns (#78350f), cream background (#fefce8)
+- **Pets / Veterinary / Pet Care**: warm greens (#16a34a) + soft oranges (#f97316), light warm background
+- **Environment / Ecology / Conservation**: forest greens (#166534) + ocean blues (#0284c7), natural backgrounds
+- **Non-Profit / Charity / NGO**: warm blues (#2563eb) + warm accents, trustworthy palette
+- **Travel / Tourism / Hospitality**: ocean blues (#0369a1) + sunset oranges (#ea580c), warm backgrounds
+- **Agriculture / Farming / Outdoor**: earth tones (#78350f, #92400e) + greens (#16a34a), natural palette
+- **Entertainment / Events / Music**: vibrant purples (#7c3aed) + pinks (#ec4899), energetic palette
+- **Cleaning / Home Services**: fresh blues (#0ea5e9) + clean whites, bright and clean
+- **Bakery / Coffee / Cafe**: warm browns (#78350f) + cream (#fefce8), cozy palette
+
+CRITICAL: The background color should NEVER be a strong/saturated color like red, blue, or green. Background should always be a NEUTRAL color:
+- Light sites: #ffffff, #fafafa, #f9fafb, #fefce8 (cream), #fdf2f8 (blush)
+- Dark sites: #0f0f0f, #1a1a2e, #111827, #0c0a09
 
 Always derive accent, accentLight, surface, background, text, border, and muted from the industry palette.
 
@@ -1668,6 +1681,23 @@ function enforceConsistency(parsed) {
           }
         }
       }
+    }
+  }
+
+  // 13. Validate theme colors — fix bad backgrounds (never saturated)
+  if (parsed.theme?.colors) {
+    const bg = parsed.theme.colors.background || ''
+    // If background is a saturated color (not near white/black/gray), fix it
+    if (bg && !bg.match(/^#(f[0-9a-f]|[0-2][0-9a-f]|[e-f][0-9a-f])/i)) {
+      // Background is a saturated color — replace with neutral
+      const isDark = parsed.theme.colors.text?.match(/^#[c-f]/i) // light text = dark theme
+      parsed.theme.colors.background = isDark ? '#0f0f0f' : '#fafafa'
+      console.log('[Consistency] Fixed saturated background color:', bg, '->', parsed.theme.colors.background)
+    }
+    // Ensure accent-light is not too saturated
+    if (!parsed.theme.colors.accentLight) {
+      const accent = parsed.theme.colors.accent || '#3b82f6'
+      parsed.theme.colors.accentLight = accent + '20' // 12% opacity hex
     }
   }
 
