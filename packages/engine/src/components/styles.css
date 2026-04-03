@@ -2079,3 +2079,13 @@ body { margin: 0; }
 /* BUG 40: Ensure page background fills - no black gaps */
 .page > .site-section:last-child { flex-grow: 1; }
 .page > .site-section--bg-dark:last-child { margin-top: auto; }
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .navbar__inner { padding: 10px 12px; }
+  .navbar__toggle { display: block !important; }
+  .navbar__menu { display: none; }
+  .navbar__menu--open { display: flex !important; flex-direction: column; }
+  .navbar__links { flex-direction: column !important; gap: 8px !important; }
+  .navbar__cta { width: 100%; text-align: center; }
+}

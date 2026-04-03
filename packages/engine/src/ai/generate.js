@@ -1282,6 +1282,38 @@ function autoPopulateEmptyPages(parsed, plan, businessProfile) {
 
 // ── Auto-assign OG images (RC9) ──
 
+function assignPerPageSEO(parsed) {
+  if (!parsed?.pages) return
+  const bizName = parsed._plan?.businessProfile?.businessName || 'Business'
+  for (const [slug, page] of Object.entries(parsed.pages)) {
+    if (!page?.sections) continue
+    if (!page.meta) page.meta = {}
+    // Find the page's section-title or hero for context
+    let pageTitle = slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ')
+    let pageDesc = ''
+    for (const s of page.sections) {
+      if (s.component === 'section-title' && s.props?.title) {
+        pageTitle = s.props.title
+        if (s.props.subtitle) pageDesc = s.props.subtitle
+        break
+      }
+      if (s.component?.includes('hero') && s.props?.title) {
+        pageTitle = s.props.title
+        if (s.props.subtitle) pageDesc = s.props.subtitle
+        break
+      }
+    }
+    if (!page.meta.metaTitle) {
+      page.meta.metaTitle = slug === 'home'
+        ? bizName + ' — ' + pageTitle
+        : pageTitle + ' | ' + bizName
+    }
+    if (!page.meta.metaDesc) {
+      page.meta.metaDesc = pageDesc || (pageTitle + '. ' + bizName + '.')
+    }
+  }
+}
+
 function assignOgImages(parsed) {
   if (!parsed?.pages) return
 
@@ -1454,11 +1486,32 @@ function enforceConsistency(parsed) {
   }
 
   // 6b. Enrich minimal footers with full content
-  const businessName = (parsed._plan?.businessProfile?.businessName && parsed._plan.businessProfile.businessName !== 'Business')
-    ? parsed._plan.businessProfile.businessName
-    : (parsed._plan?.businessName || 'Business')
+  // Extract business name from multiple sources (most reliable first)
+  let businessName = 'Business'
+  // Source 1: businessProfile
+  if (parsed._plan?.businessProfile?.businessName && parsed._plan.businessProfile.businessName !== 'Business') {
+    businessName = parsed._plan.businessProfile.businessName
+  }
+  // Source 2: _plan top-level
+  if (businessName === 'Business' && parsed._plan?.businessName) {
+    businessName = parsed._plan.businessName
+  }
+  // Source 3: Extract from the first navbar's logo prop (most reliable — the LLM always sets this)
+  if (businessName === 'Business') {
+    for (const page of Object.values(pages)) {
+      if (!page?.sections) continue
+      for (const section of page.sections) {
+        if (section.component === 'navbar' && section.props?.logo && section.props.logo !== 'SiteName') {
+          businessName = section.props.logo
+          break
+        }
+      }
+      if (businessName !== 'Business') break
+    }
+  }
   const businessTagline = parsed._plan?.businessProfile?.tagline
     || parsed._plan?.businessProfile?.valueProposition
+    || (businessName !== 'Business' ? businessName + ' — Excellence in every detail.' : '')
     || (businessName + ' — Quality you can trust.')
   const pageKeys = Object.keys(pages)
   for (const page of Object.values(pages)) {
@@ -1933,6 +1986,9 @@ export async function generateFull(prompt, blueprintContext) {
 
   // Step 3: Enforce cross-page consistency (navbar, footer, products, contact)
   enforceConsistency(parsed)
+
+  // Generate per-page SEO meta titles and descriptions
+  assignPerPageSEO(parsed)
 
   // Step 3b: Auto-populate empty pages declared by planner but not generated
   autoPopulateEmptyPages(parsed, plan, businessProfile)
