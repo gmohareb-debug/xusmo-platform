@@ -88,3 +88,31 @@ This file captures test rounds that could not be appended to TODO.md due to GitH
                           - - BUG 75 PARTIAL: Social URLs still all "#" — links have no real destinations
                             - - BUG 76 REGRESSION: Placeholder phone "(204) 555-0123" and address "201 Portage Avenue" on Contact
                               - - BUG 78 CONFIRMED: Footer tagline "Vance Legal Group — Excellence in every detail." — same generic copy as TC-005. Confirmed cross-business-type regression, not a one-off.
+
+---
+
+## Round 15 — TC-007: Verde Kitchen (Restaurant, Montreal QC)
+**Date:** 2026-04-03 | **Generation time:** ~134s | **Site ID:** cmnjizeqe00037g6ggyk5osyy
+**Result: 11 PASSED, 5 FAILED**
+
+### Passes (11)
+- Nav CTA contrast: white on green - PASS
+- - Double navbar: single nav - PASS
+  - - Black/blank sections: none - PASS
+    - - All pages content: 8 pages (Home, Menu, Brunch, Catering, Classes, About, Reservations, Contact) - PASS
+      - - SEO "in ." artifact: absent - PASS
+        - - SEO unique per page - PASS
+          - - Image alt texts: relevant - PASS
+            - - Contact email: correct (hello@verdekitchenmtl.com) - PASS
+              - - AI Designer route: fixed - PASS
+                - - Studio sidebar pages: match actual site pages - PASS (BUG 74 fixed)
+                  - - Footer social icons: no broken glyphs (social section absent from footer entirely) - PASS
+                    - - BUG 77: DID NOT REPRODUCE - restaurant/Montreal generated successfully in 134s
+                     
+                      - ### Failures (5)
+                      - - BUG 70 REGRESSION: OG image placeholder
+                        - - BUG 71 REGRESSION: Mobile navbar hamburger display:none at 390px
+                          - - BUG 72 PARTIAL FIX: QA Check now shows "queued" message but results never arrive after 60s. UI improved but functionality still broken.
+                            - - BUG 75 REGRESSION: Social links on contact page (Instagram, Facebook, TripAdvisor) all point to "#"
+                              - - BUG 76 REGRESSION: "123 Rue Saint-Paul" placeholder address and "Phone+1" (incomplete phone) on contact page
+                                - - BUG 78 CONFIRMED AGAIN: Footer tagline "Verde Kitchen — Excellence in every detail." — now seen on restaurant (3rd business type). Pattern: real estate, law, restaurant all get generic tagline. Earlier business types (fitness, dental, tutoring) got specific ones.
