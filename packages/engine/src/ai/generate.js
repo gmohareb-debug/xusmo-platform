@@ -1447,6 +1447,53 @@ function enforceConsistency(parsed) {
     }
   }
 
+  // 6b. Enrich minimal footers with full content
+  const businessName = parsed._plan?.businessProfile?.businessName || 'Business'
+  const pageKeys = Object.keys(pages)
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (section.component !== 'footer') continue
+      // If footer is missing columns, add default ones from page list
+      if (!section.props.columns || (Array.isArray(section.props.columns) && section.props.columns.length === 0)) {
+        section.props.columns = [
+          {
+            title: 'Quick Links',
+            links: pageKeys.slice(0, 6).map(slug => ({
+              label: slug === 'home' ? 'Home' : slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+              href: slug === 'home' ? '/' : '/' + slug
+            }))
+          },
+          {
+            title: 'Company',
+            links: [
+              { label: 'About Us', href: '/about' },
+              { label: 'Contact', href: '/contact' },
+              { label: 'Privacy Policy', href: '/privacy' },
+              { label: 'Terms of Service', href: '/terms' }
+            ]
+          }
+        ]
+      }
+      // If footer is missing logo, add business name
+      if (!section.props.logo) {
+        section.props.logo = businessName
+      }
+      // If footer is missing tagline, create one
+      if (!section.props.tagline) {
+        section.props.tagline = businessName + ' — Quality you can trust.'
+      }
+      // If footer is missing social links, add defaults
+      if (!section.props.social || (Array.isArray(section.props.social) && section.props.social.length === 0)) {
+        section.props.social = [
+          { label: 'Facebook', href: '#' },
+          { label: 'Instagram', href: '#' },
+          { label: 'LinkedIn', href: '#' }
+        ]
+      }
+    }
+  }
+
   // 7. Ensure navbar has "Home" link
   for (const page of Object.values(pages)) {
     if (!page?.sections) continue
@@ -1687,6 +1734,8 @@ export async function generateFull(prompt, blueprintContext) {
       websiteGoal: blueprintContext.primaryGoal || 'leads',
       uniqueSellingPoints: blueprintContext.services ? blueprintContext.services.map(s => s.name) : [],
       keyServices: blueprintContext.services ? blueprintContext.services.map(s => s.name) : [],
+      // Pass user's custom colors so the theme uses them
+      customColors: blueprintContext.colors || [],
     }
   } else {
     businessProfile = await analyzeBusinessIntelligence(prompt)
@@ -1733,6 +1782,15 @@ export async function generateFull(prompt, blueprintContext) {
 
   validateAndFilterPages(parsed, plan.components, pageKeys)
   validateTheme(parsed.theme)
+
+  // Override theme colors with user's custom colors if provided
+  if (businessProfile.customColors && Array.isArray(businessProfile.customColors) && businessProfile.customColors.length > 0) {
+    const userColors = businessProfile.customColors
+    if (userColors[0]) parsed.theme.colors.accent = userColors[0]
+    if (userColors[1]) parsed.theme.colors.background = userColors[1]
+    if (userColors[2]) parsed.theme.colors.text = userColors[2]
+    console.log('[Generator] Applied user custom colors:', userColors)
+  }
 
   // Step 2b: Validate business context — retry once if LLM hallucinated wrong business
   const mismatch = validateBusinessContext(parsed, businessProfile)
