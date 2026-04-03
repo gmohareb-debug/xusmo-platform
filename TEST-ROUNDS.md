@@ -1,0 +1,35 @@
+# Test Rounds Overflow
+
+This file captures test rounds that could not be appended to TODO.md due to GitHub editor caching. Merge into TODO.md manually.
+
+---
+
+## Round 12 — TC-004: Bright Minds Tutoring (Tutoring Service, Ottawa ON)
+**Date:** 2026-04-03 | **Generation time:** ~106s | **Site ID:** cmnjgfuzi0004g66g5zzauf75
+**Result: 10 PASSED, 6 FAILED**
+
+### Passes (10)
+- Nav CTA contrast: white on blue - PASS
+- Double navbar: single nav only - PASS
+- Footer tagline: business-specific - PASS
+- Black/blank sections: none found - PASS
+- All pages have content: 5 pages (Home, Services, Team, FAQ, Contact) - PASS
+- SEO "in ." artifact: not present - PASS
+- SEO unique per page: unique titles and descriptions - PASS
+- Image alt texts: business-relevant - PASS
+- Contact email: correct (learn@brightmindstutoring.ca) - PASS
+- AI Designer route: still fixed, redirects correctly - PASS
+
+### Failures (6)
+- BUG 71 REGRESSION: Mobile navbar hamburger hidden (display:none) at 390px
+- BUG 70 REGRESSION: OG image not auto-generated, placeholder shown
+- BUG 72 REGRESSION: QA Check returns no results after 10s
+- BUG 75 REGRESSION: Footer social icons render as "?" and link to "#"
+- BUG 76 REGRESSION: Placeholder phone "(613) 555-1234" on Contact page; fabricated staff names (Jessica Miller, Sarah Chen, David Martin) on Team page
+- BUG 77 NEW: Generation hung indefinitely for "Harvest Table" (restaurant, Montreal QC). Stuck at 50% for 9+ minutes with JS error "e.toLowerCase is not a function" visible in DOM. No timeout, no retry UI, no error message shown to user. Generator silently crashed.
+
+### Bug Status
+- BUG 74 FIXED: Studio sidebar now shows actual site pages (Home, Services, Team, Faq, Contact) matching the generated nav - confirmed fixed
+- BUG 73 FIXED: AI Designer /ai-designer route still correctly redirecting (no 404)
+
+- [ ] BUG 77 NEW — Generator hangs indefinitely on certain business inputs with no recovery UI. Observed with "Harvest Table" restaurant in Montreal. JS error "e.toLowerCase is not a function" renders into DOM. Generator must implement: (a) a server-side timeout (max 3-5 min) that returns a graceful error and retry option to the user, (b) input sanitization/type-checking before passing business data to generation pipeline to prevent TypeError crashes, (c) client-side watchdog that detects stall after N seconds and shows user an actionable error state.
