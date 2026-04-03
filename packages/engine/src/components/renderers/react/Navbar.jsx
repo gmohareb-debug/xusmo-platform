@@ -1,21 +1,7 @@
 import { useState } from 'react'
 import { onImgError } from './imgFallback'
 
-const desktopOverride = `
-@media (min-width: 769px) {
-  .navbar__toggle { display: none !important; }
-  .navbar__menu {
-    display: flex !important;
-    flex-direction: row !important;
-    position: static !important;
-    background: transparent !important;
-    padding: 0 !important;
-    border-bottom: none !important;
-    box-shadow: none !important;
-  }
-  .navbar__links { flex-direction: row !important; }
-}
-`
+// Desktop override removed — handled by styles.css
 
 export function Navbar({ logo, logoUrl, links = [], cta }) {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -29,7 +15,7 @@ export function Navbar({ logo, logoUrl, links = [], cta }) {
 
   return (
     <nav className="navbar">
-      <style dangerouslySetInnerHTML={{ __html: desktopOverride }} />
+      
       <div className="navbar__inner">
         <a className="navbar__logo" href="/">
           {isPlaceholder
