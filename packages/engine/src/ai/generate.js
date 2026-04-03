@@ -13,7 +13,7 @@ const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 const allComponentKeys = Object.keys(catalog.components)
 const knownComponents = new Set(allComponentKeys)
-const blockedComponents = new Set([...AUTH_ONLY, ...DEBUG_ONLY, 'announcement-bar'])
+const blockedComponents = new Set([...AUTH_ONLY, ...DEBUG_ONLY, 'announcement-bar', 'map-embed'])
 
 // ── Build component reference from a filtered key list ──
 
@@ -1834,6 +1834,19 @@ function enforceConsistency(parsed) {
     if (page.sections.length < beforeLen) {
       console.log('[Consistency] BUG 45 — Removed announcement-bar section')
     }
+  }
+
+  // 18. BUG 56 — Remove map-embed sections without a valid embedUrl
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    const beforeLen = page.sections.length
+    page.sections = page.sections.filter(s => {
+      if (s.component !== 'map-embed') return true
+      const url = s.props?.embedUrl || ''
+      if (url && url.includes('google.com/maps')) return true
+      console.log('[Consistency] BUG 56 — Removed map-embed section (no valid embedUrl)')
+      return false
+    })
   }
 
   console.log('[Consistency] Enforced navbar/footer/product/contact/testimonial/trust-badge/nav-links consistency across all pages')

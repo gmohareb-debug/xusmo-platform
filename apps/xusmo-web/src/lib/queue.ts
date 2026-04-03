@@ -754,31 +754,76 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
 
     // Create Page records with BOTH structured content (studio editor)
     // AND Gutenberg HTML content (WordPress rendering)
-    for (let i = 0; i < bpPages.length; i++) {
-      const bpPage = bpPages[i];
-      const structured = generateDevPageContent(
-        bpPage, biz, services, story, testimonials, faqs, team,
-        contactPrefs, seoData, goals,
-      );
+    // BUG 62/74: For engine builds, derive pages from the designDocument
+    // so DB Page records match the actual LLM-generated page slugs,
+    // not the generic blueprint pages (which may differ).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const enginePages = (engineDesignDocument as any)?.pages;
+    const useEnginePages = generatorType === "engine" && enginePages && Object.keys(enginePages).length > 0;
 
-      await prisma.page.create({
-        data: {
-          siteId: site.id,
-          slug: bpPage.slug,
-          title: bpPage.title,
-          isRequired: bpPage.isRequired,
-          sortOrder: i,
-          content: bpPage.content ?? null,
-          blocks: bpPage.blocks as unknown as undefined,
-          heroHeadline: structured.heroHeadline,
-          heroSubheadline: structured.heroSubheadline,
-          ctaLabel: structured.ctaLabel,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          bodyContent: structured.bodyContent as any,
-          metaTitle: structured.metaTitle,
-          metaDesc: structured.metaDesc,
-        },
-      });
+    if (useEnginePages) {
+      const enginePageKeys = Object.keys(enginePages);
+      for (let i = 0; i < enginePageKeys.length; i++) {
+        const slug = enginePageKeys[i];
+        const pageData = enginePages[slug];
+        // Try to find matching bpPage for structured content
+        const bpPage = bpPages.find((p) => p.slug === slug);
+        const structured = bpPage
+          ? generateDevPageContent(
+              bpPage, biz, services, story, testimonials, faqs, team,
+              contactPrefs, seoData, goals,
+            )
+          : { heroHeadline: null, heroSubheadline: null, ctaLabel: null, bodyContent: null, metaTitle: null, metaDesc: null };
+
+        const title = pageData?.title
+          || (slug === "home" ? "Home" : slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()));
+
+        await prisma.page.create({
+          data: {
+            siteId: site.id,
+            slug,
+            title,
+            isRequired: slug === "home",
+            sortOrder: i,
+            content: bpPage?.content ?? null,
+            blocks: bpPage?.blocks as unknown as undefined,
+            heroHeadline: structured.heroHeadline,
+            heroSubheadline: structured.heroSubheadline,
+            ctaLabel: structured.ctaLabel,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            bodyContent: structured.bodyContent as any,
+            metaTitle: structured.metaTitle,
+            metaDesc: structured.metaDesc,
+          },
+        });
+      }
+    } else {
+      for (let i = 0; i < bpPages.length; i++) {
+        const bpPage = bpPages[i];
+        const structured = generateDevPageContent(
+          bpPage, biz, services, story, testimonials, faqs, team,
+          contactPrefs, seoData, goals,
+        );
+
+        await prisma.page.create({
+          data: {
+            siteId: site.id,
+            slug: bpPage.slug,
+            title: bpPage.title,
+            isRequired: bpPage.isRequired,
+            sortOrder: i,
+            content: bpPage.content ?? null,
+            blocks: bpPage.blocks as unknown as undefined,
+            heroHeadline: structured.heroHeadline,
+            heroSubheadline: structured.heroSubheadline,
+            ctaLabel: structured.ctaLabel,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            bodyContent: structured.bodyContent as any,
+            metaTitle: structured.metaTitle,
+            metaDesc: structured.metaDesc,
+          },
+        });
+      }
     }
 
     console.log("[dev-pipeline] Stage 2 complete: Site + pages created.");

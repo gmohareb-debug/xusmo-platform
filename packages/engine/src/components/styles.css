@@ -1258,8 +1258,8 @@ body { margin: 0; }
 .author-profile__socials a { color: var(--accent); text-decoration: none; font-size: 13px; }
 
 /* ── 28. Gallery ── */
-.gallery__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-.gallery__cell img { width: 100%; height: 180px; object-fit: cover; border-radius: var(--radius); }
+.gallery__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.gallery__cell img, .gallery__item img { width: 100%; height: 250px; object-fit: cover; border-radius: var(--radius, 8px); }
 
 /* ── 29. Carousel ── */
 .carousel { position: relative; overflow: hidden; }

@@ -1,5 +1,3 @@
-import { onImgError } from './imgFallback'
-
 export function Hero({ variant = 'text', title, subtitle, cta, ctaSecondary, ctaHref, ctaSecondaryHref, imageUrl, videoUrl, icon, eyebrow }) {
   const isMedia = variant === 'video' || variant === 'image'
 
@@ -24,7 +22,10 @@ export function Hero({ variant = 'text', title, subtitle, cta, ctaSecondary, cta
               src={imageUrl}
               alt={title || ''}
               loading="eager"
-              onError={e => onImgError(e, 1920, 800)}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement.style.background = 'linear-gradient(135deg, var(--accent, #3b82f6), #1a1a2e)';
+              }}
             />
           )}
           <div className="hero-unified__overlay" />
