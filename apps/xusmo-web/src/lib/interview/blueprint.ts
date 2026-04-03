@@ -222,6 +222,36 @@ function buildPages(
 // Main: generateBlueprint
 // ---------------------------------------------------------------------------
 
+
+// Parse natural-language color descriptions into hex values
+function parseCustomColors(colorStr: string): string[] {
+  if (!colorStr) return [];
+  const colorMap: Record<string, string> = {
+    red: "#dc2626", blue: "#2563eb", green: "#16a34a", yellow: "#eab308",
+    orange: "#ea580c", purple: "#7c3aed", pink: "#ec4899", black: "#111111",
+    white: "#ffffff", dark: "#1a1a2e", navy: "#1e3a5f", gold: "#b8860b",
+    teal: "#0d9488", indigo: "#4f46e5", gray: "#6b7280", brown: "#92400e",
+    cyan: "#06b6d4", lime: "#84cc16", amber: "#f59e0b", rose: "#f43f5e",
+    "dark blue": "#1e40af", "dark green": "#166534", "dark red": "#991b1b",
+    "light blue": "#93c5fd", "light green": "#86efac",
+  };
+  const parts = colorStr.toLowerCase().split(/[,;&]+/).map(s => s.trim()).filter(Boolean);
+  const colors: string[] = [];
+  for (const part of parts) {
+    if (part.startsWith("#") && /^#[0-9a-f]{3,8}$/i.test(part)) {
+      colors.push(part);
+    } else if (colorMap[part]) {
+      colors.push(colorMap[part]);
+    } else {
+      // Try partial match
+      for (const [name, hex] of Object.entries(colorMap)) {
+        if (part.includes(name)) { colors.push(hex); break; }
+      }
+    }
+  }
+  return colors.length > 0 ? colors : [];
+}
+
 export async function generateBlueprint(leadId: string) {
   const startTime = Date.now();
 
@@ -273,9 +303,20 @@ const businessDesc = (answers.business_description as string) ?? lead.businessDe
   if (businessDesc.length > 20) {
     // Pass the actual business description as the primary service
     // The engine's LLM will expand this into real service cards
-    services = [
-      { name: businessName, description: businessDesc, featured: true },
-    ];
+    // Extract individual services from the description
+    const svcKeywords = businessDesc.match(/(?:offers?|provides?|specializ(?:es?|ing)|includes?|features?)[:\s]+([^.]+)/i);
+    const svcList = svcKeywords
+      ? svcKeywords[1].split(/,|and|&/).map((s: string) => s.trim()).filter((s: string) => s.length > 2)
+      : [businessDesc];
+    services = svcList.map((svc: string, i: number) => ({
+      name: svc.charAt(0).toUpperCase() + svc.slice(1),
+      description: "Professional " + svc.toLowerCase() + " services from " + businessName + ".",
+      featured: i < 3,
+    }));
+    // Fallback if parsing found nothing useful
+    if (services.length === 0) {
+      services = [{ name: businessName, description: businessDesc, featured: true }];
+    }
     // Also add any explicitly selected services
     if (selectedServiceValues.length > 0) {
       for (const svc of selectedServiceValues) {
@@ -362,7 +403,7 @@ const businessDesc = (answers.business_description as string) ?? lead.businessDe
   const designPrefs: BlueprintDesignPrefs = {
     primaryColors:
       colorPref === "custom"
-        ? [] // User will provide later
+        ? parseCustomColors((answers.custom_colors as string) ?? "")
         : (industry?.primaryColors as string[]) ?? ["#1a1a2e", "#e94560", "#0f3460"],
     tone: (answers.tone as string) ?? (industry?.tone as string) ?? "professional",
     fontPreference: (industry?.fontPreference as string) ?? "modern_sans",
