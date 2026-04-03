@@ -888,7 +888,8 @@ NEVER default to generic blue (#3b82f6) or red (#dc2626) unless the business gen
 - Use the SAME logo and logoUrl on ALL pages (navbar consistency).
 
 ### Component Placement Rules
-- Use ONLY ONE navigation component per page (navbar). Never stack multiple navs.
+- Use ONLY ONE navigation component per page (navbar). NEVER include both "navbar" AND "sticky-header" — use ONLY "navbar".
+- NEVER use the "sticky-header" or "announcement-bar" components — they are blocked.
 - Use section-title as a separator before each major content block for visual hierarchy.
 - The footer should be consistent across all pages and use the MULTI-COLUMN format (see Footer Rules below).
 - cookie-consent and back-to-top should only appear on the Home page.
@@ -928,8 +929,9 @@ Example footer props:
 - Use the SAME navbar props (logo, logoUrl, links, cta) across all 4 pages so navigation is consistent.
 - The navbar links MUST include ALL 5 items: Home (/), About (/about), ${isCommerce ? 'Products (/services)' : 'Services (/services)'}, Contact (/contact).
 - The FIRST link MUST be Home (/) — never omit it.
+- Nav links MUST only point to pages that exist in the output. Do NOT invent slugs like /menu or /custom-cakes unless those pages are in the output.
 - For COMMERCE archetype: the third nav link MUST say "Products" or "Shop" — NEVER "Services".
-- The CTA button should link to #contact or /contact.
+- The CTA button MUST have a non-empty "label" (e.g., "Contact Us", "Get Started") and an "href" (e.g., "/contact"). NEVER omit the CTA label.
 
 ### Clickability Rules (CRITICAL)
 - ALL service cards in services-section MUST have an "href" prop (e.g., "/services" or "/services#service-name").
@@ -1452,7 +1454,12 @@ function enforceConsistency(parsed) {
   }
 
   // 6b. Enrich minimal footers with full content
-  const businessName = parsed._plan?.businessProfile?.businessName || 'Business'
+  const businessName = (parsed._plan?.businessProfile?.businessName && parsed._plan.businessProfile.businessName !== 'Business')
+    ? parsed._plan.businessProfile.businessName
+    : (parsed._plan?.businessName || 'Business')
+  const businessTagline = parsed._plan?.businessProfile?.tagline
+    || parsed._plan?.businessProfile?.valueProposition
+    || (businessName + ' — Quality you can trust.')
   const pageKeys = Object.keys(pages)
   for (const page of Object.values(pages)) {
     if (!page?.sections) continue
@@ -1483,9 +1490,9 @@ function enforceConsistency(parsed) {
       if (!section.props.logo) {
         section.props.logo = businessName
       }
-      // If footer is missing tagline, create one
+      // If footer is missing tagline, create one from business profile
       if (!section.props.tagline) {
-        section.props.tagline = businessName + ' — Quality you can trust.'
+        section.props.tagline = businessTagline
       }
       // If footer is missing social links, add defaults
       if (!section.props.social || (Array.isArray(section.props.social) && section.props.social.length === 0)) {
@@ -1547,11 +1554,14 @@ function enforceConsistency(parsed) {
     if (typeof obj === 'string') {
       return obj
         .replace(/\s+in\s+\.\s*/g, ' ')      // "in ."
+        .replace(/\s+in\.\s*/g, ' ')          // "in." (no space before period)
         .replace(/\s+in\s+,\s*/g, ' ')        // "in ,"
-        .replace(/\s+in\s*$/g, '')             // trailing "in "
+        .replace(/\s+in,\s*/g, ' ')           // "in," (no space before comma)
+        .replace(/\s+in\s*$/g, '')             // trailing "in " at end of string
         .replace(/\s+in\s{2,}/g, ' ')          // "in   " (multiple spaces)
         .replace(/\s+in\s*"/g, '"')            // "in" (before quote)
         .replace(/\s+in\s*!/g, '!')            // "in!"
+        .replace(/\s+in\s*\?/g, '?')          // "in?"
         .replace(/\s{2,}/g, ' ')               // collapse double spaces
         .trim()
     }
@@ -1708,7 +1718,69 @@ function enforceConsistency(parsed) {
     }
   }
 
-  console.log('[Consistency] Enforced navbar/footer/product/contact/testimonial/trust-badge consistency across all pages')
+  // 14. BUG 52 — Navbar CTA button must have text
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (section.component === 'navbar' && section.props) {
+        if (section.props.cta && !section.props.cta.label) {
+          section.props.cta.label = 'Contact Us'
+        }
+        if (!section.props.cta) {
+          section.props.cta = { label: 'Contact Us', href: '/contact' }
+        }
+      }
+    }
+  }
+
+  // 15. BUG 53 — Remove duplicate nav: if navbar exists, remove sticky-header
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    const hasNavbar = page.sections.some(s => s.component === 'navbar')
+    if (hasNavbar) {
+      page.sections = page.sections.filter(s => s.component !== 'sticky-header')
+    }
+  }
+
+  // 16. BUG 54 — Validate navbar links point to pages that actually exist in parsed.pages
+  const validPageSlugs = new Set(Object.keys(pages))
+  validPageSlugs.add('') // home = "/"
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (section.component === 'navbar' && section.props?.links) {
+        section.props.links = section.props.links.filter(link => {
+          const href = (link.href || '').replace(/^\//, '').replace(/#.*$/, '')
+          // Allow home ("/"), anchor-only links ("#..."), and valid page slugs
+          if (href === '' || link.href?.startsWith('#')) return true
+          if (validPageSlugs.has(href)) return true
+          // Try to find closest matching page slug
+          const closestMatch = [...validPageSlugs].find(slug =>
+            slug && (slug.includes(href) || href.includes(slug))
+          )
+          if (closestMatch) {
+            link.href = '/' + closestMatch
+            return true
+          }
+          // No match found — remove this broken link
+          console.log(`[Consistency] BUG 54 — Removed broken nav link: ${link.label} -> ${link.href}`)
+          return false
+        })
+      }
+    }
+  }
+
+  // 17. BUG 45 — Remove announcement-bar from all pages (blocked component)
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    const beforeLen = page.sections.length
+    page.sections = page.sections.filter(s => s.component !== 'announcement-bar')
+    if (page.sections.length < beforeLen) {
+      console.log('[Consistency] BUG 45 — Removed announcement-bar section')
+    }
+  }
+
+  console.log('[Consistency] Enforced navbar/footer/product/contact/testimonial/trust-badge/nav-links consistency across all pages')
   return parsed
 }
 
