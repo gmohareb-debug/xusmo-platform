@@ -158,7 +158,7 @@ async function createSiteContainerRawDocker(config: ContainerConfig): Promise<Co
   // 1. Create database in shared MySQL
   try {
     await run(
-      `docker exec xusmo-wp-db mysql -uroot -prootpassword -e "CREATE DATABASE IF NOT EXISTS \`${dbName}\`; GRANT ALL ON \`${dbName}\`.* TO 'wordpress'@'%';"`
+      `docker exec xusmo-wp-db mariadb -uroot -prootpassword -e "CREATE DATABASE IF NOT EXISTS ${dbName}; GRANT ALL ON ${dbName}.* TO 'wordpress'@'%'; FLUSH PRIVILEGES;"`
     );
     console.log(`[container] Database ${dbName} created`);
   } catch (err) {
@@ -274,7 +274,7 @@ async function destroySiteContainerRawDocker(siteId: string): Promise<void> {
   await run(`docker rm -f ${wpName}`).catch(() => {});
   await run(`docker volume rm ${volumeName}`).catch(() => {});
   await run(
-    `docker exec xusmo-wp-db mysql -uroot -prootpassword -e "DROP DATABASE IF EXISTS \`${dbName}\`;"`
+    `docker exec xusmo-wp-db mariadb -uroot -prootpassword -e "DROP DATABASE IF EXISTS \`${dbName}\`;"`
   ).catch(() => {});
 
   console.log(`[container] Site ${shortId} fully destroyed`);
