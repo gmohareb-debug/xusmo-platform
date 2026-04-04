@@ -3,7 +3,7 @@ export function HeroStats({ stats }) {
 
   return (
     <section className="relative">
-      <div className="flex flex-wrap items-stretch justify-center py-10 md:py-16">
+      <div className="flex flex-wrap items-stretch justify-center">
         {stats.map((stat, index) => (
           <div key={index} className="flex items-center">
             {/* Divider between stats */}

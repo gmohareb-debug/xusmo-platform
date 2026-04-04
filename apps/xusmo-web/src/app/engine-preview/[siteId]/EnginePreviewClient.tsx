@@ -246,10 +246,10 @@ export default function EnginePreviewClient({
           };
           const padClasses: Record<string, string> = {
             none: "",
-            sm: "py-10",
-            md: "py-16",
-            lg: "py-24",
-            xl: "py-32",
+            sm: "py-6",
+            md: "py-12 md:py-16",
+            lg: "py-16 md:py-20",
+            xl: "py-20 md:py-24",
           };
           const alignClasses: Record<string, string> = {
             center: "text-center",
@@ -261,7 +261,7 @@ export default function EnginePreviewClient({
           const twPad = padClasses[l.padding || ""] || "";
           const twAlign = alignClasses[l.align || ""] || "";
           const twFull =
-            l.width === "full" ? "" : "max-w-[1200px] mx-auto px-6 md:px-10 lg:px-12";
+            l.width === "full" ? "" : "max-w-[1200px] mx-auto px-5 md:px-8 lg:px-12";
 
           // Keep legacy classes for backwards compat with styles.css
           const legacyCls = [

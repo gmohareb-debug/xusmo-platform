@@ -23,7 +23,7 @@ export function Footer({ text, links = [], columns = [], logo, tagline, social =
 
   return (
     <footer className="bg-gray-950 text-gray-300">
-      <div className="max-w-[1200px] mx-auto px-6 lg:px-12 pt-16 pb-12 md:pt-20 md:pb-16">
+      <div className="max-w-[1200px] mx-auto px-6 lg:px-12">
         <div className="grid grid-cols-1 md:grid-cols-[1.4fr_2fr] gap-12 lg:gap-24">
           {/* Brand column */}
           {(logo || tagline || address) && (

@@ -2,7 +2,7 @@ import React from "react";
 
 export function Breadcrumbs({ items = [] }) {
   return (
-    <nav className="py-4" aria-label="Breadcrumb">
+    <nav aria-label="Breadcrumb">
       <ol className="inline-flex items-center flex-wrap gap-2 list-none p-0 m-0 text-sm">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
