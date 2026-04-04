@@ -830,7 +830,7 @@ body { margin: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: 
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 48px;
+  padding: 14px 48px;
   height: var(--comp-height, 72px);
 }
 .navbar__logo {
@@ -2393,4 +2393,9 @@ body { margin: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: 
   .navbar__cta { width: 100%; text-align: center; }
   .site-section__inner { padding: 40px 18px; }
   .hero-unified__content { padding: 40px 18px; }
+}
+
+.page > .site-section:last-child .site-section__inner {
+  padding-top: 48px !important;
+  padding-bottom: 48px !important;
 }
