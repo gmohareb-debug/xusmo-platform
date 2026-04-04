@@ -264,25 +264,17 @@ export default function EnginePreviewClient({
             l.width === "full" ? "" : "max-w-[1200px] mx-auto px-5 md:px-8 lg:px-12";
 
           // Keep legacy classes for backwards compat with styles.css
-          const legacyCls = [
-            "site-section",
-            l.background ? `site-section--bg-${l.background}` : "",
-            l.padding ? `site-section--pad-${l.padding}` : "",
-            l.width === "full" ? "site-section--full" : "",
-            l.align ? `site-section--align-${l.align}` : "",
-          ]
-            .filter(Boolean)
-            .join(" ");
+          // No legacy CSS — Tailwind only
 
           const styleTokens = { ...(section.style || {}) };
 
           return (
             <div
-              className={`${legacyCls} ${twBg} ${twPad} ${twAlign}`.trim()}
+              className={`${twBg} ${twPad} ${twAlign}`.trim()}
               style={styleTokens}
               key={`${section.component}-${index}`}
             >
-              <div className={`site-section__inner ${twFull}`.trim()}>
+              <div className={twFull || "max-w-[1200px] mx-auto px-5 md:px-8 lg:px-12"}>
                 <Component
                   {...(decodeUnicode(section.props) as Record<string, unknown>)}
                 />
