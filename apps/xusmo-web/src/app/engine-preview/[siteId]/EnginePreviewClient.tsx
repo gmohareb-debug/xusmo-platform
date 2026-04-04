@@ -231,7 +231,40 @@ export default function EnginePreviewClient({
           }
 
           const l = section.layout || {};
-          const cls = [
+
+          // Tailwind-based background classes
+          const bgClasses: Record<string, string> = {
+            default: "bg-[var(--bg,var(--surface,#fff))]",
+            surface: "bg-[var(--surface,#fff)]",
+            muted: "bg-gray-50",
+            accent: "bg-[var(--accent)]/5",
+            "accent-light": "bg-[var(--accent-light,var(--accent))]/10",
+            dark: "bg-gray-900 text-white",
+            gradient:
+              "bg-gradient-to-br from-[var(--accent)]/10 to-[var(--accent)]/[0.02]",
+            none: "",
+          };
+          const padClasses: Record<string, string> = {
+            none: "",
+            sm: "py-10",
+            md: "py-16",
+            lg: "py-24",
+            xl: "py-32",
+          };
+          const alignClasses: Record<string, string> = {
+            center: "text-center",
+            left: "text-left",
+            right: "text-right",
+          };
+
+          const twBg = bgClasses[l.background || ""] || "";
+          const twPad = padClasses[l.padding || ""] || "";
+          const twAlign = alignClasses[l.align || ""] || "";
+          const twFull =
+            l.width === "full" ? "" : "max-w-[1200px] mx-auto px-6 md:px-10 lg:px-12";
+
+          // Keep legacy classes for backwards compat with styles.css
+          const legacyCls = [
             "site-section",
             l.background ? `site-section--bg-${l.background}` : "",
             l.padding ? `site-section--pad-${l.padding}` : "",
@@ -245,11 +278,11 @@ export default function EnginePreviewClient({
 
           return (
             <div
-              className={cls}
+              className={`${legacyCls} ${twBg} ${twPad} ${twAlign}`.trim()}
               style={styleTokens}
               key={`${section.component}-${index}`}
             >
-              <div className="site-section__inner">
+              <div className={`site-section__inner ${twFull}`.trim()}>
                 <Component
                   {...(decodeUnicode(section.props) as Record<string, unknown>)}
                 />
