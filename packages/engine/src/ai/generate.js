@@ -1703,6 +1703,27 @@ function enforceConsistency(parsed) {
     }
   }
 
+  // 11b. Deduplicate footer links across columns
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (section.component !== 'footer' || !section.props?.columns) continue
+      const columns = section.props.columns
+      if (!Array.isArray(columns) || columns.length < 2) continue
+      // Track all link labels seen so far
+      const seen = new Set()
+      for (const col of columns) {
+        if (!Array.isArray(col.links)) continue
+        col.links = col.links.filter(link => {
+          const key = (link.label || '').toLowerCase().trim()
+          if (seen.has(key)) return false
+          seen.add(key)
+          return true
+        })
+      }
+    }
+  }
+
   // 12. BUG 27 — Rebuild footer column links from actual page list
   // Extract actual pages from the parsed output
   const actualPageKeys = Object.keys(pages)
@@ -1783,6 +1804,30 @@ function enforceConsistency(parsed) {
     if (!parsed.theme.colors.accentLight) {
       const accent = parsed.theme.colors.accent || '#3b82f6'
       parsed.theme.colors.accentLight = accent + '20' // 12% opacity hex
+    }
+  }
+
+  // 13b. Fix hero CTA hrefs — default to /contact when null
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (!section.component?.includes('hero')) continue
+      if (!section.props) continue
+      // Fix null/missing CTA hrefs
+      if (section.props.cta && !section.props.ctaHref) {
+        section.props.ctaHref = '/contact'
+      }
+      if (section.props.ctaSecondary && !section.props.ctaSecondaryHref) {
+        section.props.ctaSecondaryHref = '/services'
+      }
+      // Fix hero layout — never use "dark" background which creates black gap
+      if (section.layout?.background === 'dark' || section.layout?.background === 'accent') {
+        section.layout.background = 'none'
+      }
+      // Ensure hero has proper padding
+      if (!section.layout) section.layout = {}
+      section.layout.padding = 'none'
+      section.layout.width = 'full'
     }
   }
 
