@@ -13,7 +13,7 @@ const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 const allComponentKeys = Object.keys(catalog.components)
 const knownComponents = new Set(allComponentKeys)
-const blockedComponents = new Set([...AUTH_ONLY, ...DEBUG_ONLY, 'announcement-bar', 'map-embed'])
+const blockedComponents = new Set([...AUTH_ONLY, ...DEBUG_ONLY, 'announcement-bar', 'map-embed', 'hero-video'])
 
 // ── Build component reference from a filtered key list ──
 
@@ -1804,6 +1804,27 @@ function enforceConsistency(parsed) {
     if (!parsed.theme.colors.accentLight) {
       const accent = parsed.theme.colors.accent || '#3b82f6'
       parsed.theme.colors.accentLight = accent + '20' // 12% opacity hex
+    }
+  }
+
+  // 13a. Convert hero-video to hero-image (video URLs are unreliable)
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (section.component === 'hero-video') {
+        section.component = 'hero-image'
+        // Move videoUrl to imageUrl if no image exists
+        if (!section.props?.imageUrl && section.props?.videoUrl) {
+          delete section.props.videoUrl
+        }
+        // The image resolver will fill in a proper Pexels image later
+      }
+      // Ensure ALL hero sections have an imageUrl
+      if (section.component === 'hero-image' && !section.props?.imageUrl) {
+        // Set a search keyword so the image resolver can find something
+        section.props = section.props || {}
+        section.props.imageUrl = 'https://picsum.photos/seed/' + (businessName || 'business').replace(/\s+/g, '-').toLowerCase() + '-hero/1920/800'
+      }
     }
   }
 
