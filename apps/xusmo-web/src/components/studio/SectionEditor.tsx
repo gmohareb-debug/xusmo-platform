@@ -992,7 +992,7 @@ export default function SectionEditor({ siteId }: { siteId: string }) {
         <span style={{ fontSize: 15, fontWeight: 600, color: C.muted }}>Section Editor</span>
         <span style={{ fontSize: 13, color: C.dim, textAlign: "center", maxWidth: 320, lineHeight: 1.6 }}>
           Use the panel on the left to view, reorder, edit, and manage the sections on each page of your site.
-          Changes are saved immediately to the design document.
+          Click Save to apply changes to the design document.
         </span>
       </div>
 

@@ -47,6 +47,19 @@ const FIELD_TO_PROP: Record<string, string[]> = {
 const CONTENT_FIELDS = ["heroHeadline", "heroSubheadline", "ctaLabel", "bodyContent", "title"];
 
 // ---------------------------------------------------------------------------
+// WordPress sync guard — only sync if the site has a WP backend
+// ---------------------------------------------------------------------------
+
+async function maybeSyncToWP(siteId: string, type: "design" | "page", pageSlug?: string) {
+  try {
+    const site = await prisma.site.findUnique({ where: { id: siteId }, select: { wpUrl: true } });
+    if (!site?.wpUrl) return;
+    if (type === "design") syncDesignToWordPress(siteId).catch(() => {});
+    if (type === "page" && pageSlug) syncPageToWordPress(siteId, pageSlug).catch(() => {});
+  } catch {}
+}
+
+// ---------------------------------------------------------------------------
 // System prompt
 // ---------------------------------------------------------------------------
 
@@ -309,7 +322,7 @@ async function executeEditAction(
           await updateDesignDocumentHero(siteId, action.pageSlug, propNames, value);
         }
 
-        syncPageToWordPress(siteId, action.pageSlug).catch(() => {});
+        maybeSyncToWP(siteId, "page", action.pageSlug);
         return { type: "UPDATE_CONTENT", success: true, label: `Updated ${field} on "${action.pageSlug}"` };
       } catch {
         return { type: "UPDATE_CONTENT", success: false, label: `Page "${action.pageSlug}" not found` };
@@ -336,7 +349,7 @@ async function executeEditAction(
         return { type: "APPLY_PRESET", success: false, label: `Invalid preset: ${action.preset}` };
       }
       await prisma.site.update({ where: { id: siteId }, data: { activePreset: action.preset } });
-      syncDesignToWordPress(siteId).catch(() => {});
+      maybeSyncToWP(siteId, "design");
       return { type: "APPLY_PRESET", success: true, label: `Applied "${action.preset}" preset` };
     }
 
@@ -358,7 +371,7 @@ async function executeEditAction(
           where: { id: siteId },
           data: { designDocument: { ...doc, theme: updatedTheme } },
         });
-        syncDesignToWordPress(siteId).catch(() => {});
+        maybeSyncToWP(siteId, "design");
 
         const parts: string[] = [];
         if (action.colors) parts.push(`colors (${Object.keys(action.colors).join(", ")})`);
@@ -374,7 +387,7 @@ async function executeEditAction(
         where: { id: siteId },
         data: { customCss: action.css, customCssUpdatedAt: new Date() },
       });
-      syncDesignToWordPress(siteId).catch(() => {});
+      maybeSyncToWP(siteId, "design");
       return { type: "UPDATE_CSS", success: true, label: "Updated custom CSS" };
     }
 

@@ -371,29 +371,7 @@ export default function AIDesignerClient({ site }: { site: SiteData }) {
       });
 
       if (!res.ok) {
-        // Fallback to old single-agent endpoint
-        const fallback = await fetch(`/api/studio/${site.id}/agent`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text.trim(), history }),
-        });
-        if (!fallback.ok) throw new Error(`${fallback.status}`);
-        const data = await fallback.json();
-        const botMsg: ChatMessage = {
-          id: `a-${Date.now()}`,
-          role: "assistant",
-          text: data.reply,
-          actions: data.actions,
-          ts: Date.now(),
-        };
-        setChatMessages((prev) => [...prev, botMsg]);
-        if (data.actions?.some((a: ActionResult) => a.success)) {
-          refreshPreview();
-          fetchSections();
-        }
-        clearTimeout(progressTimer); clearTimeout(progressTimer2); clearTimeout(progressTimer3);
-    setChatLoading(false);
-        return;
+        throw new Error(`Agent request failed: ${res.status}`);
       }
 
       const data = await res.json();

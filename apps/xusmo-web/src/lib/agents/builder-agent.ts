@@ -68,7 +68,8 @@ export async function runBuilderAgent(input: AgentInput): Promise<AgentResult> {
 
     // 4. Create/update Page records in DB for each generated page
     const pageEntries = Object.entries(siteDoc.pages as Record<string, unknown>);
-    for (const [slug, pageData] of pageEntries) {
+    for (let i = 0; i < pageEntries.length; i++) {
+      const [slug, pageData] = pageEntries[i];
       const page = pageData as Record<string, unknown>;
       const sections = (page?.sections || []) as Record<string, unknown>[];
 
@@ -87,7 +88,7 @@ export async function runBuilderAgent(input: AgentInput): Promise<AgentResult> {
           heroHeadline: heroProps.title || heroProps.headline || null,
           heroSubheadline: heroProps.subtitle || heroProps.subheadline || null,
           ctaLabel: heroProps.cta || heroProps.ctaLabel || null,
-          sortOrder: pageEntries.indexOf([slug, pageData]),
+          sortOrder: i,
         },
         update: {
           heroHeadline: heroProps.title || heroProps.headline || undefined,

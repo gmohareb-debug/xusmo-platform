@@ -92,6 +92,16 @@ export default async function DesignPage({
     }
   }
 
+  // For engine sites, use designDocument.theme as the canonical theme
+  const designDoc = site.designDocument as Record<string, unknown> | null;
+  const engineTheme = designDoc?.theme as Record<string, unknown> | null;
+  if (engineTheme) {
+    const engineColors = engineTheme.colors as Record<string, string> | null;
+    const engineFonts = engineTheme.fonts as Record<string, string> | null;
+    if (engineColors) themeColors = engineColors;
+    if (engineFonts) themeFonts = { heading: engineFonts.heading || "Inter", body: engineFonts.body || "Inter" };
+  }
+
   // Engine-generated sites have designDocument — show visual editor
   const hasDesignDocument = !!site.designDocument;
 
