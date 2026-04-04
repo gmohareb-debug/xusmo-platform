@@ -431,7 +431,7 @@ export default function AIDesignerClient({ site }: { site: SiteData }) {
   };
 
   // ---- Preview URL ----
-  const previewUrl = site.wpUrl
+  const previewUrl = `/engine-preview/${site.id}${previewPage !== "home" ? `?page=${previewPage}` : ""}`
     ? `${site.wpUrl}${previewPage !== "home" ? `/${previewPage}` : ""}`
     : `/engine-preview/${site.id}${previewPage !== "home" ? `?page=${previewPage}` : ""}`;
 

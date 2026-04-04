@@ -109,7 +109,7 @@ export default function PreviewClient({ site }: { site: SiteData }) {
   const [runningQa, setRunningQa] = useState(false);
   const [qaMessage, setQaMessage] = useState<string | null>(null);
 
-  const iframeSrc = site.wpUrl
+  const iframeSrc = `/engine-preview/${site.id}${activePage && activePage !== "home" ? `?page=${activePage}` : ""}`
     ? activePage && activePage !== "home"
       ? `${site.wpUrl}/${activePage}`
       : site.wpUrl

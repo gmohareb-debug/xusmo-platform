@@ -275,7 +275,7 @@ export default function DesignClient({
 
         {/* Live preview link — cache-bust so each click loads fresh content */}
         {(() => {
-          const previewHref = site.wpUrl || `/engine-preview/${site.id}`;
+          const previewHref = `/engine-preview/${site.id}`;
           return (
           <a
             href={`${previewHref}${previewHref.includes("?") ? "&" : "?"}cb=${Date.now()}`}
@@ -701,7 +701,7 @@ export default function DesignClient({
 
             {/* Right: Live Preview */}
             {(() => {
-              const previewUrl = site.wpUrl || `/engine-preview/${site.id}`;
+              const previewUrl = `/engine-preview/${site.id}` || `/engine-preview/${site.id}`;
               const previewSrc = site.wpUrl
                 ? `${site.wpUrl}${site.wpUrl.includes("?") ? "&" : "?"}cb=${iframeKey}`
                 : `/engine-preview/${site.id}?cb=${iframeKey}`;
