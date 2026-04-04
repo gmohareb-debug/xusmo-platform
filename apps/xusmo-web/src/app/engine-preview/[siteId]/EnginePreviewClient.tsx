@@ -6,7 +6,7 @@
 // Runs inside an iframe so component CSS is isolated from the studio.
 // =============================================================================
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 // @ts-expect-error — componentRegistry is a JS module with default export
 import componentRegistry from "@xusmo/engine/components";
 
