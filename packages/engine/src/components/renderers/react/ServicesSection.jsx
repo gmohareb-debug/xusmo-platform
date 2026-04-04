@@ -4,49 +4,74 @@ export function ServicesSection({ title, services }) {
   return (
     <section className="services-section">
       {title && (
-        <h2 className="services-section-title text-3xl md:text-4xl font-bold text-center mb-12 tracking-tight"
-            style={{ fontFamily: 'var(--font-heading, inherit)' }}>
-          {title}
-        </h2>
+        <div className="text-center mb-16">
+          <h2
+            className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--text,#1c1c1c)] mb-4"
+            style={{ fontFamily: 'var(--font-heading, inherit)' }}
+          >
+            {title}
+          </h2>
+          <div className="mx-auto w-12 h-1 rounded-full mt-4" style={{ background: 'var(--accent, #3b82f6)' }} />
+        </div>
       )}
       {services && services.length > 0 && (
-        <div className="services-section-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {services.map((service, index) => (
-            <a
-              key={index}
-              className="services-section-card group block bg-[var(--surface,#fff)] rounded-2xl border border-[var(--border,#e5e7eb)] overflow-hidden no-underline text-[var(--text,#1c1c1c)] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-              href={service.href || '#services'}
-            >
-              {service.image && (
-                <div className="services-section-image-wrap aspect-[4/3] overflow-hidden">
-                  <img
-                    src={service.image}
-                    alt={service.title || ''}
-                    className="services-section-image w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={e => onImgError(e, 400, 300)}
-                  />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          {services.map((service, index) => {
+            /* First card spans full width on 2-col, acts as hero card */
+            const isHero = index === 0 && services.length > 2
+            return (
+              <a
+                key={index}
+                className={`group block bg-[var(--surface,#fff)] rounded-2xl border border-[var(--border,#e5e7eb)] overflow-hidden no-underline text-[var(--text,#1c1c1c)] hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ${isHero ? 'md:col-span-2 lg:col-span-1' : ''}`}
+                href={service.href || '#services'}
+                style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+              >
+                {service.image && (
+                  <div className={`overflow-hidden ${isHero ? 'aspect-[16/9] md:aspect-[21/9] lg:aspect-[4/3]' : 'aspect-[4/3]'}`}>
+                    <img
+                      src={service.image}
+                      alt={service.title || ''}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      onError={e => onImgError(e, 400, 300)}
+                    />
+                  </div>
+                )}
+                <div className="p-8 lg:p-10">
+                  {service.icon && !service.image && (
+                    <div
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-6"
+                      style={{
+                        background: 'var(--accent, #3b82f6)',
+                        opacity: 0.1,
+                        position: 'relative',
+                      }}
+                    >
+                      <span className="relative" style={{ opacity: 1 }}>{service.icon}</span>
+                    </div>
+                  )}
+                  {service.icon && !service.image && (
+                    <span className="block text-3xl mb-5">{service.icon}</span>
+                  )}
+                  {service.title && (
+                    <h3 className="text-xl font-semibold mb-3 leading-snug m-0 text-[var(--text,#1c1c1c)]">
+                      {service.title}
+                    </h3>
+                  )}
+                  {service.description && (
+                    <p className="text-[15px] text-[var(--muted,#6b7280)] leading-relaxed mb-6 m-0">
+                      {service.description}
+                    </p>
+                  )}
+                  <span className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent,#3b82f6)] group-hover:gap-3 transition-all duration-300">
+                    Learn more
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </span>
                 </div>
-              )}
-              <div className="p-6 lg:p-8">
-                {service.icon && (
-                  <span className="services-section-icon block text-3xl mb-4">{service.icon}</span>
-                )}
-                {service.title && (
-                  <h3 className="services-section-card-title text-lg font-semibold mb-2 leading-snug m-0">
-                    {service.title}
-                  </h3>
-                )}
-                {service.description && (
-                  <p className="services-section-card-desc text-sm text-[var(--muted,#6b7280)] leading-relaxed mb-4 m-0">
-                    {service.description}
-                  </p>
-                )}
-                <span className="services-section-card-link text-sm font-semibold text-[var(--accent,#1f4dff)] group-hover:translate-x-1 inline-flex items-center gap-1 transition-transform duration-200">
-                  Learn more &rarr;
-                </span>
-              </div>
-            </a>
-          ))}
+              </a>
+            )
+          })}
         </div>
       )}
     </section>

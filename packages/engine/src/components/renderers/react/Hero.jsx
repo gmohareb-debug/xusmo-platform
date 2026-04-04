@@ -2,13 +2,13 @@ export function Hero({ variant = 'text', title, subtitle, cta, ctaSecondary, cta
   const isMedia = variant === 'video' || variant === 'image'
 
   return (
-    <section className={`hero-unified hero-unified--${variant} relative min-h-[85vh] flex items-center justify-center overflow-hidden ${isMedia ? 'text-white' : 'text-[var(--text,#1c1c1c)]'}`}>
-      {/* Background layer */}
+    <section className={`relative min-h-screen flex items-center justify-center overflow-hidden ${isMedia ? 'text-white' : 'text-[var(--text,#1c1c1c)]'}`}>
+      {/* Background — media variants */}
       {isMedia && (
-        <div className="hero-unified__bg absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0">
           {variant === 'video' && videoUrl && (
             <video
-              className="hero-unified__video absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
               src={videoUrl}
               autoPlay
               muted
@@ -18,7 +18,7 @@ export function Hero({ variant = 'text', title, subtitle, cta, ctaSecondary, cta
           )}
           {variant === 'image' && imageUrl && (
             <img
-              className="hero-unified__image absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
               src={imageUrl}
               alt={title || ''}
               loading="eager"
@@ -28,45 +28,75 @@ export function Hero({ variant = 'text', title, subtitle, cta, ctaSecondary, cta
               }}
             />
           )}
-          <div className="hero-unified__overlay absolute inset-0 bg-black/50" />
+          {/* Multi-stop cinematic overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/80" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
         </div>
       )}
 
-      {/* Decorative gradient orbs for text variant */}
+      {/* Gradient mesh background — text variant */}
       {!isMedia && (
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-1/2 -right-1/4 w-[80vw] h-[80vw] rounded-full bg-[var(--accent,#1f4dff)]/[0.06] blur-[100px]" />
-          <div className="absolute -bottom-1/3 -left-1/4 w-[60vw] h-[60vw] rounded-full bg-[var(--accent,#1f4dff)]/[0.04] blur-[80px]" />
+        <div className="absolute inset-0 -z-10 overflow-hidden" style={{ background: 'var(--bg, #ffffff)' }}>
+          <div
+            className="absolute -top-[20%] -right-[10%] w-[800px] h-[800px] rounded-full opacity-[0.08] blur-[120px]"
+            style={{ background: 'var(--accent, #3b82f6)' }}
+          />
+          <div
+            className="absolute -bottom-[15%] -left-[15%] w-[600px] h-[600px] rounded-full opacity-[0.06] blur-[100px]"
+            style={{ background: 'var(--accent, #3b82f6)' }}
+          />
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-[0.04] blur-[80px]"
+            style={{ background: 'linear-gradient(135deg, var(--accent, #3b82f6), #a855f7)' }}
+          />
         </div>
       )}
 
-      {/* Content layer */}
-      <div className="hero-unified__content relative z-10 max-w-[820px] mx-auto px-6 lg:px-12 py-24 md:py-32 text-center">
+      {/* Content */}
+      <div className="relative z-10 max-w-[920px] mx-auto px-6 lg:px-12 py-32 md:py-40 text-center">
         {icon && !isMedia && (
-          <div className="hero-unified__icon mb-6 text-5xl" dangerouslySetInnerHTML={{ __html: icon }} />
+          <div className="mb-8 text-5xl" dangerouslySetInnerHTML={{ __html: icon }} />
         )}
+
         {eyebrow && (
-          <p className="hero-unified__eyebrow uppercase tracking-[0.2em] text-xs font-medium text-[var(--accent,#1f4dff)] mb-4">
-            {eyebrow}
-          </p>
+          <div className="mb-6 flex items-center justify-center">
+            <span
+              className="inline-block uppercase tracking-[0.2em] text-sm font-medium pb-2"
+              style={{
+                color: isMedia ? 'rgba(255,255,255,0.9)' : 'var(--accent, #3b82f6)',
+                borderBottom: isMedia ? '2px solid rgba(255,255,255,0.3)' : '2px solid var(--accent, #3b82f6)',
+              }}
+            >
+              {eyebrow}
+            </span>
+          </div>
         )}
+
         {title && (
-          <h1 className="hero-unified__title text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight mb-6"
-              style={{ fontFamily: 'var(--font-heading, inherit)' }}>
+          <h1
+            className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-8"
+            style={{ fontFamily: 'var(--font-heading, inherit)' }}
+          >
             {title}
           </h1>
         )}
+
         {subtitle && (
-          <p className={`hero-unified__subtitle text-lg md:text-xl leading-relaxed max-w-[600px] mx-auto mb-10 ${isMedia ? 'text-white/80' : 'text-[var(--muted,#6b7280)]'}`}>
+          <p className={`text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-12 ${isMedia ? 'text-white/85' : 'text-[var(--muted,#6b7280)]'}`}>
             {subtitle}
           </p>
         )}
+
         {(cta || ctaSecondary) && (
-          <div className="hero-unified__actions flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-5">
             {cta && (
               <a
                 href={ctaHref || '#products'}
-                className="hero-unified__cta hero-unified__cta--primary inline-flex items-center px-8 py-3.5 text-base font-semibold rounded-full bg-[var(--accent,#1f4dff)] text-white no-underline shadow-lg shadow-[var(--accent,#1f4dff)]/25 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[var(--accent,#1f4dff)]/30 transition-all duration-300"
+                className="inline-flex items-center px-8 py-4 text-base font-semibold rounded-full text-white no-underline hover:-translate-y-0.5 transition-all duration-300"
+                style={{
+                  background: 'var(--accent, #3b82f6)',
+                  boxShadow: '0 8px 32px -4px var(--accent, #3b82f6)',
+                }}
               >
                 {cta}
               </a>
@@ -74,7 +104,7 @@ export function Hero({ variant = 'text', title, subtitle, cta, ctaSecondary, cta
             {ctaSecondary && (
               <a
                 href={ctaSecondaryHref || '#features'}
-                className={`hero-unified__cta hero-unified__cta--secondary inline-flex items-center px-8 py-3.5 text-base font-semibold rounded-full no-underline border-2 transition-all duration-300 hover:-translate-y-0.5 ${isMedia ? 'border-white/40 text-white hover:bg-white/10' : 'border-[var(--border,#e5e7eb)] text-[var(--text,#1c1c1c)] hover:border-[var(--accent,#1f4dff)]/30 hover:bg-[var(--accent,#1f4dff)]/5'}`}
+                className={`inline-flex items-center px-8 py-4 text-base font-semibold rounded-full no-underline border-2 transition-all duration-300 hover:-translate-y-0.5 ${isMedia ? 'border-white/30 text-white hover:bg-white/10 hover:border-white/50' : 'border-[var(--border,#e5e7eb)] text-[var(--text,#1c1c1c)] hover:border-[var(--accent,#3b82f6)] hover:shadow-lg'}`}
               >
                 {ctaSecondary}
               </a>
@@ -82,6 +112,16 @@ export function Hero({ variant = 'text', title, subtitle, cta, ctaSecondary, cta
           </div>
         )}
       </div>
+
+      {/* Bottom gradient fade */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-32 z-10 pointer-events-none"
+        style={{
+          background: isMedia
+            ? 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.6))'
+            : 'linear-gradient(to bottom, transparent, var(--bg, #ffffff))',
+        }}
+      />
     </section>
   )
 }

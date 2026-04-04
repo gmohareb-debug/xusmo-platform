@@ -1,19 +1,26 @@
 export function SectionTitle({ eyebrow, title, subtitle }) {
   return (
-    <div className="section-title text-center max-w-2xl mx-auto mb-12">
+    <div className="text-center max-w-3xl mx-auto mb-16">
       {eyebrow && (
-        <span className="section-title-eyebrow inline-block uppercase tracking-[0.2em] text-xs font-medium text-[var(--accent,#1f4dff)] mb-3">
+        <span
+          className="inline-block uppercase tracking-[0.2em] text-xs font-semibold mb-5"
+          style={{ color: 'var(--accent, #3b82f6)' }}
+        >
           {eyebrow}
         </span>
       )}
       {title && (
-        <h2 className="section-title-heading text-3xl md:text-4xl font-bold tracking-tight mb-4"
-            style={{ fontFamily: 'var(--font-heading, inherit)' }}>
+        <h2
+          className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-5 text-[var(--text,#1c1c1c)]"
+          style={{ fontFamily: 'var(--font-heading, inherit)' }}
+        >
           {title}
         </h2>
       )}
+      {/* Accent line */}
+      <div className="mx-auto w-10 h-1 rounded-full mb-5" style={{ background: 'var(--accent, #3b82f6)' }} />
       {subtitle && (
-        <p className="section-title-subtitle text-base md:text-lg text-[var(--muted,#6b7280)] leading-relaxed max-w-xl mx-auto m-0">
+        <p className="text-lg text-[var(--muted,#6b7280)] leading-relaxed max-w-2xl mx-auto m-0">
           {subtitle}
         </p>
       )}

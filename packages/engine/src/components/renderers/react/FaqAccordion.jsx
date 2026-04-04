@@ -1,4 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+
+function AccordionItem({ item, isOpen, onToggle }) {
+  const contentRef = useRef(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setHeight(isOpen ? contentRef.current.scrollHeight : 0);
+    }
+  }, [isOpen]);
+
+  return (
+    <div className="border-b border-[var(--border,#e5e7eb)]">
+      <button
+        className="w-full flex items-center justify-between gap-4 py-6 text-left bg-transparent border-none cursor-pointer text-[var(--text,#1c1c1c)] group"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+      >
+        <span className="text-base md:text-lg font-medium leading-snug group-hover:opacity-70 transition-opacity duration-200">
+          {item.question}
+        </span>
+        <span className="shrink-0 w-6 h-6 flex items-center justify-center">
+          <svg
+            className={`w-4 h-4 text-[var(--muted,#6b7280)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </span>
+      </button>
+      <div
+        className="overflow-hidden transition-all duration-300 ease-in-out"
+        style={{ height: `${height}px` }}
+      >
+        <div ref={contentRef} className="pb-6">
+          <p className="text-base text-[var(--muted,#6b7280)] leading-relaxed m-0 pr-10">
+            {item.answer}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function FaqAccordion({ title, items = [] }) {
   const [openIndex, setOpenIndex] = useState(null);
@@ -8,41 +54,26 @@ export function FaqAccordion({ title, items = [] }) {
   };
 
   return (
-    <section className="faq-accordion max-w-3xl mx-auto">
+    <section className="max-w-3xl mx-auto">
       {title && (
-        <h2 className="faq-accordion-title text-3xl md:text-4xl font-bold tracking-tight text-center mb-12"
-            style={{ fontFamily: 'var(--font-heading, inherit)' }}>
-          {title}
-        </h2>
+        <div className="text-center mb-12">
+          <h2
+            className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--text,#1c1c1c)]"
+            style={{ fontFamily: 'var(--font-heading, inherit)' }}
+          >
+            {title}
+          </h2>
+        </div>
       )}
-      <div className="faq-accordion-list flex flex-col gap-3">
-        {items.map((item, index) => {
-          const isOpen = openIndex === index;
-          return (
-            <div
-              key={index}
-              className={`faq-accordion-item rounded-xl border transition-all duration-200 ${isOpen ? 'faq-accordion-item-open border-[var(--accent,#1f4dff)]/20 bg-[var(--accent,#1f4dff)]/[0.02] shadow-sm' : 'border-[var(--border,#e5e7eb)] bg-[var(--surface,#fff)]'}`}
-            >
-              <button
-                className="faq-accordion-question w-full flex items-center justify-between gap-4 px-6 py-5 text-left bg-transparent border-none cursor-pointer text-[var(--text,#1c1c1c)]"
-                onClick={() => handleToggle(index)}
-                aria-expanded={isOpen}
-              >
-                <span className="faq-accordion-question-text text-base font-semibold leading-snug">
-                  {item.question}
-                </span>
-                <span className={`faq-accordion-icon flex items-center justify-center w-7 h-7 rounded-full text-sm font-bold shrink-0 transition-all duration-300 ${isOpen ? 'bg-[var(--accent,#1f4dff)] text-white rotate-45' : 'bg-gray-100 text-gray-500'}`}>
-                  +
-                </span>
-              </button>
-              {isOpen && (
-                <div className="faq-accordion-answer px-6 pb-6">
-                  <p className="text-base text-[var(--muted,#6b7280)] leading-relaxed m-0">{item.answer}</p>
-                </div>
-              )}
-            </div>
-          );
-        })}
+      <div className="divide-y-0">
+        {items.map((item, index) => (
+          <AccordionItem
+            key={index}
+            item={item}
+            isOpen={openIndex === index}
+            onToggle={() => handleToggle(index)}
+          />
+        ))}
       </div>
     </section>
   );
