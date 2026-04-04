@@ -1807,6 +1807,23 @@ function enforceConsistency(parsed) {
     }
   }
 
+  // 12b. Force navbar and footer sections to padding=none (they handle their own spacing)
+  for (const page of Object.values(pages)) {
+    if (!page?.sections) continue
+    for (const section of page.sections) {
+      if (section.component === 'navbar' || section.component === 'footer') {
+        if (!section.layout) section.layout = {}
+        section.layout.padding = 'none'
+      }
+      // Hero also controls its own padding
+      if (section.component?.includes('hero')) {
+        if (!section.layout) section.layout = {}
+        section.layout.padding = 'none'
+        section.layout.width = 'full'
+      }
+    }
+  }
+
   // 13a. Convert hero-video to hero-image (video URLs are unreliable)
   for (const page of Object.values(pages)) {
     if (!page?.sections) continue

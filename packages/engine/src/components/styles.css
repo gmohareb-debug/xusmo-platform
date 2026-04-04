@@ -2394,8 +2394,3 @@ body { margin: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: 
   .site-section__inner { padding: 40px 18px; }
   .hero-unified__content { padding: 40px 18px; }
 }
-
-.page > .site-section:last-child .site-section__inner {
-  padding-top: 48px !important;
-  padding-bottom: 48px !important;
-}
