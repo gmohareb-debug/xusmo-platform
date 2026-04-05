@@ -131,7 +131,32 @@ function buildThemeCSS(theme?: ThemeDef): string {
   // Don't set color: directly on :root — it overrides component-level Tailwind classes.
   // The --text CSS variable is already set above; components use text-[var(--text,...)]
 
-  const allVars = [...vars, ...fontRules].join(";\n  ");
+  // Vibe compiler variables — heading sizes, button styles, section padding
+  const vibeVars: string[] = [];
+  const t = theme as Record<string, unknown>;
+  const headingSizes = t.headingSizes as Record<string, string> | undefined;
+  if (headingSizes) {
+    if (headingSizes.h1) vibeVars.push(`--vibe-h1-size: ${headingSizes.h1}`);
+    if (headingSizes.h2) vibeVars.push(`--vibe-h2-size: ${headingSizes.h2}`);
+    if (headingSizes.h3) vibeVars.push(`--vibe-h3-size: ${headingSizes.h3}`);
+    if (headingSizes.h4) vibeVars.push(`--vibe-h4-size: ${headingSizes.h4}`);
+  }
+  const buttonStyle = t.buttonStyle as Record<string, string> | undefined;
+  if (buttonStyle) {
+    if (buttonStyle.borderRadius) vibeVars.push(`--vibe-button-radius: ${buttonStyle.borderRadius}`);
+    if (buttonStyle.padding) vibeVars.push(`--vibe-button-padding: ${buttonStyle.padding}`);
+    if (buttonStyle.fontWeight) vibeVars.push(`--vibe-button-weight: ${buttonStyle.fontWeight}`);
+  }
+  const borderRadius = t.borderRadius as Record<string, string> | undefined;
+  if (borderRadius) {
+    if (borderRadius.small) vibeVars.push(`--vibe-radius-sm: ${borderRadius.small}`);
+    if (borderRadius.medium) vibeVars.push(`--vibe-radius-md: ${borderRadius.medium}`);
+    if (borderRadius.large) vibeVars.push(`--vibe-radius-lg: ${borderRadius.large}`);
+  }
+  if (t.sectionPadding) vibeVars.push(`--vibe-section-padding: ${t.sectionPadding as string}`);
+  if (t.contentSize) vibeVars.push(`--vibe-content-max-width: ${t.contentSize as string}`);
+
+  const allVars = [...vars, ...fontRules, ...vibeVars].join(";\n  ");
   const googleLink = googleFonts.length
     ? `@import url('https://fonts.googleapis.com/css2?family=${googleFonts.join("&family=")}&display=swap');`
     : "";

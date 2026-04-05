@@ -21,6 +21,7 @@ import {
   type PageToCreate,
 } from "@/lib/wordpress/content";
 import { buildThemeJson } from "@/lib/wordpress/fonts";
+import { compileVibeToWordPressThemeJson } from "@/lib/vibe-compiler";
 import { getThemePreset, mergeUserColors } from "@/lib/wordpress/theme-presets";
 import { getExecutor } from "@/lib/wordpress/ssh";
 import type { Archetype } from "@/lib/classification/archetypes";
@@ -1588,7 +1589,23 @@ echo $cf7->id();
         if (tf.body) finalPreset.fonts.body = tf.body;
       }
 
-      const themeJson = buildThemeJson(finalPreset);
+      // Use vibe compiler for richer theme.json when designDocument has extended theme data
+      let themeJson: Record<string, unknown>;
+      if (ddTheme && (ddTheme.headingSizes || ddTheme.buttonStyle || ddTheme.borderRadius)) {
+        // Full vibe theme — use compiler for fluid typography, button styles, section padding
+        themeJson = compileVibeToWordPressThemeJson({
+          colors: finalPreset.colors,
+          fonts: finalPreset.fonts,
+          headingSizes: ddTheme.headingSizes as Record<string, string> | undefined,
+          buttonStyle: ddTheme.buttonStyle as Record<string, string> | undefined,
+          borderRadius: finalPreset.borderRadius,
+          sectionPadding: finalPreset.sectionPadding,
+          contentSize: finalPreset.layout?.contentSize,
+          wideSize: finalPreset.layout?.wideSize,
+        });
+      } else {
+        themeJson = buildThemeJson(finalPreset);
+      }
       const themeJsonStr = JSON.stringify(themeJson, null, "\t");
       const wp = USE_MULTI_THEME ? getExecutor(site.id) : getExecutor();
 
