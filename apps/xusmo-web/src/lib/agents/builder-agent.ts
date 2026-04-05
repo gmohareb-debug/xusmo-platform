@@ -174,5 +174,12 @@ function buildRichPrompt(userPrompt: string, context: AgentContext): string {
     `\nIMPORTANT: The navbar logo MUST say "${context.businessName}". All content must be about this specific business.`
   );
 
+  // Inject global vibe preferences (learned from past user edits)
+  if (context.globalPreferences && Object.keys(context.globalPreferences).length > 0) {
+    parts.push(
+      `\nCRITICAL USER PREFERENCES (MUST APPLY GLOBALLY):\n${JSON.stringify(context.globalPreferences, null, 2)}`
+    );
+  }
+
   return parts.join("\n");
 }

@@ -103,6 +103,7 @@ export interface AgentContext {
     radius: string;
   } | null;
   currentSections: Record<string, { component: string; propKeys: string[] }[]>;
+  globalPreferences?: Record<string, unknown> | null;
 }
 
 export interface AgentResult {
