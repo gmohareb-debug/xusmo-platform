@@ -161,7 +161,7 @@ function buildThemeCSS(theme?: ThemeDef): string {
     ? `@import url('https://fonts.googleapis.com/css2?family=${googleFonts.join("&family=")}&display=swap');`
     : "";
 
-  return `${googleLink}\n:root {\n  ${allVars};\n}\nh1,h2,h3,h4,h5,h6 { font-family: var(--font-heading, inherit); }`;
+  return `${googleLink}\n:root {\n  ${allVars};\n}\nbody, .page { color: var(--text, #1c1c1c); }\nh1,h2,h3,h4,h5,h6 { font-family: var(--font-heading, inherit); }`;
 }
 
 // ── Main component ──
