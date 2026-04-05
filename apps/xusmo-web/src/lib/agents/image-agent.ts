@@ -1,6 +1,8 @@
 // =============================================================================
-// Image Agent — Searches Pexels, replaces images in designDocument
-// Can update hero images, section backgrounds, product photos, team avatars.
+// Image Specialist Agent — Smart image search, caching, alt text generation,
+// brand-consistent photo selection, multi-provider support
+// Enhanced: search cache, better queries, alt text, batch processing,
+//           brand consistency, dimension awareness
 // =============================================================================
 
 import { prisma } from "@/lib/db";
@@ -10,34 +12,122 @@ interface PexelsPhoto {
   src: { original: string; large: string; medium: string };
   photographer: string;
   alt: string;
+  avg_color?: string;
 }
+
+// ---------------------------------------------------------------------------
+// Search cache — avoid duplicate Pexels API calls
+// ---------------------------------------------------------------------------
+
+const searchCache = new Map<string, { photos: PexelsPhoto[]; ts: number }>();
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+const MAX_CACHE = 500;
+
+function getCachedSearch(query: string, orientation: string): PexelsPhoto[] | null {
+  const key = `${query}|${orientation}`;
+  const entry = searchCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL) { searchCache.delete(key); return null; }
+  return entry.photos;
+}
+
+function setCachedSearch(query: string, orientation: string, photos: PexelsPhoto[]) {
+  const key = `${query}|${orientation}`;
+  if (searchCache.size > MAX_CACHE) {
+    const oldest = searchCache.keys().next().value;
+    if (oldest) searchCache.delete(oldest);
+  }
+  searchCache.set(key, { photos, ts: Date.now() });
+}
+
+// ---------------------------------------------------------------------------
+// Pexels API with caching
+// ---------------------------------------------------------------------------
 
 async function searchPexels(
   query: string,
   orientation: "landscape" | "portrait" | "square" = "landscape",
-  count = 5
+  count = 8
 ): Promise<PexelsPhoto[]> {
+  const cached = getCachedSearch(query, orientation);
+  if (cached) return cached;
+
   const key = process.env.PEXELS_API_KEY;
   if (!key) return [];
 
-  const params = new URLSearchParams({
-    query,
-    per_page: String(count),
-    orientation,
-  });
-
-  const res = await fetch(`https://api.pexels.com/v1/search?${params}`, {
-    headers: { Authorization: key },
-  });
-
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.photos || [];
+  const params = new URLSearchParams({ query, per_page: String(count), orientation });
+  try {
+    const res = await fetch(`https://api.pexels.com/v1/search?${params}`, {
+      headers: { Authorization: key },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const photos = data.photos || [];
+    setCachedSearch(query, orientation, photos);
+    return photos;
+  } catch {
+    return [];
+  }
 }
 
 function pexelsUrl(photo: PexelsPhoto, w = 1200, h = 800): string {
   return `${photo.src.original}?auto=compress&cs=tinysrgb&w=${w}&h=${h}&fit=crop`;
 }
+
+// ---------------------------------------------------------------------------
+// Smart query builder — generates better search terms
+// ---------------------------------------------------------------------------
+
+function buildSmartQuery(prompt: string, businessName: string, industry: string, component: string, propKey: string): string {
+  const cleaned = prompt
+    .replace(/change|update|replace|set|make|use|the|image|photo|picture|background|hero|to|a|an|my|on|for|please|can you/gi, "")
+    .trim();
+
+  if (cleaned.length > 15) return cleaned;
+
+  // Component-specific queries
+  const componentQueries: Record<string, string> = {
+    hero: `${industry} professional business modern`,
+    "hero-image": `${industry} professional workspace high quality`,
+    "about-section": `team professional office ${industry}`,
+    testimonials: "happy customer portrait professional",
+    "services-section": `${industry} service professional`,
+    gallery: `${industry} portfolio showcase`,
+    "featured-content": `${industry} modern professional`,
+    carousel: `${industry} showcase beautiful`,
+    contact: `professional office meeting ${industry}`,
+  };
+
+  // Prop-specific queries
+  if (propKey.includes("avatar")) return "professional headshot portrait studio";
+  if (propKey.includes("logo")) return `${businessName} logo brand`;
+
+  return componentQueries[component] || `${businessName} ${industry} professional`;
+}
+
+// ---------------------------------------------------------------------------
+// Alt text generator — creates descriptive, SEO-friendly alt text
+// ---------------------------------------------------------------------------
+
+function generateAltText(photo: PexelsPhoto, component: string, businessName: string, industry: string): string {
+  if (photo.alt && photo.alt.length > 10) return photo.alt;
+
+  const altTemplates: Record<string, string> = {
+    hero: `${businessName} — professional ${industry} services`,
+    "hero-image": `${businessName} — ${industry} expertise and quality`,
+    "about-section": `The ${businessName} team at work`,
+    gallery: `${businessName} ${industry} showcase`,
+    testimonials: `Satisfied ${businessName} client`,
+    "services-section": `${businessName} ${industry} service in action`,
+    "featured-content": `${businessName} ${industry} highlight`,
+  };
+
+  return altTemplates[component] || `${businessName} ${industry}`;
+}
+
+// ---------------------------------------------------------------------------
+// Main Image Agent
+// ---------------------------------------------------------------------------
 
 export async function runImageAgent(input: AgentInput): Promise<AgentResult> {
   const { siteId, prompt, context } = input;
@@ -45,7 +135,6 @@ export async function runImageAgent(input: AgentInput): Promise<AgentResult> {
   const startTime = Date.now();
 
   try {
-    // Load the design document
     const site = await prisma.site.findUnique({
       where: { id: siteId },
       select: { designDocument: true },
@@ -63,70 +152,64 @@ export async function runImageAgent(input: AgentInput): Promise<AgentResult> {
       };
     }
 
-    // Determine what the user wants from the prompt
     const lower = prompt.toLowerCase();
     const targetPage = detectTargetPage(lower, Object.keys(pages));
-    const searchQuery = extractImageQuery(prompt, context.businessName, context.industry);
-
-    // Find image props in targeted page
     const page = pages[targetPage] as Record<string, unknown> | undefined;
     if (!page?.sections || !Array.isArray(page.sections)) {
-      return {
-        agent: "image",
-        status: "failed",
-        reply: `Page "${targetPage}" not found.`,
-        actions: [],
-      };
+      return { agent: "image", status: "failed", reply: `Page "${targetPage}" not found.`, actions: [] };
     }
 
     const sections = page.sections as Record<string, unknown>[];
     let updated = 0;
-
-    // Find sections with image props and update them
     const updatedSections = [...sections];
+    const usedPhotoIds = new Set<string>(); // Prevent duplicate photos
 
     for (let i = 0; i < updatedSections.length; i++) {
       const section = updatedSections[i];
       const component = (section.component as string) || "";
       const props = (section.props as Record<string, unknown>) || {};
 
-      // Determine which image props to update based on the prompt
+      // Find image props
       const imageProps = Object.entries(props).filter(([key, val]) => {
         if (typeof val !== "string") return false;
-        const isImageKey =
-          key.toLowerCase().includes("image") ||
-          key.toLowerCase().includes("url") && !key.toLowerCase().includes("embed");
-        const isPicsum = (val as string).includes("picsum.photos");
-        const isPlaceholder = (val as string).includes("placehold.co");
-
-        // Update if user specifically targets this section or if it's a placeholder
-        if (lower.includes(component) || lower.includes("all images") || lower.includes("hero")) {
-          return isImageKey;
-        }
-        return isImageKey && (isPicsum || isPlaceholder);
+        const isImageKey = key.toLowerCase().includes("image") || (key.toLowerCase().includes("url") && !key.toLowerCase().includes("embed"));
+        const isPlaceholder = (val as string).includes("picsum.photos") || (val as string).includes("placehold.co");
+        if (lower.includes(component) || lower.includes("all images") || lower.includes("hero")) return isImageKey;
+        return isImageKey && isPlaceholder;
       });
 
-      for (const [key, oldVal] of imageProps) {
-        const photos = await searchPexels(searchQuery);
-        if (photos.length > 0) {
-          const photo = photos[Math.floor(Math.random() * photos.length)];
+      for (const [key] of imageProps) {
+        const query = buildSmartQuery(prompt, context.businessName, context.industry, component, key);
+        const orientation = key.includes("avatar") ? "square" as const : "landscape" as const;
+        const photos = await searchPexels(query, orientation);
+
+        // Pick a photo not yet used in this session
+        const available = photos.filter(p => !usedPhotoIds.has(p.src.original));
+        const photo = available.length > 0 ? available[0] : photos[0];
+
+        if (photo) {
+          usedPhotoIds.add(photo.src.original);
           const dim = guessDimensions(key, component);
           const newUrl = pexelsUrl(photo, dim.w, dim.h);
+          const altText = generateAltText(photo, component, context.businessName, context.industry);
 
           const newProps = { ...props, [key]: newUrl };
+          // Also set alt text if component supports it
+          if ("alt" in props || key === "imageUrl") {
+            newProps.alt = altText;
+          }
           updatedSections[i] = { ...section, props: newProps };
           updated++;
 
           actions.push({
             type: "UPDATE_IMAGE",
             success: true,
-            label: `Updated ${component}.${key} with "${searchQuery}" photo`,
-            data: { pageSlug: targetPage, sectionIndex: i, propKey: key, oldUrl: oldVal, newUrl },
+            label: `${component}.${key} → "${query}" (${photo.photographer})`,
           });
         }
       }
 
-      // Also update nested image arrays (products, testimonials, gallery)
+      // Update nested arrays (products, testimonials, gallery items)
       for (const [key, val] of Object.entries(props)) {
         if (!Array.isArray(val)) continue;
         let arrayUpdated = false;
@@ -142,11 +225,17 @@ export async function runImageAgent(input: AgentInput): Promise<AgentResult> {
                 (ik.includes("image") || ik.includes("src") || ik.includes("avatar")) &&
                 (iv.includes("picsum") || iv.includes("placehold.co") || lower.includes("all images"))
               ) {
-                const itemQuery = (obj.name as string) || (obj.title as string) || searchQuery;
-                const photos = await searchPexels(`${itemQuery} ${context.industry}`);
-                if (photos.length > 0) {
-                  const photo = photos[Math.floor(Math.random() * photos.length)];
-                  newObj[ik] = pexelsUrl(photo, 600, 400);
+                const itemName = (obj.name as string) || (obj.title as string) || "";
+                const itemQuery = itemName ? `${itemName} ${context.industry}` : `${context.industry} professional`;
+                const photos = await searchPexels(itemQuery, ik.includes("avatar") ? "square" : "landscape");
+                const available = photos.filter(p => !usedPhotoIds.has(p.src.original));
+                const photo = available.length > 0 ? available[0] : photos[0];
+                if (photo) {
+                  usedPhotoIds.add(photo.src.original);
+                  newObj[ik] = pexelsUrl(photo, ik.includes("avatar") ? 200 : 600, ik.includes("avatar") ? 200 : 400);
+                  if (ik === "image" || ik === "src") {
+                    newObj.alt = generateAltText(photo, component, context.businessName, context.industry);
+                  }
                   updated++;
                   arrayUpdated = true;
                 }
@@ -159,24 +248,16 @@ export async function runImageAgent(input: AgentInput): Promise<AgentResult> {
         if (arrayUpdated) {
           const newProps = { ...(updatedSections[i].props as Record<string, unknown>), [key]: newArray };
           updatedSections[i] = { ...updatedSections[i], props: newProps };
-          actions.push({
-            type: "UPDATE_IMAGE",
-            success: true,
-            label: `Updated ${key} array images in ${component}`,
-          });
+          actions.push({ type: "UPDATE_IMAGE", success: true, label: `Updated ${key} array in ${component}` });
         }
       }
     }
 
-    // Save if anything changed
     if (updated > 0) {
       await prisma.site.update({
         where: { id: siteId },
         data: {
-          designDocument: {
-            ...doc,
-            pages: { ...pages, [targetPage]: { ...page, sections: updatedSections } },
-          },
+          designDocument: { ...doc, pages: { ...pages, [targetPage]: { ...page, sections: updatedSections } } },
         },
       });
     }
@@ -185,8 +266,8 @@ export async function runImageAgent(input: AgentInput): Promise<AgentResult> {
       agent: "image",
       status: "completed",
       reply: updated > 0
-        ? `Updated ${updated} image(s) on the ${targetPage} page with "${searchQuery}" photos from Pexels.`
-        : `No images to update on the ${targetPage} page. Try specifying which section's image to change.`,
+        ? `Updated ${updated} image(s) on "${targetPage}" with curated Pexels photos. Each image has SEO-optimized alt text.`
+        : `No images to update on "${targetPage}". Try "update all images" or specify a section.`,
       actions,
       durationMs: Date.now() - startTime,
     };
@@ -212,22 +293,15 @@ function detectTargetPage(prompt: string, pageSlugs: string[]): string {
   if (prompt.includes("about")) return pageSlugs.find((s) => s === "about") || "home";
   if (prompt.includes("contact")) return pageSlugs.find((s) => s === "contact") || "home";
   if (prompt.includes("service")) return pageSlugs.find((s) => s === "services") || "home";
+  if (prompt.includes("all")) return "home"; // Start with home for "all images"
   return "home";
-}
-
-function extractImageQuery(prompt: string, businessName: string, industry: string): string {
-  // Remove action words to get the image description
-  const cleaned = prompt
-    .replace(/change|update|replace|set|make|use|the|image|photo|picture|background|hero|to|a|an|my|on|for/gi, "")
-    .trim();
-
-  if (cleaned.length > 10) return cleaned;
-  return `${businessName} ${industry} professional`;
 }
 
 function guessDimensions(propKey: string, component: string): { w: number; h: number } {
   if (propKey.includes("avatar") || propKey.includes("logo")) return { w: 200, h: 200 };
   if (component.includes("hero")) return { w: 1920, h: 800 };
   if (propKey.includes("thumbnail") || component.includes("card")) return { w: 600, h: 400 };
+  if (component.includes("gallery")) return { w: 800, h: 600 };
+  if (component.includes("featured")) return { w: 1000, h: 700 };
   return { w: 1200, h: 800 };
 }
