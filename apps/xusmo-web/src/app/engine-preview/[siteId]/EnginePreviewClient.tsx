@@ -256,17 +256,27 @@ export default function EnginePreviewClient({
 
           const l = section.layout || {};
 
-          // Tailwind-based background classes
+          // Theme-aware background classes — use CSS variables, not hardcoded colors
           const bgClasses: Record<string, string> = {
-            default: "bg-[var(--bg,var(--surface,#fff))]",
-            surface: "bg-[var(--surface,#fff)]",
-            muted: "bg-gray-50",
-            accent: "bg-[var(--accent)]/5",
-            "accent-light": "bg-[var(--accent-light,var(--accent))]/10",
-            dark: "bg-gray-900 text-white",
-            gradient:
-              "bg-gradient-to-br from-[var(--accent)]/10 to-[var(--accent)]/[0.02]",
+            default: "",
+            surface: "",
+            muted: "",
+            accent: "",
+            "accent-light": "",
+            dark: "",
+            gradient: "",
             none: "",
+          };
+          // Use inline styles for backgrounds to properly reference CSS variables
+          const bgStyles: Record<string, React.CSSProperties> = {
+            default: { background: "var(--bg, #fff)" },
+            surface: { background: "var(--surface, #fff)" },
+            muted: { background: "color-mix(in srgb, var(--surface, #f8f9fa) 80%, var(--text, #000) 8%)" },
+            accent: { background: "color-mix(in srgb, var(--accent, #3b82f6) 6%, var(--bg, #fff) 94%)" },
+            "accent-light": { background: "color-mix(in srgb, var(--accent, #3b82f6) 10%, var(--bg, #fff) 90%)" },
+            dark: { background: "color-mix(in srgb, var(--bg, #000) 95%, var(--text, #fff) 5%)", color: "var(--text, #fff)" },
+            gradient: { background: "linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, var(--bg) 92%), var(--bg))" },
+            none: {},
           };
           const padClasses: Record<string, string> = {
             none: "",
@@ -282,6 +292,7 @@ export default function EnginePreviewClient({
           };
 
           const twBg = bgClasses[l.background || ""] || "";
+          const sectionBgStyle = bgStyles[l.background || "default"] || bgStyles.default;
           const twPad = padClasses[l.padding || ""] || "";
           const twAlign = alignClasses[l.align || ""] || "";
           const isFullBleed = l.width === "full" || l.width === "fullbleed";
@@ -289,7 +300,7 @@ export default function EnginePreviewClient({
             ? ""
             : "max-w-[1200px] mx-auto px-5 md:px-8 lg:px-12";
 
-          const styleTokens = { ...(section.style || {}) };
+          const styleTokens = { ...sectionBgStyle, ...(section.style || {}) };
 
           return (
             <div
