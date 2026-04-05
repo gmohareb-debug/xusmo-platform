@@ -13,7 +13,7 @@ function SocialIcon({ label, icon }) {
   return <span className="text-sm font-medium">{icon || label?.charAt(0) || '?'}</span>
 }
 
-export function Footer({ text, links = [], columns = [], logo, tagline, social = [], address }) {
+export function Footer({ text, links = [], columns = [], logo, tagline, social = [], address, layout = 'columns' }) {
   const hasColumns = columns.length > 0
   const copyrightText = text
     ? text.replace(/\u00a9\s*\d{4}|©\s*\d{4}|\(c\)\s*\d{4}/gi, (m) =>
@@ -21,38 +21,84 @@ export function Footer({ text, links = [], columns = [], logo, tagline, social =
       )
     : null
 
+  // ── Centered minimal footer ──
+  if (layout === 'centered') {
+    return (
+      <footer style={{ background: 'var(--surface, #1a1a2e)', color: 'var(--muted, #9ca3af)' }}>
+        <div className="max-w-[800px] mx-auto px-6 py-16 text-center space-y-6">
+          {logo && (
+            <span className="block text-3xl font-bold tracking-tight" style={{ color: 'var(--text, #fff)', fontFamily: 'var(--font-heading, inherit)' }}>
+              {logo}
+            </span>
+          )}
+          {tagline && <p className="text-sm max-w-md mx-auto m-0">{tagline}</p>}
+          {hasColumns && (
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              {columns.flatMap(col => col.links || []).map((link, j) => (
+                <a key={j} href={link.href || '#'} className="text-sm hover:opacity-70 transition-opacity no-underline" style={{ color: 'var(--muted, #9ca3af)' }}>
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          )}
+          {social.length > 0 && (
+            <div className="flex items-center justify-center gap-3">
+              {social.map((s, i) => (
+                <a key={i} href={s.href || '#'} className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 no-underline" style={{ background: 'var(--border, rgba(255,255,255,0.1))', color: 'var(--muted, #9ca3af)' }} aria-label={s.label} target="_blank" rel="noopener noreferrer">
+                  <SocialIcon label={s.label} icon={s.icon} />
+                </a>
+              ))}
+            </div>
+          )}
+          {copyrightText && <p className="text-xs opacity-50 m-0">{copyrightText}</p>}
+        </div>
+      </footer>
+    )
+  }
+
+  // ── Simple / minimal: single row ──
+  if (layout === 'simple') {
+    return (
+      <footer style={{ background: 'var(--surface, #1a1a2e)', color: 'var(--muted, #9ca3af)' }}>
+        <div className="max-w-[1200px] mx-auto px-6 lg:px-12 py-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              {logo && <span className="text-lg font-bold" style={{ color: 'var(--text, #fff)', fontFamily: 'var(--font-heading, inherit)' }}>{logo}</span>}
+              {copyrightText && <p className="text-xs opacity-60 m-0">{copyrightText}</p>}
+            </div>
+            {social.length > 0 && (
+              <div className="flex items-center gap-3">
+                {social.map((s, i) => (
+                  <a key={i} href={s.href || '#'} className="opacity-50 hover:opacity-100 transition-opacity no-underline" style={{ color: 'var(--muted, #9ca3af)' }} aria-label={s.label} target="_blank" rel="noopener noreferrer">
+                    <SocialIcon label={s.label} icon={s.icon} />
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </footer>
+    )
+  }
+
+  // ── Columns (default) — theme-aware ──
   return (
-    <footer className="bg-gray-950 text-gray-300">
-      <div className="max-w-[1200px] mx-auto px-6 lg:px-12">
-        <div className="grid grid-cols-1 md:grid-cols-[1.4fr_2fr] gap-12 lg:gap-24">
-          {/* Brand column */}
+    <footer style={{ background: 'var(--surface, #111827)', color: 'var(--muted, #9ca3af)' }}>
+      <div className="max-w-[1200px] mx-auto px-6 lg:px-12 pt-16 pb-8">
+        <div className="grid grid-cols-1 md:grid-cols-[1.4fr_2fr] gap-12 lg:gap-24 mb-12">
           {(logo || tagline || address) && (
             <div className="space-y-5">
               {logo && (
-                <span
-                  className="block text-2xl font-bold text-white tracking-tight"
-                  style={{ fontFamily: 'var(--font-heading, inherit)' }}
-                >
+                <span className="block text-2xl font-bold tracking-tight" style={{ color: 'var(--text, #fff)', fontFamily: 'var(--font-heading, inherit)' }}>
                   {logo}
                 </span>
               )}
-              {tagline && (
-                <p className="text-sm leading-relaxed text-gray-400 max-w-xs m-0">{tagline}</p>
-              )}
-              {address && (
-                <p className="text-sm text-gray-500 m-0">{address}</p>
-              )}
+              {tagline && <p className="text-sm leading-relaxed max-w-xs m-0">{tagline}</p>}
+              {address && <p className="text-sm opacity-60 m-0">{address}</p>}
               {social.length > 0 && (
                 <div className="flex items-center gap-3 pt-3">
                   {social.map((s, i) => (
-                    <a
-                      key={i}
-                      href={s.href || '#'}
-                      className="flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.07] text-gray-400 hover:text-white hover:bg-white/[0.15] transition-all duration-300 no-underline"
-                      aria-label={s.label}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                    <a key={i} href={s.href || '#'} className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 no-underline" style={{ background: 'var(--border, rgba(255,255,255,0.07))', color: 'var(--muted, #9ca3af)' }} aria-label={s.label} target="_blank" rel="noopener noreferrer">
                       <SocialIcon label={s.label} icon={s.icon} />
                     </a>
                   ))}
@@ -60,22 +106,14 @@ export function Footer({ text, links = [], columns = [], logo, tagline, social =
               )}
             </div>
           )}
-
-          {/* Link columns */}
           {hasColumns && (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 lg:gap-12">
               {columns.map((col, i) => (
                 <div key={i} className="space-y-4">
-                  {col.title && (
-                    <h4 className="text-xs font-semibold text-white uppercase tracking-[0.15em] m-0">{col.title}</h4>
-                  )}
+                  {col.title && <h4 className="text-xs font-semibold uppercase tracking-[0.15em] m-0" style={{ color: 'var(--text, #fff)' }}>{col.title}</h4>}
                   <div className="flex flex-col gap-3">
                     {col.links?.map((link, j) => (
-                      <a
-                        key={j}
-                        href={link.href || '#'}
-                        className="text-sm text-gray-400 hover:text-white transition-colors duration-200 no-underline"
-                      >
+                      <a key={j} href={link.href || '#'} className="text-sm hover:opacity-70 transition-opacity no-underline" style={{ color: 'var(--muted, #9ca3af)' }}>
                         {link.label}
                       </a>
                     ))}
@@ -86,21 +124,13 @@ export function Footer({ text, links = [], columns = [], logo, tagline, social =
           )}
         </div>
       </div>
-
-      {/* Bottom bar */}
-      <div className="max-w-[1200px] mx-auto px-6 lg:px-12 py-6 border-t border-white/[0.08]">
+      <div className="max-w-[1200px] mx-auto px-6 lg:px-12 py-6" style={{ borderTop: '1px solid var(--border, rgba(255,255,255,0.08))' }}>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          {copyrightText && (
-            <p className="text-xs text-gray-500 m-0">{copyrightText}</p>
-          )}
+          {copyrightText && <p className="text-xs opacity-50 m-0">{copyrightText}</p>}
           {links.length > 0 && (
             <div className="flex flex-wrap items-center gap-6">
               {links.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-200 no-underline"
-                >
+                <a key={link.label} href={link.href} className="text-xs opacity-50 hover:opacity-80 transition-opacity no-underline" style={{ color: 'var(--muted, #9ca3af)' }}>
                   {link.label}
                 </a>
               ))}
