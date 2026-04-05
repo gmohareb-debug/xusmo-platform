@@ -2046,9 +2046,24 @@ function enforceConsistency(parsed) {
       }
     }
 
-    // 3. Muted should be lighter than text
+    // 3. Muted must be readable on background
+    const mutedRgb = hexToRgb(tc.muted)
+    if (bgRgb && mutedRgb) {
+      const mutedLum = luminance(mutedRgb)
+      const bgLumVal = luminance(bgRgb)
+      // On dark bg (lum < 0.2), muted must be light enough (lum > 0.25)
+      if (bgLumVal < 0.2 && mutedLum < 0.25) {
+        console.log('[Consistency] Fixed: muted color too dark for dark background (' + tc.muted + '), resetting to light gray')
+        tc.muted = '#94a3b8'
+      }
+      // On light bg (lum > 0.5), muted must be dark enough (lum < 0.6)
+      if (bgLumVal > 0.5 && mutedLum > 0.6) {
+        console.log('[Consistency] Fixed: muted color too light for light background (' + tc.muted + '), resetting to gray')
+        tc.muted = '#6b7280'
+      }
+    }
     if (!tc.muted || tc.muted === tc.text) {
-      tc.muted = '#6b7280'
+      tc.muted = bgRgb && luminance(bgRgb) < 0.2 ? '#94a3b8' : '#6b7280'
     }
 
     // 4. Background must be neutral — not saturated
