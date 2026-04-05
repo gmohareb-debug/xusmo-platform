@@ -23,7 +23,7 @@ type EditAction =
   | { action: "UPDATE_SECTION_PROP"; pageSlug: string; sectionIndex: number; propKey: string; value: unknown }
   | { action: "ADD_SECTION"; pageSlug: string; component: string; position: number }
   | { action: "REMOVE_SECTION"; pageSlug: string; sectionIndex: number }
-  | { action: "CREATE_PAGE"; slug: string; title: string; sections: { component: string }[] }
+  | { action: "CREATE_PAGE"; slug: string; title: string; sections: { component: string; props?: Record<string, unknown> }[] }
   | { action: "NAVIGATE"; tab: string }
   | { action: "INFO"; message: string };
 
@@ -129,12 +129,31 @@ AVAILABLE ACTIONS — return as JSON { "reply": "...", "actions": [...] }:
 
 9. REMOVE_SECTION: { action: "REMOVE_SECTION", pageSlug, sectionIndex }
 
-10. CREATE_PAGE: { action: "CREATE_PAGE", slug, title, sections: [{ component: "hero" }, { component: "section-title" }, ...] }
-    - Creates a brand new page with specified sections.
+10. CREATE_PAGE: { action: "CREATE_PAGE", slug, title, sections: [{ component: "hero", props: { title: "...", subtitle: "..." } }, { component: "section-title" }, ...] }
+    - Creates a brand new page with specified sections. Sections get smart defaults automatically.
+    - You CAN pass custom "props" per section to override defaults with business-specific content.
+    - Include 5-8 sections minimum: navbar, hero or section-title, 2-4 content sections, footer.
 
 11. NAVIGATE: { action: "NAVIGATE", tab }
 
 12. INFO: { action: "INFO", message }
+
+DESIGN QUALITY RULES (CRITICAL — this is what makes sites look professional):
+
+When adding sections (ADD_SECTION) or creating pages (CREATE_PAGE), ALWAYS follow these:
+
+1. **Content Richness**: Services need 4-6 items with icons, descriptions, and hrefs. Testimonials need 3-4 with names, roles, ratings (always 5), and detailed quotes. FAQs need 5-7 items.
+2. **Hero Sections**: Must have BOTH "cta" (primary) AND "ctaSecondary" (secondary) buttons. CTAs must use action+benefit: "Get Your Free Quote", "Book a Consultation" — NEVER "Submit" or "Click Here".
+3. **Copywriting**: Hero headline formula: [Clear Outcome] for [Target Audience]. Acknowledge the customer's problem before presenting the solution.
+4. **Image Strategy**: Use descriptive search terms for UPDATE_IMAGE. "modern dental clinic patient smiling" NOT "dental". Include location if known.
+5. **Visual Rhythm**: Alternate section backgrounds — don't use "default" for 3+ consecutive sections. Use accent-light for testimonials/CTAs, muted for forms/FAQs, dark for heroes/footers.
+6. **Component Selection for CREATE_PAGE**: A good page has 5-8 sections minimum. Always include navbar at top and footer at bottom. Use section-title as a visual separator before major content blocks.
+
+When using UPDATE_THEME:
+- "accent" must capture the business identity (green for nature, warm brown for coffee, navy for law)
+- "background" must ALWAYS be neutral (white/cream/dark). NEVER saturated.
+- Use DIFFERENT heading and body fonts. Serif headings + sans-serif body = professional.
+- Match fonts to personality: Playfair Display for elegant, Space Grotesk for modern, Merriweather for warm.
 
 CRITICAL RULES:
 - Return ONLY valid JSON. No markdown fences, no explanations outside the JSON.
@@ -144,7 +163,8 @@ CRITICAL RULES:
 - ONLY report actions you are ACTUALLY executing. Do NOT claim you did something from a previous conversation.
 - If a page doesn't exist and user wants to create one, use CREATE_PAGE.
 - For multi-step requests, include ALL actions in a single response.
-- The section list above shows the CURRENT state. Base your actions on THIS, not on memory of previous conversations.`;
+- The section list above shows the CURRENT state. Base your actions on THIS, not on memory of previous conversations.
+- When creating pages, include AT LEAST 5 sections (navbar + 3-4 content sections + footer) for a complete, polished page.`;
 }
 
 // ---------------------------------------------------------------------------
@@ -480,12 +500,13 @@ async function executeEditAction(
         if (!page) return { type: "ADD_SECTION", success: false, label: "Page not found" };
 
         const sections = [...((page.sections || []) as Record<string, unknown>[])];
+        const existingSectionCount = sections.length;
         const newSection = {
           id: `section-${Date.now()}`,
           component: action.component,
           props: getDefaultProps(action.component, context.businessName),
-          layout: { background: "default", padding: "lg", width: "contained", align: "center" },
-          style: {},
+          layout: getDefaultLayout(action.component, action.position ?? existingSectionCount),
+          style: getDefaultStyle(action.component),
         };
 
         const pos = Math.min(Math.max(0, action.position), sections.length);
@@ -553,9 +574,9 @@ async function executeEditAction(
         const newSections = (action.sections || []).map((s, i) => ({
           id: `section-${Date.now()}-${i}`,
           component: s.component,
-          props: {},
-          layout: { background: i === 0 ? "dark" : "default", padding: "lg", width: "contained", align: "center" },
-          style: {},
+          props: { ...getDefaultProps(s.component, context.businessName), ...(s.props || {}) },
+          layout: getDefaultLayout(s.component, i),
+          style: getDefaultStyle(s.component),
         }));
 
         pages[action.slug] = {
@@ -650,6 +671,49 @@ async function updateDesignDocumentHero(
   } catch {
     // Non-critical — don't fail the main action
   }
+}
+
+// ---------------------------------------------------------------------------
+// Default layout per component (proper visual rhythm)
+// ---------------------------------------------------------------------------
+
+function getDefaultLayout(component: string, index: number): Record<string, string> {
+  const fixedLayouts: Record<string, Record<string, string>> = {
+    navbar: { background: "none", padding: "none", width: "full", align: "center" },
+    footer: { background: "dark", padding: "lg", width: "full", align: "center" },
+    hero: { background: "dark", padding: "xl", width: "full", align: "center" },
+    "hero-image": { background: "dark", padding: "xl", width: "full", align: "center" },
+    "hero-video": { background: "dark", padding: "xl", width: "full", align: "center" },
+    "section-title": { background: "default", padding: "md", width: "contained", align: "center" },
+    "contact-form": { background: "muted", padding: "lg", width: "contained", align: "center" },
+    contact: { background: "accent-light", padding: "lg", width: "contained", align: "center" },
+    testimonials: { background: "accent-light", padding: "lg", width: "contained", align: "center" },
+    "faq-accordion": { background: "muted", padding: "lg", width: "contained", align: "left" },
+    "newsletter-form": { background: "accent", padding: "lg", width: "contained", align: "center" },
+  };
+  if (fixedLayouts[component]) return fixedLayouts[component];
+
+  const bgCycle = ["default", "muted", "default", "accent-light"];
+  const bg = bgCycle[index % bgCycle.length];
+  return { background: bg, padding: "lg", width: "contained", align: "center" };
+}
+
+// ---------------------------------------------------------------------------
+// Default style tokens per component (premium visual polish)
+// ---------------------------------------------------------------------------
+
+function getDefaultStyle(component: string): Record<string, string> {
+  const styles: Record<string, Record<string, string>> = {
+    hero: { "--comp-height": "560px", "--comp-heading-size": "52px", "--comp-eyebrow-size": "13px" },
+    "hero-image": { "--comp-height": "560px", "--comp-heading-size": "52px", "--comp-overlay": "rgba(0,0,0,0.5)", "--comp-eyebrow-size": "13px" },
+    "section-title": { "--comp-heading-size": "36px" },
+    "services-section": { "--comp-cols": "3", "--comp-gap": "28px", "--comp-card-radius": "16px", "--comp-card-shadow": "0 1px 3px rgba(0,0,0,0.04)" },
+    testimonials: { "--comp-cols": "3", "--comp-gap": "24px", "--comp-card-radius": "16px" },
+    "faq-accordion": { "--comp-gap": "0px" },
+    "pricing-table": { "--comp-cols": "3", "--comp-gap": "24px", "--comp-card-radius": "16px" },
+    gallery: { "--comp-cols": "3", "--comp-gap": "16px", "--comp-card-radius": "12px" },
+  };
+  return styles[component] || {};
 }
 
 // ---------------------------------------------------------------------------
