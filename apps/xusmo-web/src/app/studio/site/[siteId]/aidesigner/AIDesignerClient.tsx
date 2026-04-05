@@ -431,9 +431,7 @@ export default function AIDesignerClient({ site }: { site: SiteData }) {
   };
 
   // ---- Preview URL ----
-  const previewUrl = `/engine-preview/${site.id}${previewPage !== "home" ? `?page=${previewPage}` : ""}`
-    ? `${site.wpUrl}${previewPage !== "home" ? `/${previewPage}` : ""}`
-    : `/engine-preview/${site.id}${previewPage !== "home" ? `?page=${previewPage}` : ""}`;
+  const previewUrl = `/engine-preview/${site.id}${previewPage !== "home" ? `?page=${previewPage}` : ""}`;
 
   // ===========================================================================
   // RENDER
@@ -786,8 +784,8 @@ export default function AIDesignerClient({ site }: { site: SiteData }) {
                 <div style={{ padding: 16, background: C.bg, borderRadius: 10, border: `1px solid ${C.border}`, marginBottom: 16 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: site.status === "LIVE" ? C.green : C.amber, marginBottom: 4 }}>{site.status}</div>
                   <div style={{ fontSize: 12, color: C.dim }}>{site.businessName} &middot; {site.archetype}</div>
-                  {site.wpUrl && <div style={{ fontSize: 11, color: C.dim, marginTop: 4 }}>{site.wpUrl}</div>}
-                  {!site.wpUrl && site.hasDesignDocument && <div style={{ fontSize: 11, color: C.dim, marginTop: 4 }}>Engine-rendered (React)</div>}
+                  {false && <div style={{ fontSize: 11, color: C.dim, marginTop: 4 }}>{site.wpUrl}</div>}
+                  {site.hasDesignDocument && <div style={{ fontSize: 11, color: C.dim, marginTop: 4 }}>Engine-rendered (React)</div>}
                 </div>
 
                 <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 8 }}>Summary</div>

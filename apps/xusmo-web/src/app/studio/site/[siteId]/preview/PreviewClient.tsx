@@ -109,11 +109,7 @@ export default function PreviewClient({ site }: { site: SiteData }) {
   const [runningQa, setRunningQa] = useState(false);
   const [qaMessage, setQaMessage] = useState<string | null>(null);
 
-  const iframeSrc = `/engine-preview/${site.id}${activePage && activePage !== "home" ? `?page=${activePage}` : ""}`
-    ? activePage && activePage !== "home"
-      ? `${site.wpUrl}/${activePage}`
-      : site.wpUrl
-    : `/engine-preview/${site.id}${activePage && activePage !== "home" ? `?page=${activePage}` : ""}`;
+  const iframeSrc = `/engine-preview/${site.id}${activePage && activePage !== "home" ? `?page=${activePage}` : ""}`;
 
   const submitRevision = async () => {
     if (!revisionText.trim()) return;
@@ -371,9 +367,9 @@ export default function PreviewClient({ site }: { site: SiteData }) {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            {site.wpUrl && (
+            {false && (
               <a
-                href={iframeSrc || site.wpUrl}
+                href={iframeSrc}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Open in new tab"

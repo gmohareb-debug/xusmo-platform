@@ -702,16 +702,14 @@ export default function DesignClient({
             {/* Right: Live Preview */}
             {(() => {
               const previewUrl = `/engine-preview/${site.id}` || `/engine-preview/${site.id}`;
-              const previewSrc = site.wpUrl
-                ? `${site.wpUrl}${site.wpUrl.includes("?") ? "&" : "?"}cb=${iframeKey}`
-                : `/engine-preview/${site.id}?cb=${iframeKey}`;
+              const previewSrc = `/engine-preview/${site.id}?cb=${iframeKey}`;
               return (
               <div style={{ flex: 1, display: "flex", flexDirection: "column", background: C.bg, minWidth: 0 }}>
                 <div style={{ height: 40, background: C.surface, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px", flexShrink: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <Monitor size={14} color={C.muted} />
                     <span style={{ fontSize: 12, fontWeight: 600, color: C.text }}>Live Preview</span>
-                    {!site.wpUrl && <span style={{ fontSize: 10, color: C.accent, background: `${C.accent}15`, padding: "1px 6px", borderRadius: 4, fontWeight: 600 }}>Engine</span>}
+                    {site.hasDesignDocument && <span style={{ fontSize: 10, color: C.accent, background: `${C.accent}15`, padding: "1px 6px", borderRadius: 4, fontWeight: 600 }}>Engine</span>}
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <button

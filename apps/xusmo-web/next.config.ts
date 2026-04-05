@@ -4,7 +4,6 @@ const nextConfig: NextConfig = {
   output: "standalone",
   reactCompiler: true,
   typescript: {
-    // Pre-existing type issues (session augmentation, Prisma types) — app runs fine
     ignoreBuildErrors: true,
   },
   transpilePackages: [

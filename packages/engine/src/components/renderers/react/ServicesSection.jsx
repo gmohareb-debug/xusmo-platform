@@ -2,7 +2,7 @@ import { onImgError } from './imgFallback'
 
 export function ServicesSection({ title, services }) {
   return (
-    <section className="services-section">
+    <section>
       {title && (
         <div className="text-center mb-16">
           <h2

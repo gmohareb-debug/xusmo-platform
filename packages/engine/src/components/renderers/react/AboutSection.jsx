@@ -2,7 +2,7 @@ import { onImgError } from './imgFallback'
 
 export function AboutSection({ title, description, image, stats }) {
   return (
-    <section className="about-section">
+    <section>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         {/* Image with decorative accent */}
         {image && (

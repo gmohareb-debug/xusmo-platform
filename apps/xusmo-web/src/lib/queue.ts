@@ -555,6 +555,7 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
 
     // Will hold the engine's React component JSON (SiteDocument) if generatorType=engine
     let engineDesignDocument: unknown = null;
+    let gutenbergPages: Record<string, string> = {};
 
     if (generatorType === "engine") {
       // ── Engine path: WP1 AI pipeline → React JSON → Gutenberg blocks ──
@@ -613,7 +614,8 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
         })),
       };
 
-      const { siteDoc, gutenbergPages } = await generateViaEngine(prompt, blueprintContext);
+      const { siteDoc, gutenbergPages: gp } = await generateViaEngine(prompt, blueprintContext);
+      gutenbergPages = gp;
 
       // Preserve the React JSON as source of truth — will be stored in Site.designDocument
       engineDesignDocument = siteDoc;
@@ -786,7 +788,7 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
             title,
             isRequired: slug === "home",
             sortOrder: i,
-            content: bpPage?.content ?? null,
+            content: gutenbergPages?.[slug] ?? bpPage?.content ?? null,
             blocks: bpPage?.blocks as unknown as undefined,
             heroHeadline: structured.heroHeadline,
             heroSubheadline: structured.heroSubheadline,
@@ -903,6 +905,13 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
           try {
             await wpCheck.execute("db check", 10_000);
             console.log("[dev-pipeline] WordPress DB connection verified.");
+
+      // Fix wp-content permissions so image uploads work
+      try {
+        const { execSync } = require("child_process");
+        execSync(`docker exec ${site.wpContainerName} sh -c "chown -R www-data:www-data /var/www/html/wp-content && chmod -R 775 /var/www/html/wp-content"`, { timeout: 10000 });
+        console.log("[dev-pipeline] WP uploads permissions fixed.");
+      } catch { console.warn("[dev-pipeline] Uploads chmod failed (non-fatal)"); }
             break;
           } catch {
             if (dbAttempt < 11) {
@@ -927,13 +936,20 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
       }, multiSiteId);
 
       // Inject Gutenberg HTML content into WordPress pages
-      const pagesToCreate: PageToCreate[] = bpPages
-        .filter((p) => p.content)
-        .map((p) => ({
-          slug: p.slug,
-          title: p.title,
-          content: p.content!,
-        }));
+      // FIX: Read from DB Page records (engine pages may have different slugs than bpPages)
+      const dbPages = await prisma.page.findMany({
+        where: { siteId: site.id },
+        orderBy: { sortOrder: "asc" },
+        select: { slug: true, title: true, content: true },
+      });
+      const pagesToCreate: PageToCreate[] = [
+        ...dbPages
+          .filter((p) => p.content)
+          .map((p) => ({ slug: p.slug, title: p.title, content: p.content! })),
+        ...bpPages
+          .filter((p) => p.content && !dbPages.some((d) => d.slug === (p.slug as string)))
+          .map((p) => ({ slug: p.slug as string, title: p.title as string, content: p.content as string })),
+      ];
 
       let wpPageIds = new Map<string, number>();
       if (pagesToCreate.length > 0) {
@@ -1549,9 +1565,28 @@ echo $cf7->id();
       const designPrefs = blueprint.designPrefs as unknown as {
         primaryColors?: string[];
       } | null;
-      const finalPreset = designPrefs?.primaryColors?.length
+      let finalPreset = designPrefs?.primaryColors?.length
         ? mergeUserColors(preset, designPrefs.primaryColors)
-        : preset;
+        : { ...preset, colors: { ...preset.colors }, fonts: { ...preset.fonts } };
+
+      // Override preset with designDocument theme (LLM-generated colors/fonts)
+      const ddTheme = (site as Record<string, unknown>).designDocument
+        ? ((site as Record<string, unknown>).designDocument as Record<string, unknown>)?.theme as Record<string, unknown> | undefined
+        : undefined;
+      if (ddTheme?.colors) {
+        const tc = ddTheme.colors as Record<string, string>;
+        if (tc.accent) { finalPreset.colors.primary = tc.accent; finalPreset.colors.accent = tc.accent; }
+        if (tc.background) finalPreset.colors.background = tc.background;
+        if (tc.surface) finalPreset.colors.surface = tc.surface;
+        if (tc.text) finalPreset.colors.text = tc.text;
+        if (tc.muted) finalPreset.colors.textMuted = tc.muted;
+        if (tc.border) finalPreset.colors.border = tc.border;
+      }
+      if (ddTheme?.fonts) {
+        const tf = ddTheme.fonts as Record<string, string>;
+        if (tf.heading) finalPreset.fonts.heading = tf.heading;
+        if (tf.body) finalPreset.fonts.body = tf.body;
+      }
 
       const themeJson = buildThemeJson(finalPreset);
       const themeJsonStr = JSON.stringify(themeJson, null, "\t");
