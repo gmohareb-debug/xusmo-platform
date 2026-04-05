@@ -319,7 +319,70 @@ async function processEngineContentJob(
     const businessInfo = blueprint.businessInfo as Record<string, unknown>;
     const businessName = (businessInfo?.businessName as string) ?? "My Business";
     const industry = blueprint.lead.industryName ?? "General Business";
-    const prompt = `Build a professional website for "${businessName}", a ${industry} business.`;
+    const archetype = blueprint.lead.archetype ?? "SERVICE";
+
+    // Build rich prompt from ALL blueprint data so the engine generates accurately
+    const services = (blueprint.services as Array<Record<string, unknown>>) || [];
+    const story = (blueprint.story as Record<string, unknown>) || {};
+    const designPrefs = (blueprint.designPrefs as Record<string, unknown>) || {};
+    const testimonials = (blueprint.testimonials as Array<Record<string, unknown>>) || [];
+    const team = (blueprint.team as Array<Record<string, unknown>>) || [];
+    const faqs = (blueprint.faqs as Array<Record<string, unknown>>) || [];
+
+    const serviceList = services.map((s: Record<string, unknown>) => `- ${s.name}: ${s.description}`).join("\n");
+    const description = (businessInfo?.description as string) || "";
+    const tagline = (businessInfo?.tagline as string) || "";
+    const location = (businessInfo?.location as string) || "";
+    const phone = (businessInfo?.phone as string) || "";
+    const email = (businessInfo?.email as string) || "";
+    const differentiator = (story?.differentiator as string) || "";
+    const targetAudience = (story?.targetAudience as string) || "";
+    const tone = (designPrefs?.tone as string) || "professional";
+    const primaryColors = (designPrefs?.primaryColors as string[]) || [];
+
+    const promptParts = [
+      `Build a professional website for "${businessName}".`,
+      ``,
+      `BUSINESS DETAILS (CRITICAL — all content must match this exactly):`,
+      `- Business Name: ${businessName}`,
+      `- Industry: ${industry}`,
+      `- Archetype: ${archetype}`,
+      `- Description: ${description}`,
+      tagline ? `- Tagline: ${tagline}` : "",
+      location ? `- Location: ${location}` : "",
+      phone ? `- Phone: ${phone}` : "",
+      email ? `- Email: ${email}` : "",
+      differentiator ? `- What makes them different: ${differentiator}` : "",
+      targetAudience ? `- Target audience: ${targetAudience}` : "",
+      `- Tone/style: ${tone}`,
+      primaryColors.length > 0 ? `- Brand colors: ${primaryColors.join(", ")}` : "",
+      ``,
+      `SERVICES/PRODUCTS:`,
+      serviceList || "General services",
+    ].filter(Boolean);
+
+    if (testimonials.length > 0) {
+      promptParts.push("", "TESTIMONIALS:");
+      for (const t of testimonials) {
+        promptParts.push(`- "${(t as Record<string, unknown>).quote}" — ${(t as Record<string, unknown>).name}`);
+      }
+    }
+    if (team.length > 0) {
+      promptParts.push("", "TEAM:");
+      for (const t of team) {
+        promptParts.push(`- ${(t as Record<string, unknown>).name}: ${(t as Record<string, unknown>).role}`);
+      }
+    }
+    if (faqs.length > 0) {
+      promptParts.push("", "FAQs:");
+      for (const f of faqs) {
+        promptParts.push(`Q: ${(f as Record<string, unknown>).question}`, `A: ${(f as Record<string, unknown>).answer}`);
+      }
+    }
+
+    promptParts.push("", `IMPORTANT: The navbar logo MUST say "${businessName}". All content must be about ${industry}. Do NOT generate content for a different business or industry.`);
+
+    const prompt = promptParts.join("\n");
 
     await prisma.build.update({
       where: { id: buildId },
