@@ -88,7 +88,8 @@
         "cta": "string - Primary call-to-action button label",
         "ctaSecondary": "string - Secondary button label (optional)",
         "eyebrow": "string - Small uppercase text above title (optional, e.g. 'Welcome to')",
-        "icon": "string - SVG icon markup displayed above the title (optional, e.g. '<svg>...</svg>')"
+        "icon": "string - SVG icon markup displayed above the title (optional, e.g. '<svg>...</svg>')",
+        "layout": "string - \"center\" (default centered text) or \"split\" (side-by-side image+text). VARY this across sites!"
       }
     },
     "hero-video": {
@@ -110,13 +111,15 @@
         "imageUrl": "string - URL of the background image",
         "cta": "string - Primary call-to-action button label",
         "ctaSecondary": "string - Secondary button label (optional)",
-        "eyebrow": "string - Small uppercase text above title (optional)"
+        "eyebrow": "string - Small uppercase text above title (optional)",
+        "layout": "string - \"center\" (default) or \"split\" (image right, text left). Use \"split\" for modern corporate sites."
       }
     },
     "hero-stats": {
       "description": "Row of key metric statistics with values and labels",
       "props": {
-        "stats": "array<{ value: string, label: string }> - Statistics to display"
+        "stats": "array<{ value: string, label: string }> - Statistics to display",
+        "layout": "string - \"row\" (inline with dividers, default), \"cards\" (boxed stat cards with accent top border), or \"banner\" (colored accent background strip). Vary per site!"
       }
     },
     "trust-badges": {
@@ -137,7 +140,8 @@
       "props": {
         "eyebrow": "string - Small label text above the title",
         "title": "string - Main heading text",
-        "subtitle": "string - Supporting description text"
+        "subtitle": "string - Supporting description text",
+        "layout": "string - \"center\" (centered, default), \"left\" (left-aligned for editorial/corporate), or \"split\" (title left, subtitle right for modern layouts)."
       }
     },
     "content-card": {
@@ -155,7 +159,8 @@
         "title": "string - Content heading text",
         "description": "string - Content body text",
         "image": "string - Featured image URL",
-        "reverse": "boolean - Whether to flip image and text order"
+        "reverse": "boolean - Whether to flip image and text order",
+        "layout": "string - \"side\" (image+text side-by-side, default), \"overlap\" (image with overlapping text card), or \"fullbleed\" (full-width image with text overlay). Use \"fullbleed\" for dramatic impact."
       }
     },
     "about-section": {
@@ -171,7 +176,8 @@
       "description": "Grid of clickable service cards with icons, images, titles, descriptions, and links",
       "props": {
         "title": "string - Section heading text",
-        "services": "array<{ icon: string, title: string, description: string, image: string (optional thumbnail), href: string (link target) }> - Service items"
+        "services": "array<{ icon: string, title: string, description: string, image: string (optional thumbnail), href: string (link target) }> - Service items",
+        "layout": "string - \"cards\" (image card grid, default), \"list\" (alternating horizontal rows with large images), or \"minimal\" (icon-only 4-column compact). Use \"list\" for premium/corporate, \"minimal\" for tech/SaaS."
       }
     },
     "features": {
@@ -222,7 +228,8 @@
       "description": "Image gallery grid with title and alt-text support",
       "props": {
         "title": "string - Gallery heading text",
-        "images": "array<{ src: string, alt: string }> - Gallery images (default: [])"
+        "images": "array<{ src: string, alt: string }> - Gallery images (default: [])",
+        "layout": "string - \"grid\" (uniform cards) or \"masonry\" (staggered Pinterest-style heights). Use \"masonry\" for portfolios."
       }
     },
     "carousel": {
@@ -561,7 +568,8 @@
       "description": "Grid of customer testimonial cards with quotes, author photos, roles, and star ratings",
       "props": {
         "title": "string - Section heading text",
-        "testimonials": "array<{ quote: string, name: string, avatar: string (placehold.co URL with initials), role: string (job title/company), rating: number (1-5 stars) }> - Testimonial items (default: [])"
+        "testimonials": "array<{ quote: string, name: string, avatar: string (placehold.co URL with initials), role: string (job title/company), rating: number (1-5 stars) }> - Testimonial items (default: [])",
+        "layout": "string - \"grid\" (3-col cards, default), \"marquee\" (horizontal scroll strip), or \"single\" (one large featured quote). Vary per site!"
       }
     },
     "case-studies": {

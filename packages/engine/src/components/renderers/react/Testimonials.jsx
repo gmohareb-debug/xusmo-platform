@@ -24,66 +24,96 @@ function StarIcon({ filled }) {
   )
 }
 
-export function Testimonials({ title, testimonials = [] }) {
+function AvatarImg({ src, name, index }) {
+  return (
+    <img
+      src={getRealisticAvatar(src, index)}
+      alt={name}
+      className="w-12 h-12 rounded-full object-cover shrink-0"
+      style={{ boxShadow: '0 0 0 3px var(--accent, #3b82f6)' }}
+      onError={(e) => {
+        const initials = getInitials(name)
+        const color = getAvatarColor(name)
+        const div = document.createElement('div')
+        div.style.cssText = `background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;border-radius:50%;width:48px;height:48px;flex-shrink:0;`
+        div.textContent = initials
+        e.currentTarget.replaceWith(div)
+      }}
+    />
+  )
+}
+
+export function Testimonials({ title, testimonials = [], layout = 'grid' }) {
+
+  // ── Single featured quote ──
+  if (layout === 'single' && testimonials.length > 0) {
+    const t = testimonials[0]
+    return (
+      <section className="max-w-4xl mx-auto text-center">
+        <div className="text-[8rem] leading-none font-serif opacity-[0.08] mb-[-3rem]" style={{ color: 'var(--accent, #3b82f6)' }}>&ldquo;</div>
+        {title && <h3 className="text-2xl font-bold mb-10 text-[var(--text,#1c1c1c)]" style={{ fontFamily: 'var(--font-heading, inherit)' }}>{title}</h3>}
+        <blockquote className="text-2xl md:text-3xl lg:text-4xl font-medium leading-snug text-[var(--text,#1c1c1c)] mb-10 italic" style={{ fontFamily: 'var(--font-heading, inherit)' }}>
+          &ldquo;{t.quote}&rdquo;
+        </blockquote>
+        <div className="flex items-center justify-center gap-4">
+          <AvatarImg src={t.avatar} name={t.name} index={0} />
+          <div className="text-left">
+            <div className="font-semibold text-[var(--text,#1c1c1c)]">{t.name}</div>
+            {t.role && <div className="text-sm text-[var(--muted,#6b7280)]">{t.role}</div>}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // ── Marquee / horizontal scroll ─��
+  if (layout === 'marquee') {
+    return (
+      <section>
+        {title && (
+          <h3 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[var(--text,#1c1c1c)]" style={{ fontFamily: 'var(--font-heading, inherit)' }}>
+            {title}
+          </h3>
+        )}
+        <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+          {testimonials.map((record, index) => (
+            <article key={index} className="flex-none w-[340px] snap-center bg-[var(--surface,#fff)] rounded-2xl p-8 border border-[var(--border,#e5e7eb)] flex flex-col gap-5" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+              {record.rating && (
+                <div className="flex gap-0.5">{[1,2,3,4,5].map(s => <StarIcon key={s} filled={s <= Math.round(Number(record.rating))} />)}</div>
+              )}
+              <p className="text-sm leading-relaxed text-[var(--text,#1c1c1c)]/80 italic flex-1 m-0">&ldquo;{record.quote}&rdquo;</p>
+              <div className="flex items-center gap-3 pt-4 border-t border-[var(--border,#e5e7eb)]">
+                <AvatarImg src={record.avatar} name={record.name} index={index} />
+                <div>
+                  <div className="text-sm font-semibold text-[var(--text,#1c1c1c)]">{record.name}</div>
+                  {record.role && <div className="text-xs text-[var(--muted,#6b7280)]">{record.role}</div>}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  // ── Grid (default) ──
   return (
     <section className="relative">
-      {/* Large decorative quote */}
-      <div
-        className="absolute -top-6 left-1/2 -translate-x-1/2 text-[12rem] leading-none font-serif pointer-events-none select-none opacity-[0.06]"
-        style={{ color: 'var(--accent, #3b82f6)' }}
-      >
-        &ldquo;
-      </div>
-
+      <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[12rem] leading-none font-serif pointer-events-none select-none opacity-[0.06]" style={{ color: 'var(--accent, #3b82f6)' }}>&ldquo;</div>
       {title && (
-        <h3
-          className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-14 tracking-tight m-0 relative z-10 text-[var(--text,#1c1c1c)]"
-          style={{ fontFamily: 'var(--font-heading, inherit)' }}
-        >
+        <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-14 tracking-tight m-0 relative z-10 text-[var(--text,#1c1c1c)]" style={{ fontFamily: 'var(--font-heading, inherit)' }}>
           {title}
         </h3>
       )}
-
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
         {testimonials.map((record, index) => (
-          <article
-            key={index}
-            className="relative bg-[var(--surface,#fff)] rounded-2xl p-8 lg:p-10 flex flex-col gap-6 hover:shadow-xl transition-all duration-500"
-            style={{
-              borderLeft: '4px solid var(--accent, #3b82f6)',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-            }}
-          >
-            {/* Stars at top */}
+          <article key={index} className="relative bg-[var(--surface,#fff)] rounded-2xl p-8 lg:p-10 flex flex-col gap-6 hover:shadow-xl transition-all duration-500" style={{ borderLeft: '4px solid var(--accent, #3b82f6)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             {record.rating && (
-              <div className="flex items-center gap-0.5">
-                {[1,2,3,4,5].map(star => (
-                  <StarIcon key={star} filled={star <= Math.round(Number(record.rating))} />
-                ))}
-              </div>
+              <div className="flex items-center gap-0.5">{[1,2,3,4,5].map(star => <StarIcon key={star} filled={star <= Math.round(Number(record.rating))} />)}</div>
             )}
-
-            <p className="text-base lg:text-lg leading-relaxed text-[var(--text,#1c1c1c)]/80 italic flex-1 m-0">
-              &ldquo;{record.quote}&rdquo;
-            </p>
-
+            <p className="text-base lg:text-lg leading-relaxed text-[var(--text,#1c1c1c)]/80 italic flex-1 m-0">&ldquo;{record.quote}&rdquo;</p>
             <div className="flex items-center gap-4 pt-2 border-t border-[var(--border,#e5e7eb)]">
-              <img
-                src={getRealisticAvatar(record.avatar, index)}
-                alt={record.name}
-                className="w-12 h-12 rounded-full object-cover shrink-0"
-                style={{
-                  boxShadow: '0 0 0 3px var(--accent, #3b82f6)',
-                }}
-                onError={(e) => {
-                  const initials = getInitials(record.name)
-                  const color = getAvatarColor(record.name)
-                  const div = document.createElement('div')
-                  div.style.cssText = `background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;border-radius:50%;width:48px;height:48px;flex-shrink:0;`
-                  div.textContent = initials
-                  e.currentTarget.replaceWith(div)
-                }}
-              />
+              <AvatarImg src={record.avatar} name={record.name} index={index} />
               <div className="flex flex-col">
                 <span className="text-sm font-semibold text-[var(--text,#1c1c1c)]">{record.name}</span>
                 {record.role && <span className="text-xs text-[var(--muted,#6b7280)] mt-0.5">{record.role}</span>}

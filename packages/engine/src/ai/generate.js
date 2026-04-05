@@ -509,7 +509,7 @@ Analyze the business and return a JSON object with:
      - Service business: home, services, about, contact
      - Consulting/B2B: home, solutions, case-studies, about, contact
      - Medical/dental: home, services, team, about, contact
-7. **components** — array of 20-35 component keys. CRITICAL: DO NOT use the same generic components every time. Mix it up! Use features-alternating instead of services-section. Use testimonials-grid instead of testimonials-carousel. Use cta-split instead of cta-banner. Pick structurally radically different components. Include "navbar", "footer", ONE hero variant, "section-title". Do NOT include: ${[...blockedComponents].join(', ')}
+7. **components** — array of 20-35 component keys from the list above. ONLY use components that exist in the Available Components list. Include "navbar", "footer", ONE hero variant, "section-title". To create layout variety, pass different PROPS to the same component (e.g., hero with layout:"split" vs layout:"center", gallery with layout:"masonry" vs layout:"grid"). Do NOT include: ${[...blockedComponents].join(', ')}
 8. **pageStructure** — object mapping each page key to an array of component keys (5-15 per page). Make sure the layout is asymmetrical and highly engaging!
 
 ## Personality Selection Guide
@@ -733,6 +733,26 @@ ${isCommerce ? `
 - Every product in product-grid MUST have a "cartLabel" prop.
 ` : ''}
 ALL content you generate MUST be specifically about this business. Do NOT generate content about an unrelated industry.
+
+## LAYOUT VARIANTS — CRITICAL FOR DESIGN VARIETY
+
+Many components accept a "layout" prop that DRAMATICALLY changes their visual structure.
+You MUST vary these across sites to create unique designs. NEVER use the same layout for every site.
+
+- **hero**: layout: "center" (default centered text) OR "split" (side-by-side image+text, more modern)
+- **gallery**: layout: "grid" (uniform cards) OR "masonry" (staggered heights like Pinterest)
+- **testimonials**: layout: "grid" (3-col cards) OR "marquee" (horizontal scroll) OR "single" (one large featured quote)
+- **services-section**: layout: "cards" (image cards grid) OR "list" (alternating horizontal rows) OR "minimal" (icon-only compact 4-col)
+- **featured-content**: layout: "side" (image+text side-by-side) OR "overlap" (image with overlapping text card) OR "fullbleed" (full-width image with text overlay)
+- **hero-stats**: layout: "row" (inline dividers) OR "cards" (boxed stat cards) OR "banner" (colored background strip)
+- **section-title**: layout: "center" (centered) OR "left" (left-aligned) OR "split" (title left, subtitle right)
+
+For EACH site, pick a MIX of layouts. Example combinations:
+- Corporate law: hero layout:"split", services layout:"list", testimonials layout:"single", section-title layout:"left"
+- Kids venue: hero layout:"center" (image variant), services layout:"cards", testimonials layout:"marquee", hero-stats layout:"banner"
+- Portfolio: hero layout:"split", gallery layout:"masonry", featured-content layout:"fullbleed", testimonials layout:"grid"
+
+ALSO set width:"full" or width:"fullbleed" on featured-content with layout:"fullbleed" for edge-to-edge visual impact.
 `
       : '')
 
@@ -746,38 +766,45 @@ ALL content you generate MUST be specifically about this business. Do NOT genera
     ? `
 ## Home Page Structure (Story variant — MUST FOLLOW)
 The home page must follow this emotional arc:
-1. Hero with emotional hook (e.g., hero-image, hero-split-screen, or hero-cinematic)
-2. Problem statement section (e.g., features-icons or faq-accordion)
-3. Solution section (e.g., services-alternating or features-checklist)
-4. How it works / process section (e.g., timeline or team-grid)
-5. Social proof (e.g., testimonials-minimal or client-logos)
-6. CTA section (e.g., cta-gradient or cta-floating)
-7. Footer
+1. hero (with layout:"split" prop for side-by-side image+text) OR hero-image (centered dramatic)
+2. about-section (the founding story or problem statement)
+3. featured-content (solution showcase with image)
+4. services-section (what we offer)
+5. testimonials (social proof)
+6. faq-accordion (overcome objections)
+7. contact-form or newsletter-form (action)
+8. footer
 
-CRITICAL: DO NOT JUST USE 'services-section' and 'testimonials-carousel' EVERY TIME. VARY YOUR COMPONENT SELECTIONS!
+IMPORTANT: Use layout:"split" on hero for a completely different visual structure than layout:"center".
+Use layout:"masonry" on gallery for staggered heights instead of grid.
 `
     : homeVariant === 'showcase'
     ? `
 ## Home Page Structure (Showcase variant — MUST FOLLOW)
 The home page must lead with visual impact:
-1. Hero (e.g., hero-cards, hero-parallax, or hero-video)
-2. Featured products/work gallery (e.g., gallery-masonry or portfolio-grid)
-3. Categories or service areas (e.g., services-grid or category-showcase)
-4. Social proof (e.g., testimonials-grid or trust-badges)
-5. CTA section (e.g., cta-bright-border or cta-minimal)
-6. Footer
+1. hero-image (full-bleed dramatic photo)
+2. hero-stats (key numbers)
+3. gallery (with layout:"masonry" for visual drama) OR carousel
+4. category-showcase (service/product categories with image cards)
+5. case-studies OR testimonials
+6. contact or quick-inquiry-form
+7. footer
 
-CRITICAL: DO NOT JUST USE 'services-section' and 'testimonials-carousel' EVERY TIME. VARY YOUR COMPONENT SELECTIONS!
+IMPORTANT: Showcase sites should be IMAGE-HEAVY. Use gallery, carousel, category-showcase, featured-content.
 `
     : `
 ## Home Page Structure (Convert variant — MUST FOLLOW)
 The home page must drive conversions:
-1. Hero (e.g., hero-split-screen, hero-centered, or hero)
-2. Stats or trust badges (e.g., hero-stats or client-logos)
-3. Services/Features overview (e.g., features-alternating or services-overlay-cards)
-4. Testimonials or case studies (e.g., testimonials-cards or case-studies)
-5. CTA section with strong action + benefit button (e.g., cta-split or cta-banner)
-6. Footer
+1. hero (with layout:"split" for side-by-side) OR hero-image (centered)
+2. client-logos or hero-stats (instant trust)
+3. features or services-section (what we do)
+4. featured-content (key selling point with image)
+5. testimonials (social proof)
+6. pricing-table or pricing (transparent pricing)
+7. contact-form (minimize friction)
+8. footer
+
+IMPORTANT: Convert pages should have MORE sections (8-12) with clear progression toward the CTA.
 
 CRITICAL: DO NOT JUST USE 'services-section' and 'testimonials-carousel' EVERY TIME. VARY YOUR COMPONENT SELECTIONS!
 `;

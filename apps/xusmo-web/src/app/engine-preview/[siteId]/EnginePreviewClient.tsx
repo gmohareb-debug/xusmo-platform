@@ -259,11 +259,10 @@ export default function EnginePreviewClient({
           const twBg = bgClasses[l.background || ""] || "";
           const twPad = padClasses[l.padding || ""] || "";
           const twAlign = alignClasses[l.align || ""] || "";
-          const twFull =
-            l.width === "full" ? "" : "max-w-[1200px] mx-auto px-5 md:px-8 lg:px-12";
-
-          // Keep legacy classes for backwards compat with styles.css
-          // No legacy CSS — Tailwind only
+          const isFullBleed = l.width === "full" || l.width === "fullbleed";
+          const twFull = isFullBleed
+            ? ""
+            : "max-w-[1200px] mx-auto px-5 md:px-8 lg:px-12";
 
           const styleTokens = { ...(section.style || {}) };
 
@@ -273,11 +272,17 @@ export default function EnginePreviewClient({
               style={styleTokens}
               key={`${section.component}-${index}`}
             >
-              <div className={twFull || "max-w-[1200px] mx-auto px-5 md:px-8 lg:px-12"}>
+              {isFullBleed ? (
                 <Component
                   {...(decodeUnicode(section.props) as Record<string, unknown>)}
                 />
-              </div>
+              ) : (
+                <div className="max-w-[1200px] mx-auto px-5 md:px-8 lg:px-12">
+                  <Component
+                    {...(decodeUnicode(section.props) as Record<string, unknown>)}
+                  />
+                </div>
+              )}
             </div>
           );
         })}
