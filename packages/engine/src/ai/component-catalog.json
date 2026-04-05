@@ -682,7 +682,8 @@
       "description": "Simple footer with text and a row of navigation links",
       "props": {
         "text": "string - Footer body text",
-        "links": "array<{ label: string, href: string }> - Footer navigation links (default: [])"
+        "links": "array<{ label: string, href: string }> - Footer navigation links (default: [])",
+        "layout": "string - \"columns\" (multi-column with brand, default), \"centered\" (everything centered, good for minimal/portfolio), or \"simple\" (single row, brand + social). Vary across sites!"
       }
     },
     "social-media-icons": {
