@@ -1,0 +1,105 @@
+@import "tailwindcss";
+@import "../lib/design/animations.css";
+
+/* =============================================================================
+   Xusmo Theme — Tailwind v4 CSS-based configuration
+   Palette: Deep Indigo + Warm Amber + Soft Cream
+   ============================================================================= */
+
+@theme inline {
+  /* --- Fonts --- */
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+
+  /* --- Primary (Indigo) --- */
+  --color-primary-50: #EEF2FF;
+  --color-primary-100: #E0E7FF;
+  --color-primary-200: #C7D2FE;
+  --color-primary-300: #A5B4FC;
+  --color-primary-400: #818CF8;
+  --color-primary-500: #6366F1;
+  --color-primary-600: #4F46E5;
+  --color-primary-700: #4338CA;
+  --color-primary-800: #3730A3;
+  --color-primary-900: #312E81;
+  --color-primary-950: #1E1B4B;
+
+  /* --- Accent (Amber) --- */
+  --color-accent-50: #FFFBEB;
+  --color-accent-100: #FEF3C7;
+  --color-accent-200: #FDE68A;
+  --color-accent-300: #FCD34D;
+  --color-accent-400: #FBBF24;
+  --color-accent-500: #F59E0B;
+  --color-accent-600: #D97706;
+  --color-accent-700: #B45309;
+
+  /* --- Coral (Secondary) --- */
+  --color-coral-400: #FB7185;
+  --color-coral-500: #F43F5E;
+  --color-coral-600: #E11D48;
+
+  /* --- Surface --- */
+  --color-surface-cream: #FAF9F7;
+  --color-surface-white: #FFFFFF;
+  --color-surface-muted: #F4F3F0;
+  --color-surface-midnight: #0C0A1D;
+  --color-surface-card: #16132B;
+  --color-surface-card-hover: #1E1A38;
+  --color-surface-border: #E8E6E1;
+  --color-surface-border-dark: #2A2545;
+
+  /* --- Shadows --- */
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
+  --shadow-card-hover: 0 4px 12px rgb(0 0 0 / 0.06), 0 16px 40px rgb(0 0 0 / 0.1);
+  --shadow-glow: 0 0 30px -5px rgb(99 102 241 / 0.4);
+  --shadow-glow-accent: 0 0 30px -5px rgb(245 158 11 / 0.4);
+  --shadow-card-dark: 0 2px 8px rgb(0 0 0 / 0.3), 0 12px 32px rgb(0 0 0 / 0.4);
+  --shadow-card-dark-hover: 0 4px 16px rgb(0 0 0 / 0.3), 0 20px 48px rgb(0 0 0 / 0.5);
+
+  /* --- Animation durations --- */
+  --animate-duration-fast: 150ms;
+  --animate-duration-normal: 300ms;
+  --animate-duration-slow: 500ms;
+  --animate-duration-dramatic: 800ms;
+}
+
+/* --- Base Styles --- */
+
+body {
+  font-family: var(--font-body), system-ui, sans-serif;
+  background: var(--color-surface-cream);
+  color: #1C1917;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
+/* --- Selection --- */
+
+::selection {
+  background: rgb(99 102 241 / 0.2);
+  color: #1E1B4B;
+}
+
+/* --- Scrollbar (subtle, on-brand) --- */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(99 102 241 / 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(99 102 241 / 0.4);
+}

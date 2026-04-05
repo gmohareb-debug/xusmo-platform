@@ -495,10 +495,10 @@ Analyze the business and return a JSON object with:
 2. **personality** — one of: ${Object.keys(VISUAL_PERSONALITIES).join(', ')} — choose based on business tone and industry
 3. **heroVariant** — which hero to use: "hero" (text+gradient), "hero-video" (background video), or "hero-image" (background photo)
 4. **businessSummary** — a 1-2 sentence plain-English explanation of what this business ACTUALLY sells or does.
-5. **homeVariant** — choose the primary structural pattern for the home page:
-   - "convert": Hero (benefit-led) → Stats/Trust → Services/Features → Testimonials → CTA → Footer
-   - "story": Hero (story-led, full emotional hook) → Problem statement → Solution → How it works → Testimonials → CTA → Footer
-   - "showcase": Hero (full visual) → Featured products/work gallery → Categories → Social proof → CTA → Footer
+5. **homeVariant** — choose the structural narrative. YOU MUST VARY THE COMPONENTS WILDLY. NEVER generate the exact same component sequence. Create structural unpredictability:
+   - "convert": Hero (e.g., hero-split-screen or hero) → Trust (trust-badges or stats-counter) → Features (features-alternating or services-grid) → Validation (testimonials-grid) → Action (cta-split or cta-floating) → Footer
+   - "story": Hero (hero-image or hero-parallax) → Problem (features-icons) → Solution (services-alternating) → Team/Process (team-grid or faq-accordion) → Validation (testimonials-minimal) → Action (cta-gradient) → Footer
+   - "showcase": Hero (hero-centered or hero-gradient) → Visuals (gallery-masonry or portfolio-grid) → Details (services-list) → Action (cta-minimal) → Footer
 6. **pages** — array of 4-8 page objects for this specific business type. Each page: { "key": "slug-key", "label": "Display Name", "slug": "/url-path", "goal": "one-sentence conversion goal" }
    - ALWAYS include "home" and "contact" pages
    - Choose other pages based on what makes sense for this business:
@@ -509,8 +509,8 @@ Analyze the business and return a JSON object with:
      - Service business: home, services, about, contact
      - Consulting/B2B: home, solutions, case-studies, about, contact
      - Medical/dental: home, services, team, about, contact
-7. **components** — array of 20-35 component keys most relevant for this business. Include "navbar", "footer", ONE hero variant, "section-title". Do NOT include: ${[...blockedComponents].join(', ')}
-8. **pageStructure** — object mapping each page key to an array of component keys (5-15 per page)
+7. **components** — array of 20-35 component keys. CRITICAL: DO NOT use the same generic components every time. Mix it up! Use features-alternating instead of services-section. Use testimonials-grid instead of testimonials-carousel. Use cta-split instead of cta-banner. Pick structurally radically different components. Include "navbar", "footer", ONE hero variant, "section-title". Do NOT include: ${[...blockedComponents].join(', ')}
+8. **pageStructure** — object mapping each page key to an array of component keys (5-15 per page). Make sure the layout is asymmetrical and highly engaging!
 
 ## Personality Selection Guide
 - minimal → tech, agency, SaaS, software, design studio, consultant
@@ -560,7 +560,7 @@ ${JSON.stringify(businessProfile, null, 2)}`
   const plan = await callLLM(
     PLANNER_SYSTEM_PROMPT,
     `Select components for this business: ${prompt}${profileContext}`,
-    { temperature: 0.3, fast: true }
+    { temperature: 0.85, fast: true }
   )
 
   // Validate archetype
@@ -746,35 +746,41 @@ ALL content you generate MUST be specifically about this business. Do NOT genera
     ? `
 ## Home Page Structure (Story variant — MUST FOLLOW)
 The home page must follow this emotional arc:
-1. Hero with emotional hook (story-led, pain-point headline)
-2. Problem statement section (what the customer struggles with)
-3. Solution section (how this business solves it)
-4. How it works / process section
-5. Social proof (testimonials)
-6. CTA section
+1. Hero with emotional hook (e.g., hero-image, hero-split-screen, or hero-cinematic)
+2. Problem statement section (e.g., features-icons or faq-accordion)
+3. Solution section (e.g., services-alternating or features-checklist)
+4. How it works / process section (e.g., timeline or team-grid)
+5. Social proof (e.g., testimonials-minimal or client-logos)
+6. CTA section (e.g., cta-gradient or cta-floating)
 7. Footer
+
+CRITICAL: DO NOT JUST USE 'services-section' and 'testimonials-carousel' EVERY TIME. VARY YOUR COMPONENT SELECTIONS!
 `
     : homeVariant === 'showcase'
     ? `
 ## Home Page Structure (Showcase variant — MUST FOLLOW)
 The home page must lead with visual impact:
-1. Hero (full-bleed visual, striking image or video)
-2. Featured products/work gallery
-3. Categories or service areas
-4. Social proof (testimonials or client logos)
-5. CTA section
+1. Hero (e.g., hero-cards, hero-parallax, or hero-video)
+2. Featured products/work gallery (e.g., gallery-masonry or portfolio-grid)
+3. Categories or service areas (e.g., services-grid or category-showcase)
+4. Social proof (e.g., testimonials-grid or trust-badges)
+5. CTA section (e.g., cta-bright-border or cta-minimal)
 6. Footer
+
+CRITICAL: DO NOT JUST USE 'services-section' and 'testimonials-carousel' EVERY TIME. VARY YOUR COMPONENT SELECTIONS!
 `
     : `
 ## Home Page Structure (Convert variant — MUST FOLLOW)
 The home page must drive conversions:
-1. Hero (benefit-led headline, primary CTA above the fold)
-2. Stats or trust badges (immediate credibility)
-3. Services/Features overview
-4. Testimonials or case studies
-5. CTA section with strong action + benefit button
+1. Hero (e.g., hero-split-screen, hero-centered, or hero)
+2. Stats or trust badges (e.g., hero-stats or client-logos)
+3. Services/Features overview (e.g., features-alternating or services-overlay-cards)
+4. Testimonials or case studies (e.g., testimonials-cards or case-studies)
+5. CTA section with strong action + benefit button (e.g., cta-split or cta-banner)
 6. Footer
-`
+
+CRITICAL: DO NOT JUST USE 'services-section' and 'testimonials-carousel' EVERY TIME. VARY YOUR COMPONENT SELECTIONS!
+`;
 
   return `You are an expert website designer and developer. You generate complete, multi-page website layouts as JSON.
 
@@ -867,45 +873,40 @@ Use placehold.co with business initials on accent-colored background:
 - Placeholder patterns like "123 Main St", "(555) 123-4567" are FORBIDDEN
 - Only include contact details the user actually provided
 
-### Color Selection (CRITICAL — think about what fits THIS specific business)
+### Color Selection (CRITICAL — Premium Gemini-Quality Palettes & Strict Contrast Mathematics)
 
-Do NOT use a generic color palette. Think about:
-1. What does this business DO? What colors does the customer associate with it?
-2. What EMOTION should the site evoke? (trust, excitement, calm, luxury, nature, warmth)
-3. What is the TONE? (professional=navy/gray, bold=saturated+dark, elegant=muted+gold, warm=earth tones, casual=bright+friendly)
-4. If the user specified colors, USE THEM as accent and derive the rest.
+Do NOT use a generic color palette. You MUST use highly curated, sophisticated colors equivalent to award-winning web designs. Pay fanatical attention to your color selection and contrast ratios to ensure 100% WCAG readability!
+1. Use rich, complex accent colors (e.g., Violet #6D28D9, Emerald #059669, Amber #D97706, Rose #BE123C, or Deep Azure #1D4ED8).
+2. Background colors MUST be beautifully nuanced:
+   - For light mode: Use crisp white (#ffffff) or elegantly tinted neutrals like slate-white (#F8FAFC) or pearl (#FAFAFA).
+   - For dark mode: Use deep, cinematic darks like void black (#09090b), midnight slate (#0f172a), or deep charcoal (#1c1917).
+3. "accentLight" MUST be a precise 10% opacity version of the accent or a beautifully harmonious light complement (e.g., #F3E8FF for a purple accent).
+4. "surface" MUST be subtly offset from the background to create natural depth without muddying contrast.
+5. **CONTRAST MATHEMATICS (TEXT):** If your background is LIGHT, "text" must be incredibly dark (#0f172a). **IF YOUR BACKGROUND IS DARK**, "text" MUST be incredibly light (#f8fafc or #ffffff). Failure to invert text color will result in an unreadable site.
+6. **CONTRAST MATHEMATICS (MUTED):** If your background is LIGHT, "muted" is medium-dark (#64748b). **IF YOUR BACKGROUND IS DARK**, "muted" MUST be medium-light (#94a3b8 or #cbd5e1). Never use #444 or #555 muted text on a #111 background!
+7. "border" MUST be extremely crisp and subtle (e.g., #e2e8f0 for light, #334155 for dark).
 
-Rules:
-- "accent" = the primary brand color. Pick ONE color that captures the business identity.
-- "accentLight" = a very light tint of the accent (for subtle highlights). Use 10-15% opacity version.
-- "background" = ALWAYS a neutral: white (#ffffff, #fafafa), cream (#fefce8), or dark (#0f0f0f, #111827). NEVER a saturated color.
-- "surface" = slightly off from background (if bg is white, surface is #f8fafc; if bg is dark, surface is #1f2937)
-- "text" = high contrast against background (dark text on light bg, light text on dark bg)
-- "border" = subtle separator color (light gray #e5e7eb or dark gray #374151)
-- "muted" = secondary/dimmed text color
-
-Be CREATIVE and SPECIFIC. A steakhouse gets different colors than a vegan cafe. A law firm gets different colors than a skateboard shop. A wildlife sanctuary gets different colors than a nightclub.
-
-NEVER default to generic blue (#3b82f6) or red (#dc2626) unless the business genuinely warrants it.
+Be CREATIVE and SPECIFIC. A luxury business gets rich blacks and gold, meaning you MUST use #ffffff text to maintain contrast. NEVER generate unreadable dark-on-dark palettes.
 
 ### Logo Rules (CRITICAL)
 - The navbar MUST always include a "logo" prop with the business name.
 - ALSO include a "logoUrl" prop: use placehold.co to generate a square logo image with the business initials on a colored background matching the accent color (e.g., https://placehold.co/40x40/accent_hex/ffffff?text=BN where BN = business initials).
 - Use the SAME logo and logoUrl on ALL pages (navbar consistency).
 
-### Component Placement Rules
+### Component Placement Rules & Layout Unpredictability (CRITICAL)
 - Use ONLY ONE navigation component per page (navbar). NEVER include both "navbar" AND "sticky-header" — use ONLY "navbar".
 - NEVER use the "sticky-header" or "announcement-bar" components — they are blocked.
 - Use section-title as a separator before each major content block for visual hierarchy.
 - The footer should be consistent across all pages and use the MULTI-COLUMN format (see Footer Rules below).
+- **CRITICAL ASYMMETRY RULE:** You must actively prevent the "cookie-cutter" layout problem. DO NOT generate the exact same component sequence for every site. Intentionally use alternative components! If you normally use \`testimonials-carousel\`, use \`testimonials-cards\` or \`testimonials-grid\` instead. If you normally use \`services-grid\`, use \`features-alternating\` or \`services-overlay-cards\`. Build a structurally unique page!
 - cookie-consent and back-to-top should only appear on the Home page.
 
-### Footer Rules (CRITICAL — use multi-column format)
-The footer component accepts these props:
+### Footer Rules (CRITICAL — strict multi-column requirement)
+The footer MUST be robust and structurally dense. A professional site never has a sparse footer. The component accepts:
 - **logo**: Business name (string)
-- **tagline**: Short business tagline (string, 1 sentence)
-- **columns**: Array of link groups, each with { title, links: [{ label, href }] }. Include 3-4 columns such as "Quick Links", "Services/Products", "Company", "Support".
-- **social**: Array of { label, href } for social links. Use platform names as labels: "Facebook", "Instagram", "Twitter", "LinkedIn", "YouTube". SVG icons are auto-rendered from the label.
+- **tagline**: A rich, comprehensive business tagline (string, 1-2 thoughtful sentences).
+- **columns**: You MUST generate exactly 3-4 dense link columns with highly relevant links for this specific business (e.g., "Resources", "Legal", "Solutions", "Support").
+- **social**: Array of { label, href } for social links. You MUST include at least 3 social platforms (e.g., "Instagram", "LinkedIn", "Twitter").
 - **text**: Copyright text — use the © symbol (NOT "(c)") and current year ${new Date().getFullYear()} (e.g., "© ${new Date().getFullYear()} Business Name. All rights reserved.")
 - **links**: Array of { label, href } for bottom bar links (Privacy Policy, Terms, etc.)
 Example footer props:
@@ -959,17 +960,20 @@ Example footer props:
 - Every page must feel complete with proper sections — no single-component pages.
 
 ### Premium Polish Rules (CRITICAL — this is what separates amateur from professional output)
-- EVERY card-based component (services-section, features, product-grid, pricing-table, testimonials, case-studies) MUST include style tokens for visual polish:
-  - "--comp-radius": "20px" or "24px" (generous rounding, not 4px)
-  - "--comp-shadow": "0 4px 24px rgba(0,0,0,0.06)" (subtle resting shadow)
-  - "--comp-shadow-hover": "0 12px 40px rgba(0,0,0,0.12)" (elevated hover shadow)
-  - "--comp-card-padding": "28px" or "32px" (generous internal spacing)
-  - "--comp-card-bg": "#ffffff" or "rgba(255,255,255,0.9)"
-- Hero sections MUST use large heading sizes: "--comp-heading-size": "48px" to "56px"
-- Section titles MUST use: "--comp-heading-size": "36px" or "40px"
-- Use generous gaps between cards: "--comp-gap": "28px" or "32px" (never less than 20px)
-- About section stats should feel big and bold
-- Contact forms should feel spacious and inviting
+- EXPECTATIONS: You MUST create state-of-the-art, WOW-factor designs similar to award-winning websites (e.g., highly premium, bespoke styling). If your output looks simple, generic, or basic, you have FAILED.
+- VIBRANCY & AESTHETICS: Incorporate deep visual interest. Use rich, dynamic colors. If the layout allows, use smooth gradients and glassmorphism instead of flat, boring colors.
+- EVERY card-based component (services-section, features, product-grid, pricing-table, testimonials, case-studies) MUST include style tokens for extreme visual polish:
+  - "--comp-radius": "24px" or "32px" (ultra-modern, generous rounding, NEVER 4px or square)
+  - "--comp-shadow": "0 8px 32px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)" (premium layered resting shadow)
+  - "--comp-shadow-hover": "0 20px 48px rgba(0,0,0,0.12), transform translateY(-4px)" (dynamic lifted hover effect)
+  - "--comp-card-padding": "32px" or "40px" (luxurious internal spacing, very breathable)
+  - "--comp-card-bg": "rgba(255,255,255,0.98)" (premium solid or slightly glassy)
+- Hero sections MUST use massive, high-impact typography: "--comp-heading-size": "56px" to "72px", with heavy font weight.
+- Section titles MUST use: "--comp-heading-size": "40px" or "48px"
+- Use extremely generous gaps between cards to let elements breathe: "--comp-gap": "32px" or "40px" (never cramped)
+- About section stats must feel gigantic and structurally striking.
+- Borders for cards should be extremely subtle and crisp: e.g. "1px solid rgba(0,0,0,0.05)"
+- Micro-animations: Rely on the elevated hover shadows and interactive scaling wherever applicable.
 
 ### Content Richness Rules
 - Services: generate 4-6 service items (not 2-3), each with icon + image + title + 2-sentence description + href
@@ -989,18 +993,19 @@ Each section MUST include a "layout" object that controls its visual presentatio
 - **align**: "left" | "center" | "right"
 
 ### Design Rhythm Rules (creates visual breathing room)
-- Alternate backgrounds between adjacent sections: default -> muted -> default -> accent-light -> default -> dark
-- NEVER use the same background for 3+ consecutive sections
-- Heroes should use "xl" padding and "full" width
-- Section titles should use "md" padding and "center" alignment
-- Footers should use "dark" background and "full" width
-- Navbars should use "none" padding, "full" width, "none" background
-- CTAs and testimonials work well with "accent" or "accent-light" backgrounds
-- About/content sections should use "lg" padding for generous breathing room
-- Contact sections should use "lg" padding and "muted" or "accent-light" background
-- Use "accent" background sparingly (1-2 sections max) for high-impact CTAs
-- Feature/service grids look best on "default" or "muted" backgrounds (not dark)
-- The home page should create a VISUAL JOURNEY: hero (dramatic) -> trust (subtle) -> content (clean) -> social proof (warm) -> CTA (bold) -> footer (dark)
+- Sections MUST breathe. Use "xl" (extra large) padding on almost all major sections.
+- Alternate backgrounds between adjacent sections for high contrast and visual variety (e.g., default -> muted -> accent -> dark -> default).
+- NEVER use the same background for 3+ consecutive sections.
+- Heroes should use "xl" padding and "full" width.
+- Section titles should use "md" padding and "center" alignment.
+- Footers should use "dark" background and "full" width.
+- Navbars MUST use "default", "muted", or "dark" background to guarantee text readability. NEVER use a transparent ("none") background on the navbar, as it causes severe contrast failure when rendering over hero background images!
+- CTAs and testimonials work beautifully with "accent" backgrounds or dramatic gradient tokens.
+- About/content sections should use "xl" padding for ultra-luxurious breathing room.
+- Contact sections should use "lg" padding and "muted" or "accent-light" background.
+- Use "accent" background sparingly (1-2 sections max) for high-impact CTAs that demand attention.
+- Feature/service grids look best on "default" or "muted" backgrounds (not dark).
+- The home page should create a VISUAL JOURNEY: hero (dramatic) -> trust (subtle) -> content (clean) -> social proof (warm) -> CTA (bold & vibrant) -> footer (dark).
 
 ## Per-Component Style Tokens (MANDATORY for premium look)
 
@@ -1016,16 +1021,16 @@ Available tokens:
 
 ### Required style tokens per component type:
 - **navbar**: (no style tokens needed — layout handles it)
-- **hero / hero-video / hero-image**: --comp-height: "560px", --comp-heading-size: "52px", --comp-overlay, --comp-fallback-bg, --comp-eyebrow-size: "13px"
-- **section-title**: --comp-heading-size: "36px", --comp-eyebrow-color: accent color
-- **services-section**: --comp-cols: "3", --comp-gap: "28px", --comp-radius: "20px", --comp-shadow: "0 4px 24px rgba(0,0,0,0.06)", --comp-shadow-hover: "0 12px 40px rgba(0,0,0,0.12)", --comp-card-padding: "28px", --comp-icon-size: "40px"
-- **features**: --comp-cols: "3", --comp-gap: "24px", --comp-radius: "20px", --comp-shadow: "0 2px 16px rgba(0,0,0,0.05)", --comp-shadow-hover: "0 8px 32px rgba(0,0,0,0.1)", --comp-card-padding: "28px", --comp-icon-size: "36px"
-- **product-grid**: --comp-cols: "3", --comp-gap: "24px", --comp-radius: "16px", --comp-shadow: "0 4px 20px rgba(0,0,0,0.06)", --comp-shadow-hover: "0 12px 40px rgba(0,0,0,0.1)", --comp-img-height: "220px"
-- **testimonials**: --comp-cols: "3", --comp-gap: "28px", --comp-radius: "24px", --comp-shadow: "0 4px 20px rgba(0,0,0,0.05)", --comp-card-padding: "32px", --comp-card-bg: "#ffffff"
-- **pricing-table**: --comp-cols: "3", --comp-gap: "24px", --comp-radius: "24px", --comp-shadow: "0 4px 24px rgba(0,0,0,0.06)", --comp-card-padding: "36px"
-- **about-section**: --comp-radius: "20px", --comp-shadow: "0 8px 30px rgba(0,0,0,0.08)"
-- **faq-accordion**: --comp-radius: "16px", --comp-card-padding: "20px"
-- **contact-form**: --comp-radius: "16px", --comp-card-padding: "32px"
+- **hero / hero-video / hero-image**: --comp-height: "700px", --comp-heading-size: "72px", --comp-overlay, --comp-fallback-bg, --comp-eyebrow-size: "14px"
+- **section-title**: --comp-heading-size: "48px", --comp-eyebrow-color: accent color
+- **services-section**: --comp-cols: "3", --comp-gap: "40px", --comp-radius: "24px", --comp-shadow: "0 20px 40px -12px rgba(0,0,0,0.1)", --comp-shadow-hover: "0 30px 60px -10px rgba(0,0,0,0.15)", --comp-card-padding: "40px", --comp-icon-size: "48px"
+- **features**: --comp-cols: "3", --comp-gap: "48px", --comp-radius: "24px", --comp-shadow: "0 10px 30px -10px rgba(0,0,0,0.08)", --comp-shadow-hover: "0 25px 50px -12px rgba(0,0,0,0.12)", --comp-card-padding: "40px", --comp-icon-size: "40px"
+- **product-grid**: --comp-cols: "3", --comp-gap: "40px", --comp-radius: "24px", --comp-shadow: "0 15px 35px -10px rgba(0,0,0,0.1)", --comp-shadow-hover: "0 30px 50px -12px rgba(0,0,0,0.15)", --comp-img-height: "300px"
+- **testimonials**: --comp-cols: "3", --comp-gap: "40px", --comp-radius: "32px", --comp-shadow: "0 20px 40px -12px rgba(0,0,0,0.08)", --comp-card-padding: "48px", --comp-card-bg: "#ffffff"
+- **pricing-table**: --comp-cols: "3", --comp-gap: "32px", --comp-radius: "32px", --comp-shadow: "0 20px 40px -12px rgba(0,0,0,0.1)", --comp-card-padding: "48px"
+- **about-section**: --comp-radius: "24px", --comp-shadow: "0 25px 50px -12px rgba(0,0,0,0.15)"
+- **faq-accordion**: --comp-radius: "16px", --comp-card-padding: "32px", --comp-shadow: "0 10px 30px -10px rgba(0,0,0,0.05)"
+- **contact-form**: --comp-radius: "24px", --comp-card-padding: "48px", --comp-shadow: "0 20px 40px -12px rgba(0,0,0,0.1)"
 - **footer**: --comp-max-width: "1200px"
 
 ### Hero Media Notes
@@ -1070,18 +1075,22 @@ Think of it as a single "site data model" — define the business facts once and
   }
 }
 
-### Font Pairing Rules (CRITICAL for premium feel)
-- heading and body fonts MUST be DIFFERENT font families
-- Use a serif or display font for headings (e.g., "Playfair Display", "Merriweather", "Lora", "DM Serif Display", "Crimson Text")
-- Use a clean sans-serif for body (e.g., "Inter", "DM Sans", "Plus Jakarta Sans", "Outfit", "Nunito Sans")
-- Match the font pairing to the business personality:
-  - Elegant/luxury: "Playfair Display" + "Lato"
-  - Modern/tech: "Space Grotesk" + "Inter"
-  - Warm/friendly: "Merriweather" + "Nunito Sans"
-  - Bold/startup: "Sora" + "DM Sans"
-  - Professional/corporate: "DM Serif Display" + "Plus Jakarta Sans"
-  - Creative/artistic: "Cormorant Garamond" + "Outfit"
-- Use generous radius for friendly/warm brands (16-20px), smaller for corporate (6-8px)
+### Font Pairing Rules & Dimensions (CRITICAL for premium Gemini-quality feel)
+- **Typography hierarchy is EVERYTHING.** Headings must use display-grade fonts with incredibly tight tracking and perfect leading.
+- **CRITICAL**: NEVER use playful, bubbly, or childish Google Fonts (e.g., no Urbanist, Fredoka, Chewy, etc.). You must exude high-end professionalism.
+- Use ONLY cutting-edge, ultra-premium Google Fonts:
+  - Modern/tech: "Syne", "Space Grotesk", "Manrope", or "Plus Jakarta Sans".
+  - Editorial/luxury: "Playfair Display", "Cinzel", "Cormorant Garamond", or "Prata".
+  - Clean/corporate: "Inter", "Roboto Flex", "DM Sans", or "Outfit".
+- Font pairing MUST completely contrast (e.g., a striking Serif or geometric Grotesk for headings + a highly legible Sans like "Inter" or "Manrope" for body text). Do NOT use the exact same family for both.
+- **Exact Sizing Dimensions (Mandatory Component Tokens)**:
+  - Hero Headings (--comp-heading-size): 56px, 64px, or 72px (always use heavy weight contextually).
+  - Section Titles (--comp-heading-size): 40px or 48px.
+  - Card Headings / Body Text: Body text must always feel generous and readable (e.g., 16px to 18px), with an open line-height of 1.6 to 1.7.
+- **Spacing Components (Mandatory Rhythm)**:
+  - Card Padding (--comp-card-padding): MUST be exactly 32px or 40px. Never less.
+  - Grids & Gaps (--comp-gap): MUST be 32px, 40px, or 48px. Never cramped.
+- **Micro-interactions & Borders**: Borders must be sub-pixel crisp (e.g., 1px solid thin opacity). Hover states must incorporate a noticeable Y-axis translation and an expanded shadow spread.
 
 Return ONLY the JSON object. No explanations, no markdown fences, no extra text.`
 }
@@ -1961,6 +1970,74 @@ function enforceConsistency(parsed) {
     })
   }
 
+  // ── Theme color sanity checks ──
+  if (parsed.theme?.colors) {
+    const tc = parsed.theme.colors
+
+    // Helper: parse hex to RGB
+    function hexToRgb(hex) {
+      if (!hex || typeof hex !== 'string') return null
+      hex = hex.replace('#', '')
+      if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2]
+      if (hex.length !== 6) return null
+      return { r: parseInt(hex.slice(0,2),16), g: parseInt(hex.slice(2,4),16), b: parseInt(hex.slice(4,6),16) }
+    }
+
+    // Helper: relative luminance
+    function luminance(rgb) {
+      if (!rgb) return 0.5
+      const [rs,gs,bs] = [rgb.r/255, rgb.g/255, rgb.b/255].map(c => c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4))
+      return 0.2126*rs + 0.7152*gs + 0.0722*bs
+    }
+
+    // 1. Text color must be dark (high contrast on light bg) or light (on dark bg)
+    const textRgb = hexToRgb(tc.text)
+    const bgRgb = hexToRgb(tc.background)
+    if (textRgb && bgRgb) {
+      const textLum = luminance(textRgb)
+      const bgLum = luminance(bgRgb)
+      // If bg is light (lum > 0.5), text should be dark (lum < 0.3)
+      if (bgLum > 0.5 && textLum > 0.3) {
+        console.log('[Consistency] Fixed: text color was too light/saturated (' + tc.text + '), resetting to dark')
+        tc.text = '#1a1a2e'
+      }
+      // If bg is dark (lum < 0.2), text should be light (lum > 0.6)
+      if (bgLum < 0.2 && textLum < 0.6) {
+        console.log('[Consistency] Fixed: text color too dark for dark background (' + tc.text + '), resetting to light')
+        tc.text = '#f3f4f6'
+      }
+    }
+
+    // 2. Accent must not be too dark (invisible CTAs) or too close to text
+    const accentRgb = hexToRgb(tc.accent)
+    if (accentRgb) {
+      const accentLum = luminance(accentRgb)
+      // Accent on light bg should be visible (not too dark, not too light)
+      if (bgRgb && luminance(bgRgb) > 0.5 && accentLum < 0.05) {
+        console.log('[Consistency] Fixed: accent too dark (' + tc.accent + '), was nearly invisible')
+        tc.accent = '#4F46E5' // fallback to indigo
+      }
+    }
+
+    // 3. Muted should be lighter than text
+    if (!tc.muted || tc.muted === tc.text) {
+      tc.muted = '#6b7280'
+    }
+
+    // 4. Background must be neutral — not saturated
+    if (bgRgb) {
+      const maxChannel = Math.max(bgRgb.r, bgRgb.g, bgRgb.b)
+      const minChannel = Math.min(bgRgb.r, bgRgb.g, bgRgb.b)
+      const saturation = maxChannel > 0 ? (maxChannel - minChannel) / maxChannel : 0
+      if (saturation > 0.15 && luminance(bgRgb) > 0.3) {
+        console.log('[Consistency] Fixed: background was saturated (' + tc.background + '), resetting to neutral')
+        tc.background = '#ffffff'
+      }
+    }
+
+    console.log('[Consistency] Theme validated: text=' + tc.text + ' accent=' + tc.accent + ' bg=' + tc.background)
+  }
+
   console.log('[Consistency] Enforced navbar/footer/product/contact/testimonial/trust-badge/nav-links consistency across all pages')
   return parsed
 }
@@ -2067,7 +2144,7 @@ export async function generateFull(prompt, blueprintContext) {
   let parsed = await callLLM(
     systemPrompt,
     userMessage,
-    { temperature: 0.7, quality: true }
+    { temperature: 0.85, quality: true }
   )
 
   validateAndFilterPages(parsed, plan.components, pageKeys)

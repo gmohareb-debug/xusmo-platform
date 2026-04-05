@@ -1,0 +1,726 @@
+{
+  "components": {
+    "announcement-bar": {
+      "description": "Top banner with dismissible message and optional CTA link",
+      "props": {
+        "text": "string - Banner message text",
+        "link": "{ label: string, href: string } - Optional CTA link",
+        "dismissible": "boolean - Whether user can close the banner (default: false)"
+      }
+    },
+    "navbar": {
+      "description": "Main navigation bar with logo (text or image), links, and call-to-action button",
+      "props": {
+        "logo": "string - Brand name text (always required)",
+        "logoUrl": "string - Logo image URL (optional, use placehold.co with brand initials if no real logo)",
+        "links": "array<{ label: string, href: string }> - Navigation links (default: [])",
+        "cta": "{ label: string, href: string } - Call-to-action button"
+      }
+    },
+    "dropdown-nav": {
+      "description": "Hover/click-activated dropdown navigation menu",
+      "props": {
+        "label": "string - Trigger button text",
+        "items": "array<{ label: string, href: string }> - Dropdown menu items (default: [])"
+      }
+    },
+    "mega-menu": {
+      "description": "Multi-column flyout navigation panel with grouped links",
+      "props": {
+        "columns": "array<{ title: string, items: array<{ label: string, href: string }> }> - Menu columns with titled link groups (default: [])"
+      }
+    },
+    "sticky-header": {
+      "description": "Fixed navigation header that sticks on scroll with logo, links, and CTA",
+      "props": {
+        "logo": "string - Brand name or logo text",
+        "links": "array<{ label: string, href: string }> - Navigation links (default: [])",
+        "cta": "{ label: string, href: string } - Call-to-action button"
+      }
+    },
+    "search-bar": {
+      "description": "Search input field with submit button and configurable placeholder",
+      "props": {
+        "placeholder": "string - Input placeholder text (default: 'Search...')",
+        "onSearch": "function - Callback invoked with query string on submit"
+      }
+    },
+    "login-button": {
+      "description": "Styled link button for user login with icon",
+      "props": {
+        "label": "string - Button label text (default: 'Log in')",
+        "href": "string - Login page URL (default: '#')"
+      }
+    },
+    "register-button": {
+      "description": "Styled link button for user registration with icon",
+      "props": {
+        "label": "string - Button label text (default: 'Sign up')",
+        "href": "string - Registration page URL (default: '#')"
+      }
+    },
+    "user-avatar-menu": {
+      "description": "User avatar with click-toggled dropdown menu showing user name and links",
+      "props": {
+        "name": "string - User display name",
+        "avatar": "string - URL for the user's avatar image",
+        "menuItems": "array<{ label: string, href: string }> - Dropdown menu links (default: [])"
+      }
+    },
+    "notification-icon": {
+      "description": "Bell icon button with unread notification count badge",
+      "props": {
+        "count": "number - Number of unread notifications (default: 0)"
+      }
+    },
+    "language-selector": {
+      "description": "Dropdown selector for switching between available languages",
+      "props": {
+        "languages": "array<{ code: string, label: string }> - Available language options (default: [])",
+        "current": "string - Currently selected language code"
+      }
+    },
+    "hero": {
+      "description": "Text+icon hero section with gradient background. Use for simple, clean designs without media. Best for service/professional sites.",
+      "props": {
+        "title": "string - Main heading text",
+        "subtitle": "string - Supporting description text",
+        "cta": "string - Primary call-to-action button label",
+        "ctaSecondary": "string - Secondary button label (optional)",
+        "eyebrow": "string - Small uppercase text above title (optional, e.g. 'Welcome to')",
+        "icon": "string - SVG icon markup displayed above the title (optional, e.g. '<svg>...</svg>')"
+      }
+    },
+    "hero-video": {
+      "description": "Full-width hero with autoplay background video, dark overlay, and white text. Best for immersive/premium sites.",
+      "props": {
+        "title": "string - Main heading text",
+        "subtitle": "string - Supporting description text",
+        "videoUrl": "string - URL of the background video (use stock Pixabay URLs)",
+        "cta": "string - Primary call-to-action button label",
+        "ctaSecondary": "string - Secondary button label (optional)",
+        "eyebrow": "string - Small uppercase text above title (optional)"
+      }
+    },
+    "hero-image": {
+      "description": "Full-width hero with background image, dark overlay, and white text. Best for showcasing a specific photo or product.",
+      "props": {
+        "title": "string - Main heading text",
+        "subtitle": "string - Supporting description text",
+        "imageUrl": "string - URL of the background image",
+        "cta": "string - Primary call-to-action button label",
+        "ctaSecondary": "string - Secondary button label (optional)",
+        "eyebrow": "string - Small uppercase text above title (optional)"
+      }
+    },
+    "hero-stats": {
+      "description": "Row of key metric statistics with values and labels",
+      "props": {
+        "stats": "array<{ value: string, label: string }> - Statistics to display"
+      }
+    },
+    "trust-badges": {
+      "description": "Row of partner/trust logos with optional section title",
+      "props": {
+        "title": "string - Section heading text",
+        "logos": "array<{ src: string, alt: string }> - Badge/logo images"
+      }
+    },
+    "scroll-indicator": {
+      "description": "Animated scroll-down arrow that links to a target section",
+      "props": {
+        "targetId": "string - ID of the target section to scroll to"
+      }
+    },
+    "section-title": {
+      "description": "Reusable section header with eyebrow, heading, and subtitle",
+      "props": {
+        "eyebrow": "string - Small label text above the title",
+        "title": "string - Main heading text",
+        "subtitle": "string - Supporting description text"
+      }
+    },
+    "content-card": {
+      "description": "Card with image, title, description, and read-more link",
+      "props": {
+        "image": "string - Card image URL",
+        "title": "string - Card heading text",
+        "description": "string - Card body text",
+        "link": "{ label: string, href: string } - Read-more link"
+      }
+    },
+    "featured-content": {
+      "description": "Side-by-side image and text section with optional reverse layout",
+      "props": {
+        "title": "string - Content heading text",
+        "description": "string - Content body text",
+        "image": "string - Featured image URL",
+        "reverse": "boolean - Whether to flip image and text order"
+      }
+    },
+    "about-section": {
+      "description": "About section with image, description text, and optional stats row",
+      "props": {
+        "title": "string - Section heading text",
+        "description": "string - About body text",
+        "image": "string - About image URL",
+        "stats": "array<{ value: string, label: string }> - Key statistics"
+      }
+    },
+    "services-section": {
+      "description": "Grid of clickable service cards with icons, images, titles, descriptions, and links",
+      "props": {
+        "title": "string - Section heading text",
+        "services": "array<{ icon: string, title: string, description: string, image: string (optional thumbnail), href: string (link target) }> - Service items"
+      }
+    },
+    "features": {
+      "description": "Feature grid with icons, titles, and descriptions. Supports simple string list or rich objects.",
+      "props": {
+        "title": "string - Section heading text",
+        "items": "array<{ icon: string, title: string, description: string }> - Rich feature cards with icons (preferred), OR array<string> for simple bullet list"
+      }
+    },
+    "product-grid": {
+      "description": "Grid of clickable product cards with images, names, prices, descriptions, and links",
+      "props": {
+        "title": "string - Section heading text",
+        "products": "array<{ image: string, name: string, price: string, description: string, href: string }> - Product items (each card is clickable)"
+      }
+    },
+    "category-showcase": {
+      "description": "Linked category cards with background images and overlay names",
+      "props": {
+        "title": "string - Section heading text",
+        "categories": "array<{ name: string, image: string, href: string }> - Category items"
+      }
+    },
+    "tag-cloud": {
+      "description": "Collection of tag pills displayed in a flowing layout",
+      "props": {
+        "title": "string - Section heading text",
+        "tags": "array<string> - Tag label strings"
+      }
+    },
+    "related-content": {
+      "description": "Grid of linked content cards with images and titles",
+      "props": {
+        "title": "string - Section heading text",
+        "items": "array<{ title: string, image: string, href: string }> - Related content items"
+      }
+    },
+    "author-profile": {
+      "description": "Author bio card with avatar, name, bio text, and social links",
+      "props": {
+        "name": "string - Author display name",
+        "avatar": "string - Author avatar image URL",
+        "bio": "string - Author biography text",
+        "socialLinks": "array<{ platform: string, href: string }> - Social media links"
+      }
+    },
+    "gallery": {
+      "description": "Image gallery grid with title and alt-text support",
+      "props": {
+        "title": "string - Gallery heading text",
+        "images": "array<{ src: string, alt: string }> - Gallery images (default: [])"
+      }
+    },
+    "carousel": {
+      "description": "Image carousel with prev/next buttons, captions, and dot indicators",
+      "props": {
+        "items": "array<{ image: string, caption: string }> - Carousel slides"
+      }
+    },
+    "lightbox": {
+      "description": "Thumbnail grid that opens a full-screen image viewer with navigation",
+      "props": {
+        "images": "array<{ src: string, alt: string }> - Images for the lightbox"
+      }
+    },
+    "video-player": {
+      "description": "HTML5 video player with poster image and optional title",
+      "props": {
+        "src": "string - Video source URL",
+        "poster": "string - Poster/thumbnail image URL",
+        "title": "string - Video title text"
+      }
+    },
+    "embedded-media": {
+      "description": "Responsive iframe embed for external media like YouTube or Vimeo",
+      "props": {
+        "url": "string - Embed URL for the iframe",
+        "title": "string - Descriptive title for the embed"
+      }
+    },
+    "audio-player": {
+      "description": "HTML5 audio player with optional title",
+      "props": {
+        "src": "string - Audio source URL",
+        "title": "string - Audio track title"
+      }
+    },
+    "before-after-comparison": {
+      "description": "Interactive slider comparing two images side by side",
+      "props": {
+        "before": "{ src: string, label: string } - Before image with label",
+        "after": "{ src: string, label: string } - After image with label"
+      }
+    },
+    "contact": {
+      "description": "Simple contact section with title, description, email, phone, and button",
+      "props": {
+        "title": "string - Section heading text",
+        "description": "string - Contact body text",
+        "email": "string - Contact email address",
+        "phone": "string - Contact phone number",
+        "button": "string - Action button label"
+      }
+    },
+    "contact-form": {
+      "description": "Dynamic contact form with configurable fields and submit button",
+      "props": {
+        "title": "string - Form heading text",
+        "fields": "array<{ name: string, type: string, placeholder: string, required: boolean }> - Form field definitions (default: [])",
+        "submitLabel": "string - Submit button text (default: 'Submit')"
+      }
+    },
+    "newsletter-form": {
+      "description": "Email subscription form with title, description, and success message",
+      "props": {
+        "title": "string - Form heading text",
+        "description": "string - Descriptive text above the input",
+        "placeholder": "string - Email input placeholder (default: 'Enter your email')",
+        "buttonLabel": "string - Subscribe button text (default: 'Subscribe')"
+      }
+    },
+    "quick-inquiry-form": {
+      "description": "Compact inquiry form with configurable text fields",
+      "props": {
+        "title": "string - Form heading text",
+        "fields": "array<{ name: string, placeholder: string }> - Input field definitions (default: [])",
+        "submitLabel": "string - Submit button text (default: 'Send')"
+      }
+    },
+    "file-upload-form": {
+      "description": "Drag-and-drop file upload form with type and size validation",
+      "props": {
+        "title": "string - Form heading text",
+        "accept": "string - Comma-separated accepted file extensions (default: '')",
+        "maxSizeMb": "number - Maximum file size in megabytes (default: 10)",
+        "submitLabel": "string - Upload button text (default: 'Upload')"
+      }
+    },
+    "live-chat-widget": {
+      "description": "Floating live-chat bubble that opens a message panel with online status",
+      "props": {
+        "title": "string - Chat panel heading (default: 'Live Chat')",
+        "subtitle": "string - Chat panel subheading (default: 'We're here to help')",
+        "online": "boolean - Whether support is currently online (default: true)"
+      }
+    },
+    "chatbot-assistant": {
+      "description": "Conversational chatbot UI with message history and text input",
+      "props": {
+        "name": "string - Bot display name (default: 'Bot')",
+        "welcomeMessage": "string - Initial greeting message (default: 'Hello! How can I help you today?')"
+      }
+    },
+    "feedback-form": {
+      "description": "Feedback form with radio options and optional comment textarea",
+      "props": {
+        "title": "string - Form heading text",
+        "options": "array<{ value: string, label: string }> - Feedback radio options (default: [])"
+      }
+    },
+    "rating-widget": {
+      "description": "Interactive star rating widget with hover preview",
+      "props": {
+        "title": "string - Widget heading text",
+        "maxStars": "number - Maximum number of stars (default: 5)"
+      }
+    },
+    "review-form": {
+      "description": "Review submission form with optional star rating and text area",
+      "props": {
+        "title": "string - Form heading text",
+        "ratingEnabled": "boolean - Whether to show the star rating input (default: true)"
+      }
+    },
+    "comment-section": {
+      "description": "Comment thread with existing comments list and new comment form",
+      "props": {
+        "title": "string - Section heading text",
+        "comments": "array<{ author: string, text: string, date: string }> - Existing comments (default: [])"
+      }
+    },
+    "advanced-search": {
+      "description": "Search bar with expandable filter panel for multi-criteria search",
+      "props": {
+        "title": "string - Section heading text",
+        "filters": "array<{ name: string, type: string, options: array<string> }> - Filter field definitions (default: [])",
+        "placeholder": "string - Search input placeholder (default: 'Search...')"
+      }
+    },
+    "search-results": {
+      "description": "Search results list displaying query, total count, and linked result items",
+      "props": {
+        "query": "string - The search query string",
+        "results": "array<{ title: string, description: string, href: string }> - Result items (default: [])",
+        "total": "number - Total number of results (overrides results.length)"
+      }
+    },
+    "filters-sidebar": {
+      "description": "Collapsible sidebar with grouped checkbox filters",
+      "props": {
+        "title": "string - Sidebar heading text",
+        "groups": "array<{ name: string, options: array<string> }> - Filter groups with options (default: [])"
+      }
+    },
+    "sort-controls": {
+      "description": "Sort-by dropdown and button group for ordering results",
+      "props": {
+        "options": "array<{ value: string, label: string }> - Sort options (default: [])",
+        "current": "string - Currently selected sort value"
+      }
+    },
+    "price-filter": {
+      "description": "Dual-range slider for filtering by price range",
+      "props": {
+        "min": "number - Minimum price value (default: 0)",
+        "max": "number - Maximum price value (default: 1000)",
+        "currency": "string - Currency symbol (default: '$')"
+      }
+    },
+    "tag-filters": {
+      "description": "Toggleable tag pill buttons for multi-select tag filtering",
+      "props": {
+        "tags": "array<string> - Available tag labels (default: [])",
+        "selected": "array<string> - Initially selected tags (default: [])"
+      }
+    },
+    "category-filters": {
+      "description": "Vertical list of category buttons with optional item counts",
+      "props": {
+        "categories": "array<{ name: string, count: number }> - Category items with counts (default: [])"
+      }
+    },
+    "clear-filter-button": {
+      "description": "Button to reset all active filters",
+      "props": {
+        "label": "string - Button label text (default: 'Clear All Filters')",
+        "onClick": "function - Callback invoked when button is clicked"
+      }
+    },
+    "pricing": {
+      "description": "Pricing cards grid with plan names, prices, and descriptions",
+      "props": {
+        "title": "string - Section heading text",
+        "plans": "array<{ name: string, price: string, description: string }> - Pricing plans (default: [])"
+      }
+    },
+    "product-card": {
+      "description": "Product card with image, name, price, original price, badge, and optional link",
+      "props": {
+        "image": "string - Product image URL",
+        "name": "string - Product name",
+        "price": "string - Current price",
+        "originalPrice": "string - Original/strikethrough price",
+        "badge": "string - Badge label text (e.g. 'Sale')",
+        "href": "string - Product detail page URL"
+      }
+    },
+    "product-detail": {
+      "description": "Full product detail page with gallery, name, price, description, specs, and stock status",
+      "props": {
+        "images": "array<string> - Product image URLs (default: [])",
+        "name": "string - Product name",
+        "price": "string - Product price",
+        "description": "string - Product description text",
+        "specs": "array<{ label: string, value: string }> - Specification rows (default: [])",
+        "inStock": "boolean - Whether the product is in stock"
+      }
+    },
+    "add-to-cart-button": {
+      "description": "Add-to-cart button with cart icon and disabled state",
+      "props": {
+        "label": "string - Button label text (default: 'Add to Cart')",
+        "disabled": "boolean - Whether the button is disabled (default: false)"
+      }
+    },
+    "wishlist-button": {
+      "description": "Toggle button with heart icon for adding/removing from wishlist",
+      "props": {
+        "active": "boolean - Whether the item is wishlisted (default: false)",
+        "label": "string - Button label text (default: 'Wishlist')"
+      }
+    },
+    "compare-button": {
+      "description": "Toggle button for adding/removing a product from comparison",
+      "props": {
+        "label": "string - Button label text (default: 'Compare')",
+        "active": "boolean - Whether compare mode is active (default: false)"
+      }
+    },
+    "product-gallery": {
+      "description": "Product image gallery with main image and clickable thumbnails",
+      "props": {
+        "images": "array<{ src: string, alt: string }> - Product images (default: [])"
+      }
+    },
+    "product-specs-table": {
+      "description": "Striped table displaying product specification label-value pairs",
+      "props": {
+        "title": "string - Table heading text (default: 'Specifications')",
+        "specs": "array<{ label: string, value: string }> - Specification rows (default: [])"
+      }
+    },
+    "stock-indicator": {
+      "description": "Colored dot indicator showing in-stock/out-of-stock status with quantity",
+      "props": {
+        "inStock": "boolean - Whether the product is in stock (default: false)",
+        "quantity": "number - Available quantity (shown when in stock)"
+      }
+    },
+    "price-display": {
+      "description": "Formatted price display with optional original price, currency, and billing period",
+      "props": {
+        "price": "number|string - Current price amount",
+        "originalPrice": "number|string - Original/crossed-out price amount",
+        "currency": "string - Currency symbol (default: '$')",
+        "period": "string - Billing period label (e.g. 'month')"
+      }
+    },
+    "discount-badge": {
+      "description": "Small badge label for promotions like sale, new, or clearance",
+      "props": {
+        "text": "string - Badge display text",
+        "type": "string - Badge variant: 'sale', 'new', etc. (default: 'sale')"
+      }
+    },
+    "user-dashboard": {
+      "description": "User dashboard with greeting, stat cards, and recent activity list",
+      "props": {
+        "userName": "string - User's display name",
+        "stats": "array<{ value: string, label: string }> - Dashboard stat cards (default: [])",
+        "recentActivity": "array<{ action: string, date: string }> - Recent activity items (default: [])"
+      }
+    },
+    "profile-page": {
+      "description": "User profile page with avatar, name, email, bio, and member-since date",
+      "props": {
+        "name": "string - User display name",
+        "email": "string - User email address",
+        "avatar": "string - Avatar image URL",
+        "bio": "string - User biography text",
+        "memberSince": "string - Membership start date"
+      }
+    },
+    "edit-profile-form": {
+      "description": "Editable profile form with dynamic field definitions and submit button",
+      "props": {
+        "fields": "array<{ name: string, label: string, type: string, value: string }> - Form field definitions (default: [])",
+        "submitLabel": "string - Submit button text (default: 'Save Changes')"
+      }
+    },
+    "order-history": {
+      "description": "Table of past orders showing ID, date, items, total, and status",
+      "props": {
+        "title": "string - Section heading text (default: 'Order History')",
+        "orders": "array<{ id: string, date: string, items: array<string>|string, total: string, status: string }> - Order records (default: [])"
+      }
+    },
+    "saved-items": {
+      "description": "Grid of saved/bookmarked items with images, names, prices, and links",
+      "props": {
+        "title": "string - Section heading text (default: 'Saved Items')",
+        "items": "array<{ name: string, image: string, price: string, href: string }> - Saved items (default: [])"
+      }
+    },
+    "notifications-center": {
+      "description": "Notification list with unread badge, message text, and dates",
+      "props": {
+        "title": "string - Section heading text (default: 'Notifications')",
+        "notifications": "array<{ message: string, date: string, read: boolean }> - Notification items (default: [])"
+      }
+    },
+    "messages-inbox": {
+      "description": "Message inbox list with sender, subject, date, preview, and read status",
+      "props": {
+        "title": "string - Section heading text (default: 'Inbox')",
+        "messages": "array<{ from: string, subject: string, date: string, preview: string, read: boolean }> - Message items (default: [])"
+      }
+    },
+    "activity-timeline": {
+      "description": "Vertical timeline showing user activity events with dates and descriptions",
+      "props": {
+        "title": "string - Section heading text (default: 'Activity')",
+        "events": "array<{ action: string, date: string, description: string }> - Timeline events (default: [])"
+      }
+    },
+    "testimonials": {
+      "description": "Grid of customer testimonial cards with quotes, author photos, roles, and star ratings",
+      "props": {
+        "title": "string - Section heading text",
+        "testimonials": "array<{ quote: string, name: string, avatar: string (placehold.co URL with initials), role: string (job title/company), rating: number (1-5 stars) }> - Testimonial items (default: [])"
+      }
+    },
+    "case-studies": {
+      "description": "Grid of case study cards with images, client names, titles, and descriptions",
+      "props": {
+        "title": "string - Section heading text",
+        "studies": "array<{ title: string, client: string, description: string, image: string, href: string }> - Case study items (default: [])"
+      }
+    },
+    "client-logos": {
+      "description": "Grayscale logo row showcasing clients or partners",
+      "props": {
+        "title": "string - Section heading text",
+        "logos": "array<{ src: string, alt: string }> - Client logo images (default: [])"
+      }
+    },
+    "pricing-table": {
+      "description": "Pricing plan cards with features, clickable CTA buttons, and highlighted plan support",
+      "props": {
+        "title": "string - Section heading text",
+        "plans": "array<{ name: string, price: string, period: string, features: array<string>, cta: string, ctaHref: string (link target, e.g. '#contact'), badge: string (optional, e.g. 'Most Popular'), highlighted: boolean }> - Plan definitions (default: [])"
+      }
+    },
+    "feature-comparison": {
+      "description": "Feature comparison table with plan columns and check/cross values",
+      "props": {
+        "title": "string - Section heading text",
+        "features": "array<string> - Feature row labels (default: [])",
+        "plans": "array<{ name: string, values: array<boolean|string> }> - Plan columns with per-feature values (default: [])"
+      }
+    },
+    "faq-accordion": {
+      "description": "Accordion of frequently asked questions with expand/collapse toggle",
+      "props": {
+        "title": "string - Section heading text",
+        "items": "array<{ question: string, answer: string }> - FAQ entries (default: [])"
+      }
+    },
+    "certifications-badges": {
+      "description": "Grid of certification or accreditation badge images with labels",
+      "props": {
+        "title": "string - Section heading text",
+        "badges": "array<{ src: string, alt: string, label: string }> - Badge items (default: [])"
+      }
+    },
+    "breadcrumbs": {
+      "description": "Breadcrumb navigation trail with linked items and current page indicator",
+      "props": {
+        "items": "array<{ label: string, href: string }> - Breadcrumb trail items (default: [])"
+      }
+    },
+    "pagination": {
+      "description": "Page navigation with previous/next buttons and numbered page buttons",
+      "props": {
+        "currentPage": "number - Currently active page number",
+        "totalPages": "number - Total number of pages",
+        "onPageChange": "function - Callback invoked with the selected page number"
+      }
+    },
+    "back-to-top": {
+      "description": "Fixed-position button that smooth-scrolls back to the top of the page",
+      "props": {
+        "label": "string - Button label/aria-label text (default: 'Back to top')"
+      }
+    },
+    "cookie-consent": {
+      "description": "Fixed bottom banner for cookie consent with accept/decline buttons and privacy link",
+      "props": {
+        "message": "string - Consent message text",
+        "acceptLabel": "string - Accept button text (default: 'Accept')",
+        "declineLabel": "string - Decline button text (default: 'Decline')",
+        "privacyHref": "string - Privacy policy page URL"
+      }
+    },
+    "loading-spinner": {
+      "description": "Animated circular loading spinner with configurable size and label",
+      "props": {
+        "size": "string - Spinner size: 'sm', 'md', or 'lg' (default: 'md')",
+        "label": "string - Loading label text displayed below the spinner"
+      }
+    },
+    "empty-state": {
+      "description": "Placeholder UI for empty content areas with icon, message, and action link",
+      "props": {
+        "icon": "string - Icon or emoji displayed above the title",
+        "title": "string - Empty state heading text",
+        "description": "string - Explanatory description text",
+        "actionLabel": "string - Action link label",
+        "actionHref": "string - Action link URL"
+      }
+    },
+    "error-message": {
+      "description": "Error alert with title, description, and optional retry button",
+      "props": {
+        "title": "string - Error heading text",
+        "description": "string - Error description text",
+        "retryLabel": "string - Retry button label",
+        "onRetry": "function - Callback invoked when retry button is clicked"
+      }
+    },
+    "maintenance-notice": {
+      "description": "Full-page maintenance notice with title, message, and estimated time",
+      "props": {
+        "title": "string - Notice heading text (default: 'Under Maintenance')",
+        "message": "string - Maintenance explanation text",
+        "estimatedTime": "string - Estimated time until service is restored"
+      }
+    },
+    "footer": {
+      "description": "Simple footer with text and a row of navigation links",
+      "props": {
+        "text": "string - Footer body text",
+        "links": "array<{ label: string, href: string }> - Footer navigation links (default: [])"
+      }
+    },
+    "social-media-icons": {
+      "description": "Row of social media icon links for platforms like Twitter, Facebook, etc.",
+      "props": {
+        "links": "array<{ platform: string, href: string }> - Social platform links (default: [])"
+      }
+    },
+    "footer-newsletter": {
+      "description": "Footer-embedded newsletter signup form with title and description",
+      "props": {
+        "title": "string - Form heading text",
+        "description": "string - Descriptive text above the input",
+        "placeholder": "string - Email input placeholder (default: 'Enter your email')",
+        "buttonLabel": "string - Subscribe button text (default: 'Subscribe')"
+      }
+    },
+    "contact-details-block": {
+      "description": "Contact information block with address, phone, email, and business hours",
+      "props": {
+        "address": "string - Physical address text",
+        "phone": "string - Phone number (linked with tel:)",
+        "email": "string - Email address (linked with mailto:)",
+        "hours": "string - Business hours text"
+      }
+    },
+    "map-embed": {
+      "description": "Responsive iframe map embed with configurable height",
+      "props": {
+        "embedUrl": "string - Google Maps or map embed URL",
+        "title": "string - Iframe title for accessibility (default: 'Map')",
+        "height": "string - Iframe height in pixels (default: '400')"
+      }
+    },
+    "legal-links": {
+      "description": "Inline list of legal page links separated by dividers",
+      "props": {
+        "links": "array<{ label: string, href: string }> - Legal page links (default: [])"
+      }
+    },
+    "copyright-notice": {
+      "description": "Copyright text line with year and company/owner name",
+      "props": {
+        "text": "string - Company or owner name",
+        "year": "number|string - Copyright year (defaults to current year)"
+      }
+    }
+  }
+}

@@ -128,9 +128,8 @@ function buildThemeCSS(theme?: ThemeDef): string {
   if (theme.colors?.background) {
     fontRules.push(`background-color: ${theme.colors.background}`);
   }
-  if (theme.colors?.text) {
-    fontRules.push(`color: ${theme.colors.text}`);
-  }
+  // Don't set color: directly on :root — it overrides component-level Tailwind classes.
+  // The --text CSS variable is already set above; components use text-[var(--text,...)]
 
   const allVars = [...vars, ...fontRules].join(";\n  ");
   const googleLink = googleFonts.length
