@@ -35,7 +35,7 @@ export function Navbar({ logo, logoUrl, links = [], cta }) {
             <li key={link.label}>
               <a
                 href={link.href}
-                className="inline-block px-4 py-2 text-sm font-medium text-[var(--text,#1c1c1c)]/60 hover:text-[var(--text,#1c1c1c)] rounded-lg hover:bg-black/[0.04] transition-all duration-200 no-underline"
+                className="inline-block px-4 py-2 text-sm font-medium text-[var(--muted,#6b7280)] hover:text-[var(--text,#1c1c1c)] rounded-lg hover:bg-[var(--text,#1c1c1c)]/[0.06] transition-all duration-200 no-underline"
               >
                 {link.label}
               </a>

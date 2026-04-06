@@ -46,7 +46,7 @@ export function NewsletterForm({
       ) : (
         <form className="flex flex-col sm:flex-row gap-3" onSubmit={handleSubmit} noValidate>
           <input
-            className="flex-1 px-5 py-3.5 rounded-xl border border-[var(--border,#e5e7eb)] bg-[var(--surface,#fff)] text-[var(--text,#1c1c1c)] text-sm outline-none focus:ring-2 focus:ring-[var(--accent,#3b82f6)]/30 focus:border-[var(--accent,#3b82f6)] transition-all placeholder:text-[var(--muted,#6b7280)]/60"
+            className="flex-1 px-5 py-3.5 rounded-xl border border-[var(--border,#e5e7eb)] bg-[var(--surface,#fff)] text-[var(--text,#1c1c1c)] text-sm outline-none focus:ring-2 focus:ring-[var(--accent,#3b82f6)]/30 focus:border-[var(--accent,#3b82f6)] transition-all placeholder:text-[var(--muted,#6b7280)]"
             type="email"
             placeholder={placeholder}
             value={email}

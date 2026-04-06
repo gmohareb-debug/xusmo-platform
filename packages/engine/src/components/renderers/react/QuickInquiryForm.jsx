@@ -45,7 +45,7 @@ export function QuickInquiryForm({
         <form className="space-y-4" onSubmit={handleSubmit}>
           {fields.map((field) => (
             <input
-              className="w-full px-4 py-3 rounded-xl border border-[var(--border,#e5e7eb)] bg-[var(--background,#fff)] text-[var(--text,#1c1c1c)] text-sm outline-none focus:ring-2 focus:ring-[var(--accent,#3b82f6)]/30 focus:border-[var(--accent,#3b82f6)] transition-all duration-200 placeholder:text-[var(--muted,#6b7280)]/60"
+              className="w-full px-4 py-3 rounded-xl border border-[var(--border,#e5e7eb)] bg-[var(--background,#fff)] text-[var(--text,#1c1c1c)] text-sm outline-none focus:ring-2 focus:ring-[var(--accent,#3b82f6)]/30 focus:border-[var(--accent,#3b82f6)] transition-all duration-200 placeholder:text-[var(--muted,#6b7280)]"
               key={field.name}
               type="text"
               name={field.name}
