@@ -4,6 +4,7 @@
 // =============================================================================
 
 import { Worker, type Job } from "bullmq";
+import { logAgentFeedback, setAgentMemory } from "@/lib/agents/agent-memory";
 import { prisma } from "@/lib/db";
 import { completeAgent } from "@/lib/queue";
 import { routeLLM } from "@/lib/llm/router";

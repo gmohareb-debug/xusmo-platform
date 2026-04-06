@@ -574,10 +574,11 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
       const businessName = (bizForKnowledge.name as string) ?? "My Business";
       const industryForKnowledge = bpForKnowledge.lead?.industryName || "unknown";
 
+      const archetypeForKnowledge = bpForKnowledge.lead?.archetype || "SERVICE";
       const knowledgeResult = await checkKnowledgeBase(
         `Build website for ${businessName}, a ${industryForKnowledge} business`,
         industryForKnowledge,
-        archetype,
+        archetypeForKnowledge,
         businessName
       );
 

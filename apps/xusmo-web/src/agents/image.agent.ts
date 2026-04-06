@@ -4,6 +4,7 @@
 // =============================================================================
 
 import { prisma } from "@/lib/db";
+import { logAgentFeedback, setAgentMemory } from "@/lib/agents/agent-memory";
 import {
   generateImagePlan,
   type ImagePlan,

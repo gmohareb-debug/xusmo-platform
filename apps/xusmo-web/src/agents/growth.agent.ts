@@ -3,6 +3,7 @@
 // =============================================================================
 
 import { prisma } from "@/lib/db";
+import { logAgentFeedback, setAgentMemory } from "@/lib/agents/agent-memory";
 
 export interface UpsellRecommendation {
   id: string;

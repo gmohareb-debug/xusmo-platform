@@ -4,6 +4,7 @@
 // =============================================================================
 
 import { geminiFlash, geminiPro } from "@/lib/llm/gemini";
+import { logAgentFeedback, setAgentMemory } from "@/lib/agents/agent-memory";
 import {
   generateBlogIdeas as _generateBlogIdeas,
   generateBlogPost as _generateBlogPost,

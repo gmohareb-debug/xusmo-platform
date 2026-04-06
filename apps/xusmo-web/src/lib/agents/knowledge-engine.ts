@@ -64,7 +64,7 @@ interface DeltaResult {
 
 const blueprintStore: StoredBlueprint[] = [];
 const MAX_BLUEPRINTS = 5000;
-const SIMILARITY_THRESHOLD = 0.88;  // Lower than 0.92 to be more aggressive about reuse
+const SIMILARITY_THRESHOLD = 0.60;  // Lowered — bag-of-words embeddings need a lower threshold. Industry pre-filter compensates.
 const HIGH_CONFIDENCE_THRESHOLD = 0.95;
 
 // Redis for exact match
@@ -194,10 +194,17 @@ export async function findSimilarBlueprint(
   let bestScore = 0;
 
   for (const bp of blueprintStore) {
-    // Pre-filter by industry for speed
-    if (industry && bp.industry !== industry.toLowerCase() && bestScore > 0.5) continue;
+    let score = cosineSimilarity(queryEmbedding, bp.embedding);
 
-    const score = cosineSimilarity(queryEmbedding, bp.embedding);
+    // Industry match bonus — same industry is a strong signal
+    if (industry && bp.industry === industry.toLowerCase()) {
+      score = Math.min(1.0, score + 0.3); // Big boost for same industry
+    }
+    // Archetype match bonus
+    if (archetype && bp.archetype === archetype?.toLowerCase()) {
+      score = Math.min(1.0, score + 0.1);
+    }
+
     if (score > bestScore) {
       bestScore = score;
       bestMatch = bp;

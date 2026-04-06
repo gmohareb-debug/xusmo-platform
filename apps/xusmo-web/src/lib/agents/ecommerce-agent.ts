@@ -8,6 +8,7 @@
 import { prisma } from "@/lib/db";
 import { geminiFlash } from "@/lib/llm/gemini";
 import type { AgentInput, AgentResult, AgentAction } from "./types";
+import { getAgentMemory, setAgentMemory, logAgentFeedback } from "./agent-memory";
 
 // ---------------------------------------------------------------------------
 // E-commerce action types

@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { geminiPro } from "@/lib/llm/gemini";
 import { syncDesignToWordPress, syncPageToWordPress } from "@/lib/wordpress/sync";
 import type { AgentInput, AgentResult, AgentAction } from "./types";
+import { setAgentMemory, logAgentFeedback, getLessonsForPrompt, buildPersonalityPrompt } from "./agent-memory";
 
 // ---------------------------------------------------------------------------
 // Edit action types

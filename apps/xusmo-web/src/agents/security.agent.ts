@@ -5,6 +5,7 @@
 // =============================================================================
 
 import { Worker, type Job } from "bullmq";
+import { logAgentFeedback, setAgentMemory } from "@/lib/agents/agent-memory";
 import { prisma } from "@/lib/db";
 import { getExecutor } from "@/lib/wordpress/ssh";
 import crypto from "crypto";

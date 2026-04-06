@@ -6,6 +6,7 @@
 // =============================================================================
 
 import { Worker, type Job } from "bullmq";
+import { logAgentFeedback, setAgentMemory } from "@/lib/agents/agent-memory";
 import { prisma } from "@/lib/db";
 import { provisionSite } from "@/lib/wordpress/provision";
 import { buildThemeJson } from "@/lib/wordpress/fonts";

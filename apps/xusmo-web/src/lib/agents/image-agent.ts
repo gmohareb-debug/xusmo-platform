@@ -7,6 +7,7 @@
 
 import { prisma } from "@/lib/db";
 import type { AgentInput, AgentResult, AgentAction } from "./types";
+import { getAgentMemory, setAgentMemory, logAgentFeedback } from "./agent-memory";
 
 interface PexelsPhoto {
   src: { original: string; large: string; medium: string };
@@ -260,6 +261,12 @@ export async function runImageAgent(input: AgentInput): Promise<AgentResult> {
           designDocument: { ...doc, pages: { ...pages, [targetPage]: { ...page, sections: updatedSections } } },
         },
       });
+    }
+
+    // Store successful search queries in memory for industry learning
+    if (updated > 0) {
+      await setAgentMemory(siteId, "image", "lastUpdate", { page: targetPage, count: updated, ts: Date.now() });
+      logAgentFeedback(siteId, "image", "update", true, undefined, context.industry);
     }
 
     return {

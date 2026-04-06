@@ -8,6 +8,7 @@
 import { prisma } from "@/lib/db";
 import { geminiFlash } from "@/lib/llm/gemini";
 import type { AgentInput, AgentResult, AgentAction } from "./types";
+import { getAgentMemory, setAgentMemory, buildPersonalityPrompt, getLessonsForPrompt, logAgentFeedback } from "./agent-memory";
 
 // ---------------------------------------------------------------------------
 // SEO knowledge base — industry-specific keyword patterns
@@ -92,6 +93,15 @@ export async function runSEOAgent(input: AgentInput): Promise<AgentResult> {
   const startTime = Date.now();
 
   try {
+    // Check if we have cached SEO for this industry
+    const cachedSEO = await getAgentMemory(siteId, "seo", "lastAudit");
+    if (cachedSEO && !prompt.toLowerCase().includes("regenerate") && !prompt.toLowerCase().includes("redo")) {
+      actions.push({ type: "CACHE_HIT", success: true, label: "Using cached SEO data" });
+    }
+
+    // Get learned lessons for SEO
+    const lessons = await getLessonsForPrompt("seo", context.industry);
+
     const pages = await prisma.page.findMany({
       where: { siteId },
       select: { slug: true, title: true, heroHeadline: true, metaTitle: true, metaDesc: true },
@@ -201,6 +211,12 @@ ${isFullAudit ? "Generate comprehensive SEO for ALL pages including keywords, OG
     const parts = [`SEO optimized for ${actions.length - (parsed.siteKeywords ? 1 : 0)} page(s).`];
     if (parsed.siteKeywords?.length) parts.push(`Target keywords: ${parsed.siteKeywords.slice(0, 3).join(", ")}.`);
     if (parsed.contentGaps?.length) parts.push(`Content gaps found: ${parsed.contentGaps.slice(0, 2).join(", ")}.`);
+
+    // Store in agent memory for future reuse
+    await setAgentMemory(siteId, "seo", "lastAudit", new Date().toISOString());
+    await setAgentMemory(siteId, "seo", "keywords", parsed.siteKeywords || []);
+    await setAgentMemory(siteId, "seo", "industry", context.industry);
+    logAgentFeedback(siteId, "seo", "audit", true, undefined, context.industry);
 
     return {
       agent: "seo",
