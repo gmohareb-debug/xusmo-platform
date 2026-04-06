@@ -27,40 +27,64 @@ export function FiltersSidebar({ title, groups = [] }) {
   }
 
   return (
-    <aside className="filters-sidebar">
-      {title && <h3 className="filters-sidebar-title">{title}</h3>}
-      {groups.map((group) => (
-        <div className="filters-sidebar-group" key={group.name}>
-          <button
-            className="filters-sidebar-group-header"
-            type="button"
-            onClick={() => toggleCollapse(group.name)}
+    <aside className="w-full max-w-xs">
+      {title && (
+        <h3
+          className="text-lg font-bold mb-4"
+          style={{ color: 'var(--text, #1c1c1c)', fontFamily: 'var(--font-heading, inherit)' }}
+        >
+          {title}
+        </h3>
+      )}
+      <div className="flex flex-col gap-2">
+        {groups.map((group) => (
+          <div
+            key={group.name}
+            className="rounded-lg overflow-hidden"
+            style={{ border: '1px solid var(--border, #e5e7eb)' }}
           >
-            <span className="filters-sidebar-group-name">{group.name}</span>
-            <span className="filters-sidebar-group-toggle">
-              {collapsed[group.name] ? "+" : "\u2212"}
-            </span>
-          </button>
-          {!collapsed[group.name] && (
-            <div className="filters-sidebar-group-options">
-              {(group.options || []).map((opt) => {
-                const key = group.name + ":" + opt;
-                return (
-                  <label className="filters-sidebar-option" key={key}>
-                    <input
-                      className="filters-sidebar-checkbox"
-                      type="checkbox"
-                      checked={!!checked[key]}
-                      onChange={() => toggleCheck(key)}
-                    />
-                    <span className="filters-sidebar-option-label">{opt}</span>
-                  </label>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      ))}
+            <button
+              className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold transition-colors duration-150 hover:brightness-95"
+              style={{
+                backgroundColor: 'var(--surface, #fff)',
+                color: 'var(--text, #1c1c1c)',
+              }}
+              type="button"
+              onClick={() => toggleCollapse(group.name)}
+            >
+              <span>{group.name}</span>
+              <span className="text-base" style={{ color: 'var(--muted, #6b7280)' }}>
+                {collapsed[group.name] ? "+" : "\u2212"}
+              </span>
+            </button>
+            {!collapsed[group.name] && (
+              <div
+                className="flex flex-col gap-2 px-4 py-3"
+                style={{ borderTop: '1px solid var(--border, #e5e7eb)' }}
+              >
+                {(group.options || []).map((opt) => {
+                  const key = group.name + ":" + opt;
+                  return (
+                    <label
+                      className="flex items-center gap-2.5 cursor-pointer text-sm"
+                      style={{ color: 'var(--text, #1c1c1c)' }}
+                      key={key}
+                    >
+                      <input
+                        className="w-4 h-4 rounded accent-[var(--accent,#3b82f6)]"
+                        type="checkbox"
+                        checked={!!checked[key]}
+                        onChange={() => toggleCheck(key)}
+                      />
+                      <span>{opt}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </aside>
   );
 }

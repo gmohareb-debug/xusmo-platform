@@ -25,7 +25,7 @@ export function FeaturedContent({ title, description, image, reverse, layout = '
   if (layout === 'overlap' && image) {
     return (
       <section className="relative">
-        <div className="rounded-2xl overflow-hidden aspect-[21/9]">
+        <div className="rounded-2xl overflow-hidden aspect-[16/9] md:aspect-[2/1]">
           <img src={image} alt={title || ''} className="w-full h-full object-cover" onError={e => onImgError(e, 1200, 500)} />
         </div>
         <div className={`relative -mt-20 ${reverse ? 'ml-auto mr-8' : 'ml-8'} max-w-lg bg-[var(--surface,#fff)] rounded-2xl p-8 lg:p-10 shadow-2xl border border-[var(--border,#e5e7eb)]`}>

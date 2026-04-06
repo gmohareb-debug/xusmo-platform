@@ -81,7 +81,7 @@ export function Testimonials({ title, testimonials = [], layout = 'grid' }) {
               {record.rating && (
                 <div className="flex gap-0.5">{[1,2,3,4,5].map(s => <StarIcon key={s} filled={s <= Math.round(Number(record.rating))} />)}</div>
               )}
-              <p className="text-sm leading-relaxed text-[var(--text,#1c1c1c)]/80 italic flex-1 m-0">&ldquo;{record.quote}&rdquo;</p>
+              <p className="text-sm leading-relaxed text-[var(--muted,#6b7280)] italic flex-1 m-0">&ldquo;{record.quote}&rdquo;</p>
               <div className="flex items-center gap-3 pt-4 border-t border-[var(--border,#e5e7eb)]">
                 <AvatarImg src={record.avatar} name={record.name} index={index} />
                 <div>
@@ -111,7 +111,7 @@ export function Testimonials({ title, testimonials = [], layout = 'grid' }) {
             {record.rating && (
               <div className="flex items-center gap-0.5">{[1,2,3,4,5].map(star => <StarIcon key={star} filled={star <= Math.round(Number(record.rating))} />)}</div>
             )}
-            <p className="text-base lg:text-lg leading-relaxed text-[var(--text,#1c1c1c)]/80 italic flex-1 m-0">&ldquo;{record.quote}&rdquo;</p>
+            <p className="text-base lg:text-lg leading-relaxed text-[var(--muted,#6b7280)] italic flex-1 m-0">&ldquo;{record.quote}&rdquo;</p>
             <div className="flex items-center gap-4 pt-2 border-t border-[var(--border,#e5e7eb)]">
               <AvatarImg src={record.avatar} name={record.name} index={index} />
               <div className="flex flex-col">

@@ -19,9 +19,13 @@ export function UserAvatarMenu({ name, avatar, menuItems = [] }) {
     : '?'
 
   return (
-    <div className={`user-avatar-menu ${open ? 'user-avatar-menu--open' : ''}`} ref={menuRef}>
+    <div className="relative inline-block" ref={menuRef}>
       <button
-        className="user-avatar-menu__trigger"
+        className="flex items-center justify-center w-10 h-10 rounded-full overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg p-0 border-none"
+        style={{
+          backgroundColor: avatar ? 'transparent' : 'var(--accent, #3b82f6)',
+          border: '2px solid var(--border, #e5e7eb)',
+        }}
         type="button"
         aria-expanded={open}
         aria-haspopup="true"
@@ -30,24 +34,37 @@ export function UserAvatarMenu({ name, avatar, menuItems = [] }) {
       >
         {avatar ? (
           <img
-            className="user-avatar-menu__avatar"
+            className="w-full h-full object-cover"
             src={avatar}
             alt={name || 'User avatar'}
           />
         ) : (
-          <span className="user-avatar-menu__initials">{initials}</span>
+          <span className="text-sm font-bold text-white">{initials}</span>
         )}
       </button>
 
       {open && (
-        <div className="user-avatar-menu__dropdown" role="menu">
-          <div className="user-avatar-menu__header">
-            <span className="user-avatar-menu__name">{name}</span>
+        <div
+          className="absolute right-0 mt-2 w-56 rounded-xl shadow-xl overflow-hidden z-50"
+          style={{ backgroundColor: 'var(--surface, #fff)', border: '1px solid var(--border, #e5e7eb)' }}
+          role="menu"
+        >
+          <div
+            className="px-4 py-3"
+            style={{ borderBottom: '1px solid var(--border, #e5e7eb)' }}
+          >
+            <span className="text-sm font-semibold" style={{ color: 'var(--text, #1c1c1c)' }}>
+              {name}
+            </span>
           </div>
-          <ul className="user-avatar-menu__list">
+          <ul className="list-none p-0 m-0 py-1">
             {menuItems.map((item) => (
-              <li className="user-avatar-menu__item" key={item.label} role="menuitem">
-                <a className="user-avatar-menu__link" href={item.href || '#'}>
+              <li key={item.label} role="menuitem">
+                <a
+                  className="block px-4 py-2.5 text-sm no-underline transition-colors duration-150"
+                  href={item.href || '#'}
+                  style={{ color: 'var(--text, #1c1c1c)' }}
+                >
                   {item.label}
                 </a>
               </li>

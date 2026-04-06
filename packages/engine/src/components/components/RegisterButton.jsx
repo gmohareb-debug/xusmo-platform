@@ -1,8 +1,15 @@
 export function RegisterButton({ label = 'Sign up', href = '#' }) {
   return (
-    <a className="register-button" href={href} role="button">
+    <a
+      className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-full text-white no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+      href={href}
+      role="button"
+      style={{
+        backgroundColor: 'var(--accent, #3b82f6)',
+        boxShadow: '0 4px 14px -2px var(--accent, #3b82f6)',
+      }}
+    >
       <svg
-        className="register-button__icon"
         width="16"
         height="16"
         viewBox="0 0 16 16"
@@ -16,7 +23,7 @@ export function RegisterButton({ label = 'Sign up', href = '#' }) {
           strokeLinecap="round"
         />
       </svg>
-      <span className="register-button__label">{label}</span>
+      <span>{label}</span>
     </a>
   )
 }

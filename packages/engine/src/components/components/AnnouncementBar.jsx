@@ -1,17 +1,25 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
 export function AnnouncementBar({ text, link, dismissible = false }) {
-  const [visible, setVisible] = useState(true)
+  const [visible, setVisible] = useState(true);
 
-  if (!visible) return null
+  if (!visible) return null;
 
   return (
-    <div className="announcement-bar" role="banner">
-      <div className="announcement-bar__inner">
-        <p className="announcement-bar__text">
+    <div
+      className="w-full py-2.5 px-4"
+      role="banner"
+      style={{ backgroundColor: 'var(--accent, #3b82f6)', color: 'var(--surface, #fff)' }}
+    >
+      <div className="max-w-6xl mx-auto flex items-center justify-center gap-3">
+        <p className="text-xs sm:text-sm font-medium text-center">
           {text}
           {link && (
-            <a className="announcement-bar__link" href={link.href || '#'}>
+            <a
+              className="ml-2 underline font-semibold transition-opacity hover:opacity-80"
+              href={link.href || '#'}
+              style={{ color: 'inherit' }}
+            >
               {link.label}
             </a>
           )}
@@ -19,13 +27,13 @@ export function AnnouncementBar({ text, link, dismissible = false }) {
 
         {dismissible && (
           <button
-            className="announcement-bar__close"
+            className="shrink-0 p-1 bg-transparent border-0 cursor-pointer transition-opacity hover:opacity-70"
             type="button"
             aria-label="Dismiss announcement"
             onClick={() => setVisible(false)}
+            style={{ color: 'inherit' }}
           >
             <svg
-              className="announcement-bar__close-icon"
               width="16"
               height="16"
               viewBox="0 0 16 16"
@@ -43,5 +51,5 @@ export function AnnouncementBar({ text, link, dismissible = false }) {
         )}
       </div>
     </div>
-  )
+  );
 }

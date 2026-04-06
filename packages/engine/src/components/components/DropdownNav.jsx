@@ -5,20 +5,24 @@ export function DropdownNav({ label, items = [] }) {
 
   return (
     <div
-      className={`dropdown-nav ${open ? 'dropdown-nav--open' : ''}`}
+      className="relative inline-block"
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
       <button
-        className="dropdown-nav__trigger"
+        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 hover:brightness-95"
+        style={{
+          backgroundColor: 'var(--surface, #fff)',
+          color: 'var(--text, #1c1c1c)',
+        }}
         type="button"
         aria-expanded={open}
         aria-haspopup="true"
         onClick={() => setOpen(!open)}
       >
-        <span className="dropdown-nav__label">{label}</span>
+        <span>{label}</span>
         <svg
-          className="dropdown-nav__chevron"
+          className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
           width="12"
           height="12"
           viewBox="0 0 12 12"
@@ -36,10 +40,23 @@ export function DropdownNav({ label, items = [] }) {
       </button>
 
       {open && (
-        <ul className="dropdown-nav__menu" role="menu">
+        <ul
+          className="absolute left-0 top-full mt-1 min-w-[180px] rounded-lg py-1 shadow-lg z-50"
+          style={{
+            backgroundColor: 'var(--surface, #fff)',
+            border: '1px solid var(--border, #e5e7eb)',
+          }}
+          role="menu"
+        >
           {items.map((item) => (
-            <li className="dropdown-nav__item" key={item.label} role="menuitem">
-              <a className="dropdown-nav__link" href={item.href || '#'}>
+            <li key={item.label} role="menuitem">
+              <a
+                className="block px-4 py-2 text-sm transition-colors duration-150 no-underline hover:brightness-95"
+                style={{
+                  color: 'var(--text, #1c1c1c)',
+                }}
+                href={item.href || '#'}
+              >
                 {item.label}
               </a>
             </li>

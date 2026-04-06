@@ -24,9 +24,14 @@ export function LanguageSelector({ languages = [], current }) {
   }
 
   return (
-    <div className={`language-selector ${open ? 'language-selector--open' : ''}`} ref={selectorRef}>
+    <div className="relative inline-block" ref={selectorRef}>
       <button
-        className="language-selector__trigger"
+        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 hover:brightness-95"
+        style={{
+          backgroundColor: 'var(--surface, #fff)',
+          color: 'var(--text, #1c1c1c)',
+          border: '1px solid var(--border, #e5e7eb)',
+        }}
         type="button"
         aria-expanded={open}
         aria-haspopup="listbox"
@@ -34,12 +39,13 @@ export function LanguageSelector({ languages = [], current }) {
         onClick={() => setOpen(!open)}
       >
         <svg
-          className="language-selector__globe"
+          className="shrink-0"
           width="16"
           height="16"
           viewBox="0 0 16 16"
           fill="none"
           aria-hidden="true"
+          style={{ color: 'var(--muted, #6b7280)' }}
         >
           <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" />
           <path
@@ -49,11 +55,11 @@ export function LanguageSelector({ languages = [], current }) {
             strokeLinecap="round"
           />
         </svg>
-        <span className="language-selector__current">
+        <span>
           {currentLanguage ? currentLanguage.label : 'Language'}
         </span>
         <svg
-          className="language-selector__chevron"
+          className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
           width="12"
           height="12"
           viewBox="0 0 12 12"
@@ -71,16 +77,28 @@ export function LanguageSelector({ languages = [], current }) {
       </button>
 
       {open && (
-        <ul className="language-selector__dropdown" role="listbox" aria-label="Languages">
+        <ul
+          className="absolute left-0 top-full mt-1 min-w-[160px] rounded-lg py-1 shadow-lg z-50"
+          style={{
+            backgroundColor: 'var(--surface, #fff)',
+            border: '1px solid var(--border, #e5e7eb)',
+          }}
+          role="listbox"
+          aria-label="Languages"
+        >
           {languages.map((lang) => (
             <li
-              className={`language-selector__option ${lang.code === selected ? 'language-selector__option--active' : ''}`}
               key={lang.code}
               role="option"
               aria-selected={lang.code === selected}
             >
               <button
-                className="language-selector__option-button"
+                className="w-full text-left px-4 py-2 text-sm transition-colors duration-150 hover:brightness-95"
+                style={{
+                  color: 'var(--text, #1c1c1c)',
+                  backgroundColor: lang.code === selected ? 'var(--border, #e5e7eb)' : 'transparent',
+                  fontWeight: lang.code === selected ? 600 : 400,
+                }}
                 type="button"
                 onClick={() => handleSelect(lang.code)}
               >

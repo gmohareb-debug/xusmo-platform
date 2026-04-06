@@ -16,10 +16,25 @@ export function QuickInquiryForm({
     setValues((prev) => ({ ...prev, [name]: value }));
   }
 
+  function guessInputType(name) {
+    const n = (name || "").toLowerCase();
+    if (n.includes("email")) return "email";
+    if (n.includes("phone") || n.includes("tel")) return "tel";
+    if (n.includes("url") || n.includes("website")) return "url";
+    return "text";
+  }
+
+  function isTextArea(name) {
+    const n = (name || "").toLowerCase();
+    return n.includes("message") || n.includes("comment") || n.includes("description") || n.includes("details") || n.includes("inquiry");
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
     setSubmitted(true);
   }
+
+  const inputClass = "w-full px-4 py-3 rounded-xl border border-[var(--border,#e5e7eb)] bg-[var(--background,#fff)] text-[var(--text,#1c1c1c)] text-sm outline-none focus:ring-2 focus:ring-[var(--accent,#3b82f6)]/30 focus:border-[var(--accent,#3b82f6)] transition-all duration-200 placeholder:text-[var(--muted,#6b7280)]";
 
   return (
     <div className="max-w-xl mx-auto bg-[var(--surface,#fff)] border border-[var(--border,#e5e7eb)] rounded-2xl p-8 md:p-10 shadow-lg">
@@ -44,15 +59,29 @@ export function QuickInquiryForm({
       ) : (
         <form className="space-y-4" onSubmit={handleSubmit}>
           {fields.map((field) => (
-            <input
-              className="w-full px-4 py-3 rounded-xl border border-[var(--border,#e5e7eb)] bg-[var(--background,#fff)] text-[var(--text,#1c1c1c)] text-sm outline-none focus:ring-2 focus:ring-[var(--accent,#3b82f6)]/30 focus:border-[var(--accent,#3b82f6)] transition-all duration-200 placeholder:text-[var(--muted,#6b7280)]/60"
-              key={field.name}
-              type="text"
-              name={field.name}
-              placeholder={field.placeholder || field.name}
-              value={values[field.name] || ""}
-              onChange={(e) => handleChange(field.name, e.target.value)}
-            />
+            isTextArea(field.name) ? (
+              <textarea
+                className={inputClass + " min-h-[100px] resize-y"}
+                key={field.name}
+                name={field.name}
+                placeholder={field.placeholder || field.name}
+                value={values[field.name] || ""}
+                onChange={(e) => handleChange(field.name, e.target.value)}
+                required
+                rows={4}
+              />
+            ) : (
+              <input
+                className={inputClass}
+                key={field.name}
+                type={guessInputType(field.name)}
+                name={field.name}
+                placeholder={field.placeholder || field.name}
+                value={values[field.name] || ""}
+                onChange={(e) => handleChange(field.name, e.target.value)}
+                required
+              />
+            )
           ))}
           <button
             className="w-full py-3 rounded-xl text-white text-sm font-semibold border-none cursor-pointer hover:opacity-90 hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200"

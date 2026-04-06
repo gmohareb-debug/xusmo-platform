@@ -1997,6 +1997,55 @@ function enforceConsistency(parsed) {
     })
   }
 
+  // ── Generic phrase blacklist — kill boilerplate text ──
+  const BLACKLIST = [
+    "Premium quality",
+    "Unmatched experience",
+    "Excellence in every detail",
+    "Quality you can trust",
+    "Your tagline goes here",
+    "Brief description of this section",
+    "Lorem ipsum",
+    "Click here to learn more",
+    "We are the best",
+    "World-class service",
+    "Second to none",
+    "Industry-leading",
+    "Best in class",
+    "One-stop shop",
+    "Your trusted partner",
+    "Taking it to the next level",
+  ]
+
+  function stripBlacklisted(obj) {
+    if (!obj || typeof obj !== 'object') return
+    for (const [key, val] of Object.entries(obj)) {
+      if (typeof val === 'string') {
+        for (const phrase of BLACKLIST) {
+          if (val.toLowerCase().includes(phrase.toLowerCase())) {
+            // Replace with empty or remove the generic part
+            obj[key] = val.replace(new RegExp(phrase, 'gi'), '').trim()
+            if (obj[key].length < 5) delete obj[key]
+          }
+        }
+      } else if (typeof val === 'object') {
+        stripBlacklisted(val)
+      }
+    }
+  }
+
+  // Strip from all pages
+  for (const page of Object.values(pages)) {
+    if (page?.sections) {
+      for (const section of page.sections) {
+        if (section.props) stripBlacklisted(section.props)
+      }
+    }
+  }
+  // Strip from theme
+  if (parsed.theme) stripBlacklisted(parsed.theme)
+
+
   // ── Theme color sanity checks ──
   if (parsed.theme?.colors) {
     const tc = parsed.theme.colors

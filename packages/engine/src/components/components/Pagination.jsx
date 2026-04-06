@@ -11,31 +11,48 @@ export function Pagination({ currentPage = 1, totalPages = 1, onPageChange }) {
   };
 
   return (
-    <nav className="pagination" aria-label="Pagination">
+    <nav className="flex items-center justify-center gap-2 px-4 py-6" aria-label="Pagination">
       <button
-        className="pagination-btn pagination-prev"
+        className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{
+          color: 'var(--text, #1c1c1c)',
+          border: '1px solid var(--border, #e5e7eb)',
+          backgroundColor: 'var(--surface, #fff)',
+        }}
         onClick={() => handleChange(currentPage - 1)}
         disabled={currentPage <= 1}
       >
         Previous
       </button>
-      <div className="pagination-pages">
-        {pages.map((page) => (
-          <button
-            key={page}
-            className={
-              "pagination-page" +
-              (page === currentPage ? " pagination-page-active" : "")
-            }
-            onClick={() => handleChange(page)}
-            aria-current={page === currentPage ? "page" : undefined}
-          >
-            {page}
-          </button>
-        ))}
+
+      <div className="flex items-center gap-1">
+        {pages.map((page) => {
+          const isActive = page === currentPage;
+          return (
+            <button
+              key={page}
+              className="w-10 h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-all duration-200"
+              style={{
+                backgroundColor: isActive ? 'var(--accent, #3b82f6)' : 'transparent',
+                color: isActive ? '#fff' : 'var(--muted, #6b7280)',
+                border: isActive ? 'none' : '1px solid transparent',
+              }}
+              onClick={() => handleChange(page)}
+              aria-current={isActive ? "page" : undefined}
+            >
+              {page}
+            </button>
+          );
+        })}
       </div>
+
       <button
-        className="pagination-btn pagination-next"
+        className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{
+          color: 'var(--text, #1c1c1c)',
+          border: '1px solid var(--border, #e5e7eb)',
+          backgroundColor: 'var(--surface, #fff)',
+        }}
         onClick={() => handleChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
       >

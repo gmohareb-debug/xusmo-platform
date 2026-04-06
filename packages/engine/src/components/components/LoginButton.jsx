@@ -1,8 +1,16 @@
 export function LoginButton({ label = 'Log in', href = '#' }) {
   return (
-    <a className="login-button" href={href} role="button">
+    <a
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium no-underline transition-all duration-200 hover:brightness-110 hover:shadow-md active:scale-95"
+      style={{
+        backgroundColor: 'var(--accent, #3b82f6)',
+        color: 'var(--surface, #fff)',
+      }}
+      href={href}
+      role="button"
+    >
       <svg
-        className="login-button__icon"
+        className="shrink-0"
         width="16"
         height="16"
         viewBox="0 0 16 16"
@@ -17,7 +25,7 @@ export function LoginButton({ label = 'Log in', href = '#' }) {
           strokeLinejoin="round"
         />
       </svg>
-      <span className="login-button__label">{label}</span>
+      <span>{label}</span>
     </a>
   )
 }
