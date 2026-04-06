@@ -282,8 +282,10 @@ ${p.rules.map((r, i) => `Rule ${i + 1}: ${r}`).join("\n")}`;
 }
 
 // ---------------------------------------------------------------------------
-// 5. LEARNING / FEEDBACK LOOP
+// 5. LEARNING SYSTEM — Persistent, industry-aware, behavior-changing
 // ---------------------------------------------------------------------------
+
+// ── In-memory feedback log (volatile — for session stats) ──
 
 interface FeedbackEntry {
   siteId: string;
@@ -291,25 +293,27 @@ interface FeedbackEntry {
   action: string;
   success: boolean;
   feedback?: string;
+  industry?: string;
   ts: number;
 }
 
 const feedbackLog: FeedbackEntry[] = [];
 const MAX_FEEDBACK = 500;
 
-export function logAgentFeedback(siteId: string, agent: string, action: string, success: boolean, feedback?: string): void {
-  feedbackLog.push({ siteId, agent, action, success, feedback, ts: Date.now() });
+export function logAgentFeedback(siteId: string, agent: string, action: string, success: boolean, feedback?: string, industry?: string): void {
+  feedbackLog.push({ siteId, agent, action, success, feedback, industry, ts: Date.now() });
   if (feedbackLog.length > MAX_FEEDBACK) feedbackLog.splice(0, feedbackLog.length - MAX_FEEDBACK);
+
+  // Auto-learn from patterns
+  if (!success && feedback) {
+    learnFromFailure(agent, action, feedback, industry);
+  }
 }
 
 export function getAgentSuccessRate(agent: string): { total: number; successful: number; rate: number } {
   const entries = feedbackLog.filter(f => f.agent === agent);
   const successful = entries.filter(f => f.success).length;
-  return {
-    total: entries.length,
-    successful,
-    rate: entries.length > 0 ? successful / entries.length : 1,
-  };
+  return { total: entries.length, successful, rate: entries.length > 0 ? successful / entries.length : 1 };
 }
 
 export function getCommonFailures(agent: string, limit = 5): string[] {
@@ -317,6 +321,197 @@ export function getCommonFailures(agent: string, limit = 5): string[] {
     .filter(f => f.agent === agent && !f.success && f.feedback)
     .slice(-limit)
     .map(f => f.feedback!);
+}
+
+// ── Persistent lessons — stored in DB, survive restarts ──
+
+interface Lesson {
+  rule: string;
+  source: string; // what triggered this lesson
+  agent: string;
+  industry?: string;
+  learnedAt: string;
+  appliedCount: number;
+}
+
+// In-memory cache of lessons (loaded from DB on first access)
+let lessonsCache: Lesson[] | null = null;
+
+async function loadLessons(): Promise<Lesson[]> {
+  if (lessonsCache) return lessonsCache;
+  try {
+    // Store lessons in a special "system" site record or use the first admin user's prefs
+    // For now, use Redis if available, else in-memory
+    if (redis) {
+      const raw = await redis.get("xusmo:agent:lessons");
+      if (raw) {
+        lessonsCache = JSON.parse(raw);
+        return lessonsCache!;
+      }
+    }
+  } catch { /* fall through */ }
+  lessonsCache = [];
+  return lessonsCache;
+}
+
+async function saveLessons(): Promise<void> {
+  if (!lessonsCache) return;
+  try {
+    if (redis) {
+      await redis.set("xusmo:agent:lessons", JSON.stringify(lessonsCache));
+    }
+  } catch { /* non-critical */ }
+}
+
+/**
+ * Record a lesson that agents should follow in future generations.
+ * Persisted to Redis, injected into LLM prompts via getLessonsForPrompt().
+ */
+export async function recordLesson(agent: string, rule: string, source: string, industry?: string): Promise<void> {
+  const lessons = await loadLessons();
+
+  // Don't duplicate
+  if (lessons.some(l => l.rule === rule && l.agent === agent)) return;
+
+  lessons.push({
+    rule,
+    source,
+    agent,
+    industry,
+    learnedAt: new Date().toISOString(),
+    appliedCount: 0,
+  });
+
+  // Keep max 100 lessons
+  if (lessons.length > 100) lessons.splice(0, lessons.length - 100);
+
+  await saveLessons();
+  console.log(`[Learning] New lesson for ${agent}: "${rule}" (from: ${source})`);
+}
+
+/**
+ * Get lessons relevant to a specific agent + industry, formatted for LLM injection.
+ * Returns a string block that can be appended to any system prompt.
+ */
+export async function getLessonsForPrompt(agent: string, industry?: string): Promise<string> {
+  const lessons = await loadLessons();
+  const relevant = lessons.filter(l =>
+    l.agent === agent || l.agent === "all" ||
+    (industry && l.industry && industry.toLowerCase().includes(l.industry.toLowerCase()))
+  );
+
+  if (relevant.length === 0) return "";
+
+  // Mark as applied
+  for (const l of relevant) l.appliedCount++;
+  saveLessons().catch(() => {});
+
+  return `\n\nLEARNED RULES (from past experience — MUST follow):\n${relevant.map((l, i) => `${i + 1}. ${l.rule}`).join("\n")}`;
+}
+
+/**
+ * Auto-learn from common failure patterns.
+ * Called automatically by logAgentFeedback when success=false.
+ */
+function learnFromFailure(agent: string, action: string, feedback: string, industry?: string): void {
+  const lower = feedback.toLowerCase();
+
+  // Pattern: contrast/color issues
+  if (lower.includes("contrast") || lower.includes("black on black") || lower.includes("unreadable") || lower.includes("can't read")) {
+    recordLesson(agent, "NEVER use dark text colors (#000-#333) on dark backgrounds (#000-#1a1a1a). Dark themes must use light text (#f0f0f0+) and light muted (#94a3b8+).", feedback, industry);
+  }
+
+  // Pattern: generic/boring design
+  if (lower.includes("generic") || lower.includes("boring") || lower.includes("same") || lower.includes("template")) {
+    recordLesson(agent, "Vary layouts aggressively — use split hero, masonry gallery, list services, marquee testimonials. Never generate the same component sequence twice.", feedback, industry);
+  }
+
+  // Pattern: spacing issues
+  if (lower.includes("spacing") || lower.includes("padding") || lower.includes("too much space") || lower.includes("cramped")) {
+    recordLesson(agent, "Section padding should be moderate (py-12 to py-16). Never double-pad — if the component has internal padding, the wrapper should use less.", feedback, industry);
+  }
+
+  // Pattern: wrong images
+  if (lower.includes("wrong image") || lower.includes("irrelevant") || lower.includes("stock photo") || lower.includes("doesn't match")) {
+    recordLesson("image", `Search with specific business context: "${industry} professional [specific service]" not just generic industry terms.`, feedback, industry);
+  }
+
+  // Pattern: missing content
+  if (lower.includes("placeholder") || lower.includes("lorem") || lower.includes("empty") || lower.includes("no content")) {
+    recordLesson(agent, "Never leave placeholder text. Every section must have real, business-specific content. Services need descriptions, testimonials need real-sounding quotes.", feedback, industry);
+  }
+}
+
+// ── Industry knowledge accumulation ──
+
+interface IndustryInsight {
+  industry: string;
+  bestComponents: string[];
+  bestPersonality: string;
+  bestAccentColors: string[];
+  commonServices: string[];
+  siteCount: number;
+  avgSections: number;
+}
+
+const industryKnowledge = new Map<string, IndustryInsight>();
+
+/**
+ * Record what worked well for an industry after a successful build.
+ */
+export function recordIndustrySuccess(
+  industry: string,
+  components: string[],
+  personality: string,
+  accentColor: string,
+  sectionCount: number
+): void {
+  const lower = industry.toLowerCase();
+  const existing = industryKnowledge.get(lower) || {
+    industry: lower,
+    bestComponents: [],
+    bestPersonality: personality,
+    bestAccentColors: [],
+    commonServices: [],
+    siteCount: 0,
+    avgSections: 0,
+  };
+
+  existing.siteCount++;
+  existing.avgSections = (existing.avgSections * (existing.siteCount - 1) + sectionCount) / existing.siteCount;
+
+  // Track top components
+  for (const c of components) {
+    if (!existing.bestComponents.includes(c)) existing.bestComponents.push(c);
+  }
+  if (existing.bestComponents.length > 20) existing.bestComponents = existing.bestComponents.slice(-20);
+
+  // Track accent colors
+  if (!existing.bestAccentColors.includes(accentColor)) existing.bestAccentColors.push(accentColor);
+  if (existing.bestAccentColors.length > 5) existing.bestAccentColors.shift();
+
+  industryKnowledge.set(lower, existing);
+}
+
+/**
+ * Get accumulated knowledge about an industry for prompt injection.
+ */
+export function getIndustryKnowledge(industry: string): IndustryInsight | null {
+  return industryKnowledge.get(industry.toLowerCase()) || null;
+}
+
+/**
+ * Build a prompt section with industry knowledge.
+ */
+export function buildIndustryKnowledgePrompt(industry: string): string {
+  const insight = getIndustryKnowledge(industry);
+  if (!insight || insight.siteCount < 2) return "";
+
+  return `\n\nINDUSTRY KNOWLEDGE (learned from ${insight.siteCount} successful ${insight.industry} sites):
+- Best components: ${insight.bestComponents.slice(0, 10).join(", ")}
+- Typical section count: ${Math.round(insight.avgSections)}
+- Proven accent colors: ${insight.bestAccentColors.join(", ")}
+- Preferred personality: ${insight.bestPersonality}`;
 }
 
 // ---------------------------------------------------------------------------

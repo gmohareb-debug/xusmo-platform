@@ -22,6 +22,7 @@ import {
 } from "@/lib/wordpress/content";
 import { buildThemeJson } from "@/lib/wordpress/fonts";
 import { compileVibeToWordPressThemeJson } from "@/lib/vibe-compiler";
+import { recordIndustrySuccess } from "@/lib/agents/agent-memory";
 import { getThemePreset, mergeUserColors } from "@/lib/wordpress/theme-presets";
 import { getExecutor } from "@/lib/wordpress/ssh";
 import type { Archetype } from "@/lib/classification/archetypes";
@@ -1817,6 +1818,33 @@ echo $cf7->id();
     console.log(
       `[dev-pipeline] Build ${buildId} complete! Site ${site.id} ready for preview.`
     );
+
+    // Record industry knowledge for future builds (learning system)
+    try {
+      const dd = (site as Record<string, unknown>).designDocument as Record<string, unknown> | undefined;
+      if (dd?.pages && dd?.theme) {
+        const allComps: string[] = [];
+        let totalSections = 0;
+        for (const p of Object.values(dd.pages as Record<string, unknown>)) {
+          const sects = ((p as Record<string, unknown>).sections as unknown[]) || [];
+          totalSections += sects.length;
+          for (const s of sects) {
+            const comp = (s as Record<string, string>).component;
+            if (comp && !allComps.includes(comp)) allComps.push(comp);
+          }
+        }
+        const thm = dd.theme as Record<string, unknown>;
+        const cols = thm.colors as Record<string, string> | undefined;
+        recordIndustrySuccess(
+          blueprint.lead?.industryName || "unknown",
+          allComps,
+          (thm.name as string) || "default",
+          cols?.accent || "#3b82f6",
+          totalSections
+        );
+        console.log(`[learning] Recorded industry success for ${blueprint.lead?.industryName || "unknown"}`);
+      }
+    } catch { /* non-critical */ }
   } catch (err) {
     console.error("[dev-pipeline] Pipeline failed:", err);
     try {

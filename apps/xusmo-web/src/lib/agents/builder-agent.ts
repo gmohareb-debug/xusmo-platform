@@ -15,7 +15,7 @@ export async function runBuilderAgent(input: AgentInput): Promise<AgentResult> {
 
   try {
     // 1. Build a rich prompt from context + user input
-    const richPrompt = buildRichPrompt(prompt, context);
+    const richPrompt = await buildRichPrompt(prompt, context);
 
     actions.push({
       type: "PLAN",
@@ -157,7 +157,9 @@ export async function runBuilderAgent(input: AgentInput): Promise<AgentResult> {
 // Build a rich prompt from user input + existing context
 // ---------------------------------------------------------------------------
 
-function buildRichPrompt(userPrompt: string, context: AgentContext): string {
+async function buildRichPrompt(userPrompt: string, context: AgentContext): Promise<string> {
+  const { getLessonsForPrompt, buildIndustryKnowledgePrompt } = await import("./agent-memory");
+
   const parts = [userPrompt];
 
   if (context.businessName && !userPrompt.includes(context.businessName)) {
@@ -180,6 +182,14 @@ function buildRichPrompt(userPrompt: string, context: AgentContext): string {
       `\nCRITICAL USER PREFERENCES (MUST APPLY GLOBALLY):\n${JSON.stringify(context.globalPreferences, null, 2)}`
     );
   }
+
+  // Inject lessons learned from past builds (persistent learning)
+  const lessons = await getLessonsForPrompt("builder", context.industry);
+  if (lessons) parts.push(lessons);
+
+  // Inject industry knowledge from successful past builds
+  const industryKnowledge = buildIndustryKnowledgePrompt(context.industry);
+  if (industryKnowledge) parts.push(industryKnowledge);
 
   return parts.join("\n");
 }
