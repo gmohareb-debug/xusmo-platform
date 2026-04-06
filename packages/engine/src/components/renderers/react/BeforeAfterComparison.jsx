@@ -6,34 +6,47 @@ export function BeforeAfterComparison({ before, after }) {
   if (!before?.src || !after?.src) return null;
 
   return (
-    <div className="ba-comparison">
-      <div className="ba-comparison-container">
-        <div className="ba-comparison-image-wrap">
+    <div className="w-full max-w-3xl mx-auto px-4 py-8">
+      <div className="flex flex-col gap-4">
+        <div className="relative w-full overflow-hidden rounded-xl select-none">
           <img
-            className="ba-comparison-image ba-comparison-after"
+            className="block w-full h-auto object-cover"
             src={after.src}
             alt={after.label || "After"}
           />
           <div
-            className="ba-comparison-reveal"
+            className="absolute inset-0 overflow-hidden"
             style={{ width: `${position}%` }}
           >
             <img
-              className="ba-comparison-image ba-comparison-before"
+              className="block w-full h-full object-cover"
+              style={{ minWidth: '100%', minHeight: '100%' }}
               src={before.src}
               alt={before.label || "Before"}
             />
           </div>
           <div
-            className="ba-comparison-slider-line"
-            style={{ left: `${position}%` }}
+            className="absolute top-0 bottom-0 w-0.5"
+            style={{
+              left: `${position}%`,
+              backgroundColor: 'var(--surface, #fff)',
+              boxShadow: '0 0 6px rgba(0,0,0,0.3)',
+            }}
           >
-            <div className="ba-comparison-slider-handle" />
+            <div
+              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shadow-lg"
+              style={{
+                backgroundColor: 'var(--surface, #fff)',
+                color: 'var(--text, #1c1c1c)',
+              }}
+            >
+              &#x2194;
+            </div>
           </div>
         </div>
 
         <input
-          className="ba-comparison-range"
+          className="w-full cursor-pointer accent-[var(--accent,#3b82f6)]"
           type="range"
           min="0"
           max="100"
@@ -42,12 +55,16 @@ export function BeforeAfterComparison({ before, after }) {
           aria-label="Comparison slider"
         />
 
-        <div className="ba-comparison-labels">
+        <div className="flex justify-between">
           {before.label && (
-            <span className="ba-comparison-label">{before.label}</span>
+            <span className="text-sm font-medium" style={{ color: 'var(--text, #1c1c1c)' }}>
+              {before.label}
+            </span>
           )}
           {after.label && (
-            <span className="ba-comparison-label">{after.label}</span>
+            <span className="text-sm font-medium" style={{ color: 'var(--text, #1c1c1c)' }}>
+              {after.label}
+            </span>
           )}
         </div>
       </div>

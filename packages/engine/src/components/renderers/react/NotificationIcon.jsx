@@ -1,12 +1,15 @@
 export function NotificationIcon({ count = 0 }) {
   return (
     <button
-      className="notification-icon"
+      className="relative inline-flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 hover:brightness-95 active:scale-95"
+      style={{
+        backgroundColor: 'var(--surface, #fff)',
+        color: 'var(--text, #1c1c1c)',
+      }}
       type="button"
       aria-label={`Notifications${count > 0 ? `, ${count} unread` : ''}`}
     >
       <svg
-        className="notification-icon__bell"
         width="20"
         height="20"
         viewBox="0 0 20 20"
@@ -23,7 +26,14 @@ export function NotificationIcon({ count = 0 }) {
       </svg>
 
       {count > 0 && (
-        <span className="notification-icon__badge" aria-hidden="true">
+        <span
+          className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full text-[10px] font-bold leading-none"
+          style={{
+            backgroundColor: '#ef4444',
+            color: 'var(--surface, #fff)',
+          }}
+          aria-hidden="true"
+        >
           {count > 99 ? '99+' : count}
         </span>
       )}

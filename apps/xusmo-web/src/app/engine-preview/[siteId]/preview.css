@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+/* Critical utilities that Tailwind v4 JIT may not generate from external packages */
+.columns-2 { columns: 2; }
+.columns-3 { columns: 3; }
+.columns-4 { columns: 4; }
+@media (min-width: 768px) { .md\:columns-3 { columns: 3; } }
+@media (min-width: 1024px) { .lg\:columns-4 { columns: 4; } }
+.break-inside-avoid { break-inside: avoid; }
+.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

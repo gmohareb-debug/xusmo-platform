@@ -1,19 +1,28 @@
-import React from "react";
-
-export function PriceDisplay({ price, originalPrice, currency = "$", period }) {
+export function PriceDisplay({ price, originalPrice, currency = '$', period }) {
   return (
-    <div className="price-display">
-      <span className="price-display-current">
-        <span className="price-display-currency">{currency}</span>
-        <span className="price-display-amount">{price}</span>
+    <div className="flex items-baseline flex-wrap gap-2">
+      <span className="flex items-baseline">
+        <span className="text-sm font-medium" style={{ color: 'var(--text, #1c1c1c)' }}>
+          {currency}
+        </span>
+        <span
+          className="text-2xl md:text-3xl font-bold"
+          style={{ color: 'var(--text, #1c1c1c)' }}
+        >
+          {price}
+        </span>
       </span>
       {originalPrice && (
-        <span className="price-display-original">
-          <span className="price-display-currency">{currency}</span>
-          <span className="price-display-original-amount">{originalPrice}</span>
+        <span className="flex items-baseline line-through" style={{ color: 'var(--muted, #6b7280)' }}>
+          <span className="text-xs">{currency}</span>
+          <span className="text-base">{originalPrice}</span>
         </span>
       )}
-      {period && <span className="price-display-period">/{period}</span>}
+      {period && (
+        <span className="text-sm" style={{ color: 'var(--muted, #6b7280)' }}>
+          /{period}
+        </span>
+      )}
     </div>
   );
 }

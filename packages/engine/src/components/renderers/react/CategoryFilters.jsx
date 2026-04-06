@@ -4,27 +4,34 @@ export function CategoryFilters({ categories = [] }) {
   const [activeCategory, setActiveCategory] = useState(null);
 
   return (
-    <div className="category-filters">
-      <ul className="category-filters-list">
-        {categories.map((cat) => (
-          <li className="category-filters-item" key={cat.name}>
-            <button
-              className={
-                "category-filters-link" +
-                (activeCategory === cat.name
-                  ? " category-filters-link-active"
-                  : "")
-              }
-              type="button"
-              onClick={() => setActiveCategory(cat.name)}
-            >
-              <span className="category-filters-name">{cat.name}</span>
-              {cat.count !== undefined && (
-                <span className="category-filters-count">({cat.count})</span>
-              )}
-            </button>
-          </li>
-        ))}
+    <div className="w-full max-w-xs">
+      <ul className="flex flex-col gap-1">
+        {categories.map((cat) => {
+          const isActive = activeCategory === cat.name;
+          return (
+            <li key={cat.name}>
+              <button
+                className="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:brightness-95"
+                style={{
+                  backgroundColor: isActive ? 'var(--accent, #3b82f6)' : 'transparent',
+                  color: isActive ? 'var(--surface, #fff)' : 'var(--text, #1c1c1c)',
+                }}
+                type="button"
+                onClick={() => setActiveCategory(cat.name)}
+              >
+                <span>{cat.name}</span>
+                {cat.count !== undefined && (
+                  <span
+                    className="text-xs"
+                    style={{ color: isActive ? 'var(--surface, #fff)' : 'var(--muted, #6b7280)' }}
+                  >
+                    ({cat.count})
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
