@@ -18,6 +18,12 @@ import { runBuilderAgent } from "./builder-agent";
 import { runEditorAgent } from "./editor-agent";
 import { runEcommerceAgent } from "./ecommerce-agent";
 import { runImageAgent } from "./image-agent";
+import {
+  buildPersonalityPrompt,
+  addToConversation,
+  getConversationHistory,
+  logAgentFeedback,
+} from "./agent-memory";
 import { runSEOAgent } from "./seo-agent";
 
 // ---------------------------------------------------------------------------
@@ -285,6 +291,14 @@ export async function runAgentPipeline(
 ): Promise<AgentResult> {
   const startTime = Date.now();
 
+  // Store user message in conversation memory
+  addToConversation(input.siteId, "user", input.prompt);
+
+  // Inject conversation history if not already provided
+  if (!input.history || input.history.length === 0) {
+    input.history = getConversationHistory(input.siteId, 8);
+  }
+
   // 1. Classify intent
   onProgress?.({
     agent: "router",
@@ -394,6 +408,20 @@ export async function runAgentPipeline(
 
   // 4. Final result
   const durationMs = Date.now() - startTime;
+
+  // Store assistant reply in conversation memory
+  addToConversation(input.siteId, "assistant", primaryResult.reply);
+
+  // Log feedback for learning
+  const successCount = allActions.filter(a => a.success).length;
+  const failCount = allActions.filter(a => !a.success).length;
+  logAgentFeedback(
+    input.siteId,
+    decision.primaryAgent,
+    decision.intent,
+    primaryResult.status === "completed" && failCount === 0,
+    failCount > 0 ? `${failCount} action(s) failed` : undefined
+  );
 
   onProgress?.({
     agent: decision.primaryAgent,

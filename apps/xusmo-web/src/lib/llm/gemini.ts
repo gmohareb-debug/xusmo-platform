@@ -1,13 +1,18 @@
 // =============================================================================
-// Gemini Client (Google AI)
-// Primary LLM for content generation.
-//   - geminiFlash: Gemini 2.0 Flash — fast, cheap (classification, short tasks)
-//   - geminiPro: Gemini 2.0 Pro — quality (content generation)
+// Gemini Client (Google AI) — Enhanced with prompt caching + cost tracking
+//   - geminiFlash: Gemini 2.5 Flash — fast, cheap (classification, short tasks)
+//   - geminiPro: Gemini 2.5 Pro — quality (content generation)
+//   - Both now check prompt cache before calling API
 // Usage: import { geminiFlash, geminiPro } from "@/lib/llm/gemini";
 // =============================================================================
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { LLMResponse } from "./types";
+import {
+  getCachedLLMResponse,
+  setCachedLLMResponse,
+  trackLLMCost,
+} from "@/lib/agents/agent-memory";
 
 // ---------------------------------------------------------------------------
 // Cost constants (USD per 1M tokens)
@@ -54,13 +59,24 @@ async function withRetry<T>(
 }
 
 // ---------------------------------------------------------------------------
-// Gemini Flash — fast, cheap
+// Gemini Flash — fast, cheap (with caching)
 // ---------------------------------------------------------------------------
 
 export async function geminiFlash(
   prompt: string,
-  systemPrompt?: string
+  systemPrompt?: string,
+  options?: { skipCache?: boolean; agentName?: string }
 ): Promise<LLMResponse | null> {
+  // Check cache first (unless explicitly skipped)
+  if (!options?.skipCache) {
+    try {
+      const cached = await getCachedLLMResponse(systemPrompt || "", prompt);
+      if (cached) {
+        return { text: cached, tokensUsed: 0, model: "gemini-2.5-flash (cached)", cost: 0 };
+      }
+    } catch { /* cache miss, proceed to API */ }
+  }
+
   const client = getClient();
   if (!client) return null;
 
@@ -83,12 +99,15 @@ export async function geminiFlash(
       const cost =
         inputTokens * FLASH_INPUT_COST + outputTokens * FLASH_OUTPUT_COST;
 
-      return {
-        text,
-        tokensUsed,
-        model: "gemini-2.5-flash",
-        cost,
-      };
+      // Cache the response
+      try {
+        await setCachedLLMResponse(systemPrompt || "", prompt, text, tokensUsed);
+      } catch { /* non-critical */ }
+
+      // Track cost
+      trackLLMCost(options?.agentName || "flash", tokensUsed, cost);
+
+      return { text, tokensUsed, model: "gemini-2.5-flash", cost };
     });
   } catch (err) {
     console.error("[gemini-flash] Failed after retries:", err);
@@ -97,13 +116,24 @@ export async function geminiFlash(
 }
 
 // ---------------------------------------------------------------------------
-// Gemini Pro — quality content generation
+// Gemini Pro — quality content generation (with caching)
 // ---------------------------------------------------------------------------
 
 export async function geminiPro(
   prompt: string,
-  systemPrompt?: string
+  systemPrompt?: string,
+  options?: { skipCache?: boolean; agentName?: string }
 ): Promise<LLMResponse | null> {
+  // Check cache first — Pro calls are expensive, caching saves $$$
+  if (!options?.skipCache) {
+    try {
+      const cached = await getCachedLLMResponse(systemPrompt || "", prompt);
+      if (cached) {
+        return { text: cached, tokensUsed: 0, model: "gemini-2.5-pro (cached)", cost: 0 };
+      }
+    } catch { /* cache miss, proceed to API */ }
+  }
+
   const client = getClient();
   if (!client) return null;
 
@@ -126,12 +156,15 @@ export async function geminiPro(
       const cost =
         inputTokens * PRO_INPUT_COST + outputTokens * PRO_OUTPUT_COST;
 
-      return {
-        text,
-        tokensUsed,
-        model: "gemini-2.5-pro",
-        cost,
-      };
+      // Cache the response
+      try {
+        await setCachedLLMResponse(systemPrompt || "", prompt, text, tokensUsed);
+      } catch { /* non-critical */ }
+
+      // Track cost
+      trackLLMCost(options?.agentName || "pro", tokensUsed, cost);
+
+      return { text, tokensUsed, model: "gemini-2.5-pro", cost };
     });
   } catch (err) {
     console.error("[gemini-pro] Failed after retries:", err);
