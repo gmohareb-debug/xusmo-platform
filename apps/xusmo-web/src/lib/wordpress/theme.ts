@@ -8,6 +8,7 @@
 import { exec } from "child_process";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
+import { compileVibeToWordPressThemeJson } from "@/lib/vibe-compiler";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -26,6 +27,7 @@ interface DesignPrefs {
 
 interface ThemeBlueprint {
   designPrefs: DesignPrefs;
+  vibeConfig?: Record<string, unknown>; // The AI generated full aesthetic theme
 }
 
 // ---------------------------------------------------------------------------
@@ -152,69 +154,74 @@ export async function applyThemeCustomization(
 ): Promise<void> {
   const { site, serverIp, sshUser, sshKeyRef, wpDir } = await resolveSiteConnection(siteId);
 
-  // Resolve colors — merge blueprint colors with defaults
-  const colors: Record<string, string> = {
-    ...DEFAULT_COLORS,
-    ...(blueprint.designPrefs.colors ?? {}),
-  };
+  let globalStyles;
 
-  // Resolve fonts
-  const fontPairKey = blueprint.designPrefs.fontPreference ?? "modern-clean";
-  const fontPair = FONT_PAIRS[fontPairKey] ?? FONT_PAIRS["modern-clean"];
+  if (blueprint.vibeConfig) {
+    // 1. New AI Vibe Compiler Logic
+    globalStyles = compileVibeToWordPressThemeJson(blueprint.vibeConfig);
+  } else {
+    // 2. Legacy Fallback Logic
+    const colors: Record<string, string> = {
+      ...DEFAULT_COLORS,
+      ...(blueprint.designPrefs?.colors ?? {}),
+    };
 
-  // Build wp_global_styles JSON
-  const globalStyles = {
-    version: 2,
-    settings: {
-      color: {
-        palette: {
-          custom: [
-            { slug: "primary", color: colors.primary, name: "Primary" },
-            { slug: "secondary", color: colors.secondary, name: "Secondary" },
-            { slug: "accent", color: colors.accent, name: "Accent" },
-            { slug: "background", color: colors.background, name: "Background" },
-            { slug: "foreground", color: colors.foreground, name: "Foreground" },
-            { slug: "muted", color: colors.muted, name: "Muted" },
-          ],
-        },
-      },
-      typography: {
-        fontFamilies: {
-          custom: [
-            { fontFamily: fontPair.heading, slug: "heading", name: "Heading" },
-            { fontFamily: fontPair.body, slug: "body", name: "Body" },
-          ],
-        },
-      },
-    },
-    styles: {
-      color: {
-        background: colors.background,
-        text: colors.foreground,
-      },
-      typography: {
-        fontFamily: fontPair.body,
-      },
-      elements: {
-        heading: {
-          typography: {
-            fontFamily: fontPair.heading,
+    const fontPairKey = blueprint.designPrefs?.fontPreference ?? "modern-clean";
+    const fontPair = FONT_PAIRS[fontPairKey] ?? FONT_PAIRS["modern-clean"];
+
+    globalStyles = {
+      version: 2,
+      settings: {
+        color: {
+          palette: {
+            custom: [
+              { slug: "primary", color: colors.primary, name: "Primary" },
+              { slug: "secondary", color: colors.secondary, name: "Secondary" },
+              { slug: "accent", color: colors.accent, name: "Accent" },
+              { slug: "background", color: colors.background, name: "Background" },
+              { slug: "foreground", color: colors.foreground, name: "Foreground" },
+              { slug: "muted", color: colors.muted, name: "Muted" },
+            ],
           },
         },
-        link: {
-          color: {
-            text: colors.primary,
-          },
-        },
-        button: {
-          color: {
-            background: colors.primary,
-            text: colors.background,
+        typography: {
+          fontFamilies: {
+            custom: [
+              { fontFamily: `"${fontPair.heading}", sans-serif`, slug: "heading", name: "Heading" },
+              { fontFamily: `"${fontPair.body}", sans-serif`, slug: "body", name: "Body" },
+            ],
           },
         },
       },
-    },
-  };
+      styles: {
+        color: {
+          background: colors.background,
+          text: colors.foreground,
+        },
+        typography: {
+          fontFamily: "var(--wp--preset--font-family--body)",
+        },
+        elements: {
+          heading: {
+            typography: {
+              fontFamily: "var(--wp--preset--font-family--heading)",
+            },
+          },
+          link: {
+            color: {
+              text: colors.primary,
+            },
+          },
+          button: {
+            color: {
+              background: colors.primary,
+              text: colors.background,
+            },
+          },
+        },
+      },
+    };
+  }
 
   // Encode and push via WP-CLI
   const stylesJson = JSON.stringify(JSON.stringify(globalStyles));
@@ -229,19 +236,25 @@ export async function applyThemeCustomization(
     data: { themeVersion: newVersion },
   });
 
+  const logMetadata = blueprint.vibeConfig 
+    ? { 
+        isVibeTheme: true, 
+        themeVersion: newVersion,
+        fonts: blueprint.vibeConfig.fonts 
+      }
+    : {
+        fontPairKey: blueprint.designPrefs?.fontPreference ?? "modern-clean",
+        themeVersion: newVersion,
+        isVibeTheme: false
+      };
+
   await logActivity(
     siteId,
     "theme.customized",
     "theme",
     "info",
-    `Applied theme customization: font=${fontPairKey}, colors=${Object.keys(colors).length} overrides`,
-    {
-      fontPairKey,
-      fontHeading: fontPair.heading,
-      fontBody: fontPair.body,
-      colors,
-      themeVersion: newVersion,
-    }
+    `Applied theme customization: ${blueprint.vibeConfig ? 'AI Generated Vibe' : 'Standard Fallback'}`,
+    logMetadata
   );
 }
 
