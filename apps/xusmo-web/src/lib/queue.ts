@@ -560,8 +560,48 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
     let gutenbergPages: Record<string, string> = {};
 
     if (generatorType === "engine") {
-      // ── Engine path: WP1 AI pipeline → React JSON → Gutenberg blocks ──
-      console.log("[dev-pipeline] Stage 1: Running engine generator...");
+      // ── Knowledge Engine Check — can we reuse a cached blueprint? ──
+      const { checkKnowledgeBase, storeBlueprint, bootstrapKnowledge } = await import("@/lib/agents/knowledge-engine");
+
+      // Bootstrap knowledge from existing sites (first run only)
+      await bootstrapKnowledge();
+
+      const bpForKnowledge = await prisma.blueprint.findUniqueOrThrow({
+        where: { id: blueprintId },
+        include: { lead: true },
+      });
+      const bizForKnowledge = (bpForKnowledge.businessInfo as Record<string, unknown>) ?? {};
+      const businessName = (bizForKnowledge.name as string) ?? "My Business";
+      const industryForKnowledge = bpForKnowledge.lead?.industryName || "unknown";
+
+      const knowledgeResult = await checkKnowledgeBase(
+        `Build website for ${businessName}, a ${industryForKnowledge} business`,
+        industryForKnowledge,
+        archetype,
+        businessName
+      );
+
+      if (knowledgeResult.found && knowledgeResult.designDocument) {
+        // KNOWLEDGE HIT — skip full LLM generation!
+        console.log(`[dev-pipeline] KNOWLEDGE HIT: ${knowledgeResult.source} (${knowledgeResult.llmCallsSaved} LLM calls saved)`);
+        if (knowledgeResult.delta) {
+          console.log(`[dev-pipeline] Delta: ${knowledgeResult.delta.differences.join(", ")}`);
+        }
+        engineDesignDocument = knowledgeResult.designDocument;
+
+        // Still need gutenberg conversion for WP pages
+        const { toGutenbergBlocks } = await import("@xusmo/wordpress");
+        const pages = (knowledgeResult.designDocument as Record<string, unknown>).pages as Record<string, unknown>;
+        for (const [slug, pageData] of Object.entries(pages)) {
+          try {
+            gutenbergPages[slug] = toGutenbergBlocks(pageData);
+          } catch { /* non-critical */ }
+        }
+
+        console.log("[dev-pipeline] Stage 1 complete: Served from knowledge base (no LLM generation).");
+      } else {
+        // KNOWLEDGE MISS — full generation
+        console.log(`[dev-pipeline] Stage 1: Running engine generator (knowledge miss)...`);
 
       const { generateViaEngine } = await import("@/lib/generators/engine-adapter");
       const bp = await prisma.blueprint.findUniqueOrThrow({
@@ -637,6 +677,17 @@ async function runDevPipelineAsync(buildId: string, blueprintId: string, themePo
       });
 
       console.log("[dev-pipeline] Stage 1 complete: Engine content generated + converted to Gutenberg blocks.");
+
+      // Store to knowledge base for future reuse
+      try {
+        const bizName = (biz.name as string) || "Unknown";
+        const ind = bp.lead.industryName || "unknown";
+        await storeBlueprint(
+          `Build website for ${bizName}, a ${ind} business`,
+          ind, archetype, bizName, engineDesignDocument
+        );
+      } catch { /* non-critical */ }
+      } // close knowledge-miss else
     } else {
       // ── Gutenberg path: Pattern hydration via @xusmo/gutenberg ──
       console.log("[dev-pipeline] Stage 1: Running content agent (gutenberg)...");
